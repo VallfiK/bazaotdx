@@ -28,15 +28,141 @@ type GuestApp struct {
 	window                fyne.Window
 	guestService          *service.GuestService
 	cottageService        *service.CottageService
-	tariffService         *service.TariffService // Добавлено
+	tariffService         *service.TariffService
 	updateCottagesContent func()
+}
+
+// DatePickerButton — кастомная кнопка для выбора даты через календарь
+type DatePickerButton struct {
+	widget.BaseWidget
+	selectedDate time.Time
+	label        string
+	button       *widget.Button
+	onDateChange func(time.Time)
+	window       fyne.Window
+}
+
+// NewDatePickerButton создает новую кнопку выбора даты
+func NewDatePickerButton(label string, window fyne.Window, onChange func(time.Time)) *DatePickerButton {
+	dpb := &DatePickerButton{
+		label:        label,
+		window:       window,
+		onDateChange: onChange,
+	}
+
+	dpb.button = widget.NewButton(label, dpb.showCalendar)
+	dpb.ExtendBaseWidget(dpb)
+	return dpb
+}
+
+// showCalendar отображает календарь для выбора даты
+func (dpb *DatePickerButton) showCalendar() {
+	// Определяем начальную дату для календаря
+	initialDate := time.Now()
+	if !dpb.selectedDate.IsZero() {
+		initialDate = dpb.selectedDate
+	}
+
+	// Создаем календарь
+	cal := widget.NewCalendar(initialDate, func(t time.Time) {
+		// Устанавливаем время в зависимости от типа даты
+		var finalTime time.Time
+		if dpb.label == "Дата заезда" {
+			finalTime = time.Date(t.Year(), t.Month(), t.Day(), 14, 0, 0, 0, time.Local)
+		} else {
+			finalTime = time.Date(t.Year(), t.Month(), t.Day(), 12, 0, 0, 0, time.Local)
+		}
+
+		dpb.selectedDate = finalTime
+		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006 15:04")))
+
+		if dpb.onDateChange != nil {
+			dpb.onDateChange(finalTime)
+		}
+	})
+
+	// Создаем кнопки для управления
+	todayBtn := widget.NewButton("Сегодня", func() {
+		// Создаем новый календарь с сегодняшней датой
+		today := time.Now()
+		var finalTime time.Time
+		if dpb.label == "Дата заезда" {
+			finalTime = time.Date(today.Year(), today.Month(), today.Day(), 14, 0, 0, 0, time.Local)
+		} else {
+			finalTime = time.Date(today.Year(), today.Month(), today.Day(), 12, 0, 0, 0, time.Local)
+		}
+
+		dpb.selectedDate = finalTime
+		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006 15:04")))
+
+		if dpb.onDateChange != nil {
+			dpb.onDateChange(finalTime)
+		}
+	})
+
+	tomorrowBtn := widget.NewButton("Завтра", func() {
+		// Создаем новый календарь с завтрашней датой
+		tomorrow := time.Now().AddDate(0, 0, 1)
+		var finalTime time.Time
+		if dpb.label == "Дата заезда" {
+			finalTime = time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 14, 0, 0, 0, time.Local)
+		} else {
+			finalTime = time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 12, 0, 0, 0, time.Local)
+		}
+
+		dpb.selectedDate = finalTime
+		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006 15:04")))
+
+		if dpb.onDateChange != nil {
+			dpb.onDateChange(finalTime)
+		}
+	})
+
+	clearBtn := widget.NewButton("Очистить", func() {
+		dpb.selectedDate = time.Time{}
+		dpb.button.SetText(dpb.label)
+		if dpb.onDateChange != nil {
+			dpb.onDateChange(time.Time{})
+		}
+	})
+
+	// Создаем содержимое диалога
+	content := container.NewVBox(
+		cal,
+		container.NewGridWithColumns(3, todayBtn, tomorrowBtn, clearBtn),
+	)
+
+	// Показываем диалог
+	d := dialog.NewCustom("Выберите дату", "Закрыть", content, dpb.window)
+	d.Resize(fyne.NewSize(300, 400))
+	d.Show()
+}
+
+// GetSelectedDate возвращает выбранную дату
+func (dpb *DatePickerButton) GetSelectedDate() time.Time {
+	return dpb.selectedDate
+}
+
+// SetSelectedDate устанавливает дату программно
+func (dpb *DatePickerButton) SetSelectedDate(t time.Time) {
+	dpb.selectedDate = t
+	if t.IsZero() {
+		dpb.button.SetText(dpb.label)
+	} else {
+		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, t.Format("02.01.2006 15:04")))
+	}
+}
+
+// CreateRenderer возвращает рендерер для виджета
+func (dpb *DatePickerButton) CreateRenderer() fyne.WidgetRenderer {
+	return dpb.button.CreateRenderer()
 }
 
 // NewGuestApp создаёт новое приложение
 func NewGuestApp(
 	guestService *service.GuestService,
 	cottageService *service.CottageService,
-	tariffService *service.TariffService, // Добавлено
+	tariffService *service.TariffService,
 ) *GuestApp {
 	a := app.New()
 	w := a.NewWindow("Учет гостей - База отдыха")
@@ -47,7 +173,7 @@ func NewGuestApp(
 		window:         w,
 		guestService:   guestService,
 		cottageService: cottageService,
-		tariffService:  tariffService, // Добавлено
+		tariffService:  tariffService,
 	}
 }
 
@@ -109,35 +235,46 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 
 	// Переменные состояния
 	var (
-		checkIn  time.Time
-		checkOut time.Time
 		cottages []models.Cottage
 		tariffs  []models.Tariff
 	)
 
-	// Текстовые поля для ввода дат
-	checkInEntry := widget.NewEntry()
-	checkInEntry.SetPlaceHolder("дд.мм.гггг 14:00")
-	checkOutEntry := widget.NewEntry()
-	checkOutEntry.SetPlaceHolder("дд.мм.гггг 12:00")
+	// Создаем календарные кнопки заранее
+	var checkInPicker, checkOutPicker *DatePickerButton
 
-	// Функция обработки ввода дат
-	setupDateEntry := func(entry *widget.Entry, setTime *time.Time, hour int) {
-		entry.OnChanged = func(s string) {
-			t, err := time.Parse("02.01.2006 15:04", s)
-			if err == nil {
-				*setTime = time.Date(
-					t.Year(), t.Month(), t.Day(),
-					hour, 0, 0, 0, time.Local,
-				)
-				updateCost()
-			}
+	// Функция расчета стоимости
+	updateCost := func() {
+		if checkInPicker == nil || checkOutPicker == nil {
+			return
 		}
+
+		checkIn := checkInPicker.GetSelectedDate()
+		checkOut := checkOutPicker.GetSelectedDate()
+
+		if checkIn.IsZero() || checkOut.IsZero() || tariffSelect.SelectedIndex() < 0 {
+			costLabel.SetText("Стоимость: -")
+			return
+		}
+
+		if checkOut.Before(checkIn) {
+			costLabel.SetText("Дата выезда раньше заезда!")
+			return
+		}
+
+		days := checkOut.Sub(checkIn).Hours() / 24
+		price := tariffs[tariffSelect.SelectedIndex()].PricePerDay
+		cost := days * price
+		costLabel.SetText(fmt.Sprintf("Стоимость: %.2f руб. (дней: %.1f)", cost, days))
 	}
 
-	// Инициализация обработчиков дат
-	setupDateEntry(checkInEntry, &checkIn, 14)
-	setupDateEntry(checkOutEntry, &checkOut, 12)
+	// Создаем календарные кнопки
+	checkInPicker = NewDatePickerButton("Дата заезда", a.window, func(t time.Time) {
+		updateCost()
+	})
+
+	checkOutPicker = NewDatePickerButton("Дата выезда", a.window, func(t time.Time) {
+		updateCost()
+	})
 
 	// Инициализация тарифов
 	initTariffs := func() {
@@ -174,24 +311,6 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 	}
 	updateCottages()
 
-	// Расчет стоимости (теперь объявлена до использования)
-	updateCost := func() {
-		if checkIn.IsZero() || checkOut.IsZero() || tariffSelect.SelectedIndex() < 0 {
-			costLabel.SetText("Стоимость: -")
-			return
-		}
-
-		if checkOut.Before(checkIn) {
-			costLabel.SetText("Дата выезда раньше заезда!")
-			return
-		}
-
-		days := checkOut.Sub(checkIn).Hours() / 24
-		price := tariffs[tariffSelect.SelectedIndex()].PricePerDay
-		cost := days * price
-		costLabel.SetText(fmt.Sprintf("Стоимость: %.2f руб.", cost))
-	}
-
 	// Добавляем обработчик изменения тарифа
 	tariffSelect.OnChanged = func(_ string) {
 		updateCost()
@@ -213,13 +332,16 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			{Text: "Email", Widget: emailEntry},
 			{Text: "Телефон", Widget: phoneEntry},
 			{Text: "Домик", Widget: cottageSelect},
-			{Text: "Дата заезда", Widget: checkInEntry},
-			{Text: "Дата выезда", Widget: checkOutEntry},
+			{Text: "Дата заезда", Widget: checkInPicker.button},
+			{Text: "Дата выезда", Widget: checkOutPicker.button},
 			{Text: "Тариф", Widget: tariffSelect},
 			{Text: "Документ", Widget: container.NewHBox(fileButton, documentPath)},
 			{Text: "Стоимость", Widget: costLabel},
 		},
 		OnSubmit: func() {
+			checkIn := checkInPicker.GetSelectedDate()
+			checkOut := checkOutPicker.GetSelectedDate()
+
 			// Валидация
 			if nameEntry.Text == "" || emailEntry.Text == "" || phoneEntry.Text == "" ||
 				cottageSelect.Selected == "" || checkIn.IsZero() || checkOut.IsZero() ||
@@ -272,8 +394,8 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			phoneEntry.SetText("")
 			cottageSelect.ClearSelected()
 			documentPath.SetText("")
-			checkInEntry.SetText("")
-			checkOutEntry.SetText("")
+			checkInPicker.SetSelectedDate(time.Time{})
+			checkOutPicker.SetSelectedDate(time.Time{})
 			tariffSelect.ClearSelected()
 			costLabel.SetText("Стоимость: 0.00 руб.")
 			updateCottages()
@@ -286,10 +408,6 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 		container.NewVScroll(
 			container.NewPadded(form),
 		))
-}
-
-func updateCost() {
-	panic("unimplemented")
 }
 
 // createCottagesTab создаёт вкладку для управления домиками
