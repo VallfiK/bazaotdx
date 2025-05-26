@@ -3,7 +3,8 @@ package service
 import (
 	"database/sql"
 	"fmt"
-	"guest-management/internal/models"
+
+	"github.com/VallfIK/bazaotdx/internal/models"
 )
 
 type CottageService struct {

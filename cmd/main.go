@@ -1,10 +1,11 @@
 package main
 
 import (
-	"guest-management/internal/db"
-	"guest-management/internal/service"
-	"guest-management/internal/ui"
 	"log"
+
+	"github.com/VallfIK/bazaotdx/internal/db"
+	"github.com/VallfIK/bazaotdx/internal/service"
+	"github.com/VallfIK/bazaotdx/internal/ui"
 )
 
 func main() {

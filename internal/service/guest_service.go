@@ -4,8 +4,9 @@ package service
 import (
 	"database/sql"
 	"fmt"
-	"guest-management/internal/models"
-	"guest-management/internal/utils"
+
+	"github.com/VallfIK/bazaotdx/internal/models"
+	"github.com/VallfIK/bazaotdx/internal/utils"
 )
 
 type GuestService struct {

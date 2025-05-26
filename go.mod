@@ -1,4 +1,4 @@
-module guest-management
+module github.com/VallfIK/bazaotdx
 
 go 1.24.0
 

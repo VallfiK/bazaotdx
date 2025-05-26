@@ -2,13 +2,15 @@ package ui
 
 import (
 	"fmt"
-	"guest-management/internal/models"
-	"guest-management/internal/service"
 	"image/color"
 	"log"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+
+	"github.com/VallfIK/bazaotdx/internal/service"
+
+	"github.com/VallfIK/bazaotdx/internal/models"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -25,6 +27,8 @@ type GuestApp struct {
 	window         fyne.Window
 	guestService   *service.GuestService
 	cottageService *service.CottageService
+	// Добавляем функцию обновления для вкладки домиков
+	updateCottagesContent func()
 }
 
 // NewGuestApp создаёт новое приложение
@@ -158,8 +162,13 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			cottageSelect.ClearSelected()
 			documentPath.SetText("")
 
-			// Обновление списка домиков
+			// Обновление списка домиков в форме
 			updateCottages()
+
+			// ИСПРАВЛЕНИЕ: Обновляем также вкладку домиков
+			if a.updateCottagesContent != nil {
+				a.updateCottagesContent()
+			}
 
 			dialog.ShowInformation("Успешно!", "Гость зарегистрирован", a.window)
 		},
@@ -176,7 +185,11 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 func (a *GuestApp) createCottagesTab() *container.TabItem {
 	content := container.NewGridWithColumns(5)
 
-	updateContent := func() {
+	// ИСПРАВЛЕНИЕ: Объявляем переменную для функции обновления
+	var updateContent func()
+
+	// Определяем функцию обновления
+	updateContent = func() {
 		content.RemoveAll()
 		cottages, err := a.cottageService.GetAllCottages()
 		if err != nil {
@@ -185,16 +198,22 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 		}
 
 		for _, c := range cottages {
-			btn := NewCottageButton(c, func() {
-				if c.Status == "occupied" {
-					a.showCottageDetails(c)
+			btn := NewCottageButton(c, func(cottage models.Cottage) func() {
+				return func() {
+					if cottage.Status == "occupied" {
+						a.showCottageDetails(cottage, updateContent)
+					}
 				}
-			})
+			}(c)) // Замыкание для передачи правильного cottage
 			content.Add(btn)
 		}
 		content.Refresh()
 	}
-	updateContent()
+
+	// Сохраняем функцию обновления в приложении
+	a.updateCottagesContent = updateContent
+
+	updateContent() // Первоначальная загрузка
 
 	addButton := widget.NewButton("Добавить домик", func() {
 		dialog.ShowEntryDialog("Новый домик", "Введите название домика:", func(name string) {
@@ -212,8 +231,8 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 		container.NewBorder(addButton, nil, nil, nil, content))
 }
 
-// showCottageDetails отображает информацию о госте и кнопку "Выселить"
-func (a *GuestApp) showCottageDetails(c models.Cottage) {
+// ИСПРАВЛЕНИЕ: Добавляем параметр для обновления интерфейса
+func (a *GuestApp) showCottageDetails(c models.Cottage, refreshCallback func()) {
 	guest, err := a.guestService.GetGuestByCottageID(c.ID)
 	if err != nil {
 		dialog.ShowError(err, a.window)
@@ -232,9 +251,11 @@ func (a *GuestApp) showCottageDetails(c models.Cottage) {
 				return
 			}
 			detailsWindow.Close()
-			a.createUI() // Обновляем интерфейс
+			// ИСПРАВЛЕНИЕ: Вызываем переданный колбэк для обновления
+			if refreshCallback != nil {
+				refreshCallback()
+			}
 		}),
-		// Добавляем новую кнопку
 		widget.NewButton("Открыть папку с документами", func() {
 			if guest.DocumentScanPath == "" {
 				dialog.ShowInformation("Информация", "Документы отсутствуют", detailsWindow)
@@ -276,10 +297,6 @@ func textColorForStatus(status string) color.Color {
 }
 
 // CottageButton — кастомная кнопка для отображения статуса домика
-// реализует fyne.Tappable и имеет свой рендерер
-// -----------------------------------------------
-// структура кнопки
-// -----------------------------------------------
 type CottageButton struct {
 	widget.BaseWidget
 	Cottage  models.Cottage
@@ -299,7 +316,13 @@ func (b *CottageButton) CreateRenderer() fyne.WidgetRenderer {
 	txt := canvas.NewText(b.Cottage.Name, textColorForStatus(b.Cottage.Status))
 	txt.Alignment = fyne.TextAlignCenter
 	box := container.NewMax(bg, container.NewCenter(txt))
-	return &cottageButtonRenderer{box: box, objects: []fyne.CanvasObject{box}}
+	return &cottageButtonRenderer{
+		bg:      bg,
+		txt:     txt,
+		box:     box,
+		objects: []fyne.CanvasObject{box},
+		cottage: &b.Cottage, // Сохраняем ссылку на cottage для обновления
+	}
 }
 
 // Tapped обрабатывает нажатие
@@ -313,22 +336,33 @@ func (b *CottageButton) Tapped(_ *fyne.PointEvent) {
 func (b *CottageButton) TappedSecondary(_ *fyne.PointEvent) {}
 
 // cottageButtonRenderer рендерер для CottageButton
-// -----------------------------------------------
 type cottageButtonRenderer struct {
+	bg      *canvas.Rectangle
+	txt     *canvas.Text
 	box     *fyne.Container
 	objects []fyne.CanvasObject
+	cottage *models.Cottage
 }
 
 func (r *cottageButtonRenderer) Layout(size fyne.Size) {
 	r.box.Resize(size)
 }
+
 func (r *cottageButtonRenderer) MinSize() fyne.Size {
 	return r.box.MinSize()
 }
+
+// ИСПРАВЛЕНИЕ: Обновляем цвета при рефреше
 func (r *cottageButtonRenderer) Refresh() {
+	if r.cottage != nil {
+		r.bg.FillColor = colorForStatus(r.cottage.Status)
+		r.txt.Color = textColorForStatus(r.cottage.Status)
+	}
 	canvas.Refresh(r.box)
 }
+
 func (r *cottageButtonRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
+
 func (r *cottageButtonRenderer) Destroy() {}
