@@ -231,7 +231,7 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 		container.NewBorder(addButton, nil, nil, nil, content))
 }
 
-// ИСПРАВЛЕНИЕ: Добавляем параметр для обновления интерфейса
+// ИСПРАВЛЕНИЕ: Отображаем информацию о домике в модальном окне по центру
 func (a *GuestApp) showCottageDetails(c models.Cottage, refreshCallback func()) {
 	guest, err := a.guestService.GetGuestByCottageID(c.ID)
 	if err != nil {
@@ -239,48 +239,70 @@ func (a *GuestApp) showCottageDetails(c models.Cottage, refreshCallback func()) 
 		return
 	}
 
-	detailsWindow := a.app.NewWindow(fmt.Sprintf("Домик: %s", c.Name))
+	// Создаем контент для модального окна
 	content := container.NewVBox(
-		widget.NewLabel(fmt.Sprintf("ФИО: %s", guest.FullName)),
-		widget.NewLabel(fmt.Sprintf("Email: %s", guest.Email)),
-		widget.NewLabel(fmt.Sprintf("Телефон: %s", guest.Phone)),
-		widget.NewLabel(fmt.Sprintf("Документ: %s", guest.DocumentScanPath)),
-		widget.NewButton("Выселить", func() {
-			if err := a.guestService.CheckOutGuest(c.ID); err != nil {
-				dialog.ShowError(err, detailsWindow)
-				return
-			}
-			detailsWindow.Close()
-			// ИСПРАВЛЕНИЕ: Вызываем переданный колбэк для обновления
-			if refreshCallback != nil {
-				refreshCallback()
-			}
-		}),
-		widget.NewButton("Открыть папку с документами", func() {
-			if guest.DocumentScanPath == "" {
-				dialog.ShowInformation("Информация", "Документы отсутствуют", detailsWindow)
-				return
-			}
+		widget.NewCard("", fmt.Sprintf("Информация о домике: %s", c.Name),
+			container.NewVBox(
+				widget.NewLabel(fmt.Sprintf("ФИО: %s", guest.FullName)),
+				widget.NewLabel(fmt.Sprintf("Email: %s", guest.Email)),
+				widget.NewLabel(fmt.Sprintf("Телефон: %s", guest.Phone)),
+				widget.NewLabel(fmt.Sprintf("Документ: %s", guest.DocumentScanPath)),
+				container.NewHBox(
+					widget.NewButton("Выселить", func() {
+						// Подтверждение выселения
+						dialog.ShowConfirm("Подтверждение",
+							fmt.Sprintf("Вы уверены, что хотите выселить %s из домика %s?", guest.FullName, c.Name),
+							func(confirm bool) {
+								if confirm {
+									if err := a.guestService.CheckOutGuest(c.ID); err != nil {
+										dialog.ShowError(err, a.window)
+										return
+									}
+									// Вызываем колбэк для обновления
+									if refreshCallback != nil {
+										refreshCallback()
+									}
+									dialog.ShowInformation("Успешно!", "Гость выселен", a.window)
+								}
+							}, a.window)
+					}),
+					widget.NewButton("Открыть папку", func() {
+						if guest.DocumentScanPath == "" {
+							dialog.ShowInformation("Информация", "Документы отсутствуют", a.window)
+							return
+						}
 
-			// Получаем путь к папке
-			dirPath := filepath.Dir(guest.DocumentScanPath)
+						// Получаем путь к папке
+						dirPath := filepath.Dir(guest.DocumentScanPath)
 
-			// Открываем папку в файловом менеджере
-			switch runtime.GOOS {
-			case "windows":
-				exec.Command("explorer.exe", dirPath).Start()
-			case "darwin":
-				exec.Command("open", dirPath).Start()
-			case "linux":
-				exec.Command("xdg-open", dirPath).Start()
-			default:
-				dialog.ShowError(fmt.Errorf("Неподдерживаемая ОС"), detailsWindow)
-			}
-		}),
+						// Открываем папку в файловом менеджере
+						switch runtime.GOOS {
+						case "windows":
+							exec.Command("explorer.exe", dirPath).Start()
+						case "darwin":
+							exec.Command("open", dirPath).Start()
+						case "linux":
+							exec.Command("xdg-open", dirPath).Start()
+						default:
+							dialog.ShowError(fmt.Errorf("Неподдерживаемая ОС"), a.window)
+						}
+					}),
+				),
+			),
+		),
 	)
 
-	detailsWindow.SetContent(content)
-	detailsWindow.Show()
+	// Создаем и показываем модальное окно
+	modal := dialog.NewCustom(
+		"", // Без заголовка, так как у нас есть Card с заголовком
+		"Закрыть",
+		content,
+		a.window,
+	)
+
+	// Устанавливаем фиксированный размер модального окна
+	modal.Resize(fyne.NewSize(400, 300))
+	modal.Show()
 }
 
 // colorForStatus возвращает цвет для фона в зависимости от статуса
