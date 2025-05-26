@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/VallfIK/bazaotdx/internal/db"
 	"github.com/VallfIK/bazaotdx/internal/service"
@@ -22,8 +23,23 @@ func main() {
 	// Инициализация сервисов
 	guestService := service.NewGuestService(database.DB, documentsRoot)
 	cottageService := service.NewCottageService(database.DB)
+	tariffService := service.NewTariffService(database.DB) // Добавлено
 
 	// Создание GUI
-	app := ui.NewGuestApp(guestService, cottageService)
+	app := ui.NewGuestApp(guestService, cottageService, tariffService)
 	app.Run()
+
+	// Добавьте фоновую задачу
+	go func() {
+		for {
+			_, err := database.DB.Exec(`
+            DELETE FROM lesbaza.guests 
+            WHERE check_out_date <= NOW() - INTERVAL '2 hours'
+        `)
+			if err != nil {
+				log.Println("Auto-checkout error:", err)
+			}
+			time.Sleep(1 * time.Hour)
+		}
+	}()
 }

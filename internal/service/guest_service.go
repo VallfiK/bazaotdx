@@ -4,6 +4,7 @@ package service
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/VallfIK/bazaotdx/internal/models"
 	"github.com/VallfIK/bazaotdx/internal/utils"
@@ -45,15 +46,18 @@ func (s *GuestService) RegisterGuest(guest models.Guest, cottageID int) error {
 
 	// Вставляем запись о госте
 	_, err = tx.Exec(`
-        INSERT INTO lesbaza.guests 
-            (full_name, email, phone, cottage_id, document_scan_path) 
-        VALUES 
-            ($1, $2, $3, $4, $5)`,
+		INSERT INTO lesbaza.guests 
+			(full_name, email, phone, cottage_id, document_scan_path, check_in_date, check_out_date, tariff_id) 
+		VALUES 
+			($1, $2, $3, $4, $5, $6, $7, $8)`,
 		guest.FullName,
 		guest.Email,
 		guest.Phone,
 		cottageID,
 		guest.DocumentScanPath,
+		guest.CheckInDate,
+		guest.CheckOutDate,
+		guest.TariffID,
 	)
 	if err != nil {
 		tx.Rollback()
@@ -130,4 +134,21 @@ func (s *GuestService) CheckOutGuest(cottageID int) error {
 	}
 
 	return tx.Commit()
+}
+
+func (s *GuestService) CalculateCost(checkIn, checkOut time.Time, tariffID int) (float64, error) {
+	var price float64
+	err := s.db.QueryRow(
+		"SELECT price_per_day FROM lesbaza.tariffs WHERE tariff_id = $1",
+		tariffID,
+	).Scan(&price)
+	if err != nil {
+		return 0, err
+	}
+
+	days := checkOut.Sub(checkIn).Hours() / 24
+	if checkOut.Hour() < 12 {
+		days -= 0.5 // Коррекция на время выезда
+	}
+	return days * price, nil
 }

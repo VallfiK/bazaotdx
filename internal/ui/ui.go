@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"math"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-
-	"github.com/VallfIK/bazaotdx/internal/service"
-
-	"github.com/VallfIK/bazaotdx/internal/models"
+	"strconv"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -18,26 +17,38 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"github.com/VallfIK/bazaotdx/internal/models"
+	"github.com/VallfIK/bazaotdx/internal/service"
 )
 
 // GuestApp — основное приложение для учёта гостей
 // содержит сервисы для гостей и домиков
 type GuestApp struct {
-	app            fyne.App
-	window         fyne.Window
-	guestService   *service.GuestService
-	cottageService *service.CottageService
-	// Добавляем функцию обновления для вкладки домиков
+	app                   fyne.App
+	window                fyne.Window
+	guestService          *service.GuestService
+	cottageService        *service.CottageService
+	tariffService         *service.TariffService // Добавлено
 	updateCottagesContent func()
 }
 
 // NewGuestApp создаёт новое приложение
-func NewGuestApp(guestService *service.GuestService, cottageService *service.CottageService) *GuestApp {
+func NewGuestApp(
+	guestService *service.GuestService,
+	cottageService *service.CottageService,
+	tariffService *service.TariffService, // Добавлено
+) *GuestApp {
 	a := app.New()
 	w := a.NewWindow("Учет гостей - База отдыха")
 	w.Resize(fyne.NewSize(800, 600))
 
-	return &GuestApp{app: a, window: w, guestService: guestService, cottageService: cottageService}
+	return &GuestApp{
+		app:            a,
+		window:         w,
+		guestService:   guestService,
+		cottageService: cottageService,
+		tariffService:  tariffService, // Добавлено
+	}
 }
 
 // Run запускает приложение
@@ -51,8 +62,38 @@ func (a *GuestApp) createUI() {
 	tabs := container.NewAppTabs(
 		a.createGuestTab(),
 		a.createCottagesTab(),
+		a.createTariffsTab(),
 	)
 	a.window.SetContent(tabs)
+}
+
+func (a *GuestApp) createTariffsTab() *container.TabItem {
+	nameEntry := widget.NewEntry()
+	priceEntry := widget.NewEntry()
+	form := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "Название тарифа", Widget: nameEntry},
+			{Text: "Цена за день", Widget: priceEntry},
+		},
+		OnSubmit: func() {
+			price, _ := strconv.ParseFloat(priceEntry.Text, 64)
+			err := a.tariffService.CreateTariff(nameEntry.Text, price)
+			if err != nil {
+				dialog.ShowError(err, a.window)
+				return
+			}
+			dialog.ShowInformation("Успех", "Тариф создан", a.window)
+		},
+	}
+	return container.NewTabItem("Тарифы", form)
+}
+
+func calculateDays(checkIn, checkOut time.Time) float64 {
+	checkIn = checkIn.Add(-14 * time.Hour) // Нормализация до 00:00
+	checkOut = checkOut.Add(-12 * time.Hour)
+
+	days := checkOut.Sub(checkIn).Hours() / 24
+	return math.Ceil(days*100) / 100 // Округление до 2 знаков
 }
 
 // createGuestTab создаёт вкладку для регистрации гостей
@@ -63,12 +104,63 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 	phoneEntry := widget.NewEntry()
 	cottageSelect := widget.NewSelect([]string{}, nil)
 	documentPath := widget.NewLabel("")
+	tariffSelect := widget.NewSelect([]string{}, nil)
+	costLabel := widget.NewLabel("Стоимость: 0.00 руб.")
 
-	// Функция обновления списка свободных домиков
-	updateCottages := func() {
-		cottages, err := a.cottageService.GetFreeCottages()
+	// Переменные состояния
+	var (
+		checkIn  time.Time
+		checkOut time.Time
+		cottages []models.Cottage
+		tariffs  []models.Tariff
+	)
+
+	// Текстовые поля для ввода дат
+	checkInEntry := widget.NewEntry()
+	checkInEntry.SetPlaceHolder("дд.мм.гггг 14:00")
+	checkOutEntry := widget.NewEntry()
+	checkOutEntry.SetPlaceHolder("дд.мм.гггг 12:00")
+
+	// Функция обработки ввода дат
+	setupDateEntry := func(entry *widget.Entry, setTime *time.Time, hour int) {
+		entry.OnChanged = func(s string) {
+			t, err := time.Parse("02.01.2006 15:04", s)
+			if err == nil {
+				*setTime = time.Date(
+					t.Year(), t.Month(), t.Day(),
+					hour, 0, 0, 0, time.Local,
+				)
+				updateCost()
+			}
+		}
+	}
+
+	// Инициализация обработчиков дат
+	setupDateEntry(checkInEntry, &checkIn, 14)
+	setupDateEntry(checkOutEntry, &checkOut, 12)
+
+	// Инициализация тарифов
+	initTariffs := func() {
+		var err error
+		tariffs, err = a.tariffService.GetTariffs()
 		if err != nil {
-			log.Println("Error fetching cottages:", err)
+			dialog.ShowError(fmt.Errorf("Ошибка загрузки тарифов"), a.window)
+			return
+		}
+
+		tariffSelect.Options = make([]string, len(tariffs))
+		for i, t := range tariffs {
+			tariffSelect.Options[i] = fmt.Sprintf("%s (%.2f руб./день)", t.Name, t.PricePerDay)
+		}
+		tariffSelect.Refresh()
+	}
+	initTariffs()
+
+	// Обновление списка домиков
+	updateCottages := func() {
+		var err error
+		cottages, err = a.cottageService.GetFreeCottages()
+		if err != nil {
 			dialog.ShowError(fmt.Errorf("Ошибка загрузки домиков"), a.window)
 			return
 		}
@@ -80,19 +172,37 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 		cottageSelect.Options = options
 		cottageSelect.Refresh()
 	}
-	updateCottages() // Первоначальная загрузка
+	updateCottages()
 
-	// Кнопка выбора документа
+	// Расчет стоимости (теперь объявлена до использования)
+	updateCost := func() {
+		if checkIn.IsZero() || checkOut.IsZero() || tariffSelect.SelectedIndex() < 0 {
+			costLabel.SetText("Стоимость: -")
+			return
+		}
+
+		if checkOut.Before(checkIn) {
+			costLabel.SetText("Дата выезда раньше заезда!")
+			return
+		}
+
+		days := checkOut.Sub(checkIn).Hours() / 24
+		price := tariffs[tariffSelect.SelectedIndex()].PricePerDay
+		cost := days * price
+		costLabel.SetText(fmt.Sprintf("Стоимость: %.2f руб.", cost))
+	}
+
+	// Добавляем обработчик изменения тарифа
+	tariffSelect.OnChanged = func(_ string) {
+		updateCost()
+	}
+
+	// Выбор документа
 	fileButton := widget.NewButton("Выбрать документ", func() {
 		dialog.ShowFileOpen(func(reader fyne.URIReadCloser, err error) {
-			if err != nil {
-				dialog.ShowError(err, a.window)
-				return
+			if err == nil && reader != nil {
+				documentPath.SetText(reader.URI().Path())
 			}
-			if reader == nil {
-				return // Пользователь отменил выбор
-			}
-			documentPath.SetText(reader.URI().Path())
 		}, a.window)
 	})
 
@@ -103,28 +213,27 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			{Text: "Email", Widget: emailEntry},
 			{Text: "Телефон", Widget: phoneEntry},
 			{Text: "Домик", Widget: cottageSelect},
-			{Text: "Документ", Widget: container.NewHBox(
-				fileButton,
-				documentPath,
-			)},
+			{Text: "Дата заезда", Widget: checkInEntry},
+			{Text: "Дата выезда", Widget: checkOutEntry},
+			{Text: "Тариф", Widget: tariffSelect},
+			{Text: "Документ", Widget: container.NewHBox(fileButton, documentPath)},
+			{Text: "Стоимость", Widget: costLabel},
 		},
 		OnSubmit: func() {
-			// Валидация полей
-			if nameEntry.Text == "" ||
-				emailEntry.Text == "" ||
-				phoneEntry.Text == "" ||
-				cottageSelect.Selected == "" {
-				dialog.ShowError(fmt.Errorf("Все поля обязательны для заполнения"), a.window)
+			// Валидация
+			if nameEntry.Text == "" || emailEntry.Text == "" || phoneEntry.Text == "" ||
+				cottageSelect.Selected == "" || checkIn.IsZero() || checkOut.IsZero() ||
+				tariffSelect.SelectedIndex() < 0 {
+				dialog.ShowError(fmt.Errorf("Заполните все обязательные поля"), a.window)
 				return
 			}
 
-			// Поиск ID выбранного домика
-			cottages, err := a.cottageService.GetFreeCottages()
-			if err != nil {
-				dialog.ShowError(fmt.Errorf("Ошибка получения данных домиков"), a.window)
+			if checkOut.Before(checkIn) {
+				dialog.ShowError(fmt.Errorf("Дата выезда раньше заезда"), a.window)
 				return
 			}
 
+			// Поиск ID домика
 			var cottageID int
 			found := false
 			for _, c := range cottages {
@@ -136,49 +245,51 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			}
 
 			if !found {
-				dialog.ShowError(fmt.Errorf("Выбранный домик больше не доступен"), a.window)
+				dialog.ShowError(fmt.Errorf("Домик недоступен"), a.window)
 				updateCottages()
 				return
 			}
 
-			// Создание объекта гостя
+			// Регистрация гостя
 			guest := models.Guest{
 				FullName:         nameEntry.Text,
 				Email:            emailEntry.Text,
 				Phone:            phoneEntry.Text,
 				DocumentScanPath: documentPath.Text,
+				CheckInDate:      checkIn,
+				CheckOutDate:     checkOut,
+				TariffID:         tariffs[tariffSelect.SelectedIndex()].ID,
 			}
 
-			// Регистрация гостя
 			if err := a.guestService.RegisterGuest(guest, cottageID); err != nil {
 				dialog.ShowError(fmt.Errorf("Ошибка регистрации: %v", err), a.window)
 				return
 			}
 
-			// Очистка формы
+			// Сброс формы
 			nameEntry.SetText("")
 			emailEntry.SetText("")
 			phoneEntry.SetText("")
 			cottageSelect.ClearSelected()
 			documentPath.SetText("")
-
-			// Обновление списка домиков в форме
+			checkInEntry.SetText("")
+			checkOutEntry.SetText("")
+			tariffSelect.ClearSelected()
+			costLabel.SetText("Стоимость: 0.00 руб.")
 			updateCottages()
 
-			// ИСПРАВЛЕНИЕ: Обновляем также вкладку домиков
-			if a.updateCottagesContent != nil {
-				a.updateCottagesContent()
-			}
-
-			dialog.ShowInformation("Успешно!", "Гость зарегистрирован", a.window)
+			dialog.ShowInformation("Успех", "Регистрация завершена", a.window)
 		},
 	}
 
 	return container.NewTabItem("Регистрация гостей",
 		container.NewVScroll(
 			container.NewPadded(form),
-		),
-	)
+		))
+}
+
+func updateCost() {
+	panic("unimplemented")
 }
 
 // createCottagesTab создаёт вкладку для управления домиками
