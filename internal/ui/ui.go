@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-	"math"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -214,12 +213,25 @@ func (a *GuestApp) createTariffsTab() *container.TabItem {
 	return container.NewTabItem("Тарифы", form)
 }
 
-func calculateDays(checkIn, checkOut time.Time) float64 {
-	checkIn = checkIn.Add(-14 * time.Hour) // Нормализация до 00:00
-	checkOut = checkOut.Add(-12 * time.Hour)
+func calculateDays(checkIn, checkOut time.Time) int {
+	// Нормализируем даты: заезд в 14:00, выезд в 12:00
+	checkInNormalized := time.Date(checkIn.Year(), checkIn.Month(), checkIn.Day(), 14, 0, 0, 0, time.Local)
+	checkOutNormalized := time.Date(checkOut.Year(), checkOut.Month(), checkOut.Day(), 12, 0, 0, 0, time.Local)
 
-	days := checkOut.Sub(checkIn).Hours() / 24
-	return math.Ceil(days*100) / 100 // Округление до 2 знаков
+	// Если выезд в тот же день что и заезд - это минимум 1 день
+	if checkInNormalized.Format("2006-01-02") == checkOutNormalized.Format("2006-01-02") {
+		return 1
+	}
+
+	// Рассчитываем количество полных дней
+	days := int(checkOutNormalized.Sub(checkInNormalized).Hours() / 24)
+
+	// Если получается 0 или меньше дней, возвращаем 1 (минимум)
+	if days <= 0 {
+		return 1
+	}
+
+	return days
 }
 
 // createGuestTab создаёт вкладку для регистрации гостей
@@ -261,10 +273,11 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			return
 		}
 
-		days := checkOut.Sub(checkIn).Hours() / 24
+		// Используем новую функцию расчета дней
+		days := calculateDays(checkIn, checkOut)
 		price := tariffs[tariffSelect.SelectedIndex()].PricePerDay
-		cost := days * price
-		costLabel.SetText(fmt.Sprintf("Стоимость: %.2f руб. (дней: %.1f)", cost, days))
+		cost := float64(days) * price
+		costLabel.SetText(fmt.Sprintf("Стоимость: %.2f руб. (дней: %d)", cost, days))
 	}
 
 	// Создаем календарные кнопки

@@ -146,9 +146,22 @@ func (s *GuestService) CalculateCost(checkIn, checkOut time.Time, tariffID int) 
 		return 0, err
 	}
 
-	days := checkOut.Sub(checkIn).Hours() / 24
-	if checkOut.Hour() < 12 {
-		days -= 0.5 // Коррекция на время выезда
+	// Нормализируем даты: заезд в 14:00, выезд в 12:00
+	checkInNormalized := time.Date(checkIn.Year(), checkIn.Month(), checkIn.Day(), 14, 0, 0, 0, time.Local)
+	checkOutNormalized := time.Date(checkOut.Year(), checkOut.Month(), checkOut.Day(), 12, 0, 0, 0, time.Local)
+
+	// Если выезд в тот же день что и заезд - это минимум 1 день
+	if checkInNormalized.Format("2006-01-02") == checkOutNormalized.Format("2006-01-02") {
+		return price, nil
 	}
-	return days * price, nil
+
+	// Рассчитываем количество полных дней
+	days := int(checkOutNormalized.Sub(checkInNormalized).Hours() / 24)
+
+	// Если получается 0 или меньше дней, возвращаем стоимость за 1 день
+	if days <= 0 {
+		return price, nil
+	}
+
+	return float64(days) * price, nil
 }
