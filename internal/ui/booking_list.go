@@ -179,7 +179,7 @@ func (blw *BookingListWidget) updateBookingItem(id widget.ListItemID, item fyne.
 
 	booking := blw.bookings[id]
 	card := item.(*widget.Card)
-	content := card.Content.(*fyne.Container)
+	vbox := card.Content.(*fyne.Container)
 
 	// Находим название домика
 	cottageName := ""
@@ -191,8 +191,6 @@ func (blw *BookingListWidget) updateBookingItem(id widget.ListItemID, item fyne.
 	}
 
 	// Обновляем labels
-	vbox := content.Objects[0].(*fyne.Container)
-
 	nameLabel := vbox.Objects[0].(*widget.Label)
 	nameLabel.SetText(booking.GuestName)
 
@@ -290,6 +288,22 @@ func (blw *BookingListWidget) showBookingActions(booking models.Booking) {
 					blw.loadData()
 					blw.triggerRefresh()
 					dialog.ShowInformation("Успешно", "Бронирование отменено", blw.window)
+				}
+			}, blw.window)
+		}))
+
+	case models.BookingStatusCheckedIn:
+		actions.Add(widget.NewButton("Выселить", func() {
+			dialog.ShowConfirm("Подтверждение", "Выселить гостя?", func(ok bool) {
+				if ok {
+					err := blw.bookingService.CheckOutBooking(booking.ID)
+					if err != nil {
+						dialog.ShowError(err, blw.window)
+						return
+					}
+					blw.loadData()
+					blw.triggerRefresh()
+					dialog.ShowInformation("Успешно", "Гость выселен", blw.window)
 				}
 			}, blw.window)
 		}))

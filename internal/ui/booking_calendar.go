@@ -299,7 +299,7 @@ func (bc *BookingCalendar) showBookingDetails(bookingID int) {
 				dialog.ShowError(err, bc.window)
 				return
 			}
-			bc.refreshCalendar()
+			bc.Update()
 			dialog.ShowInformation("Успешно", "Гость заселен", bc.window)
 		}))
 		actions.Add(widget.NewButton("Отменить", func() {
@@ -310,7 +310,7 @@ func (bc *BookingCalendar) showBookingDetails(bookingID int) {
 						dialog.ShowError(err, bc.window)
 						return
 					}
-					bc.refreshCalendar()
+					bc.Update()
 					dialog.ShowInformation("Успешно", "Бронирование отменено", bc.window)
 				}
 			}, bc.window)
@@ -340,10 +340,6 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Ti
 			break
 		}
 	}
-	if err != nil {
-		dialog.ShowError(err, bc.window)
-		return
-	}
 
 	// Проверяем доступность домика на даты
 	available, err := bc.bookingService.IsCottageAvailable(cottageID, startDate, startDate.AddDate(0, 0, 1))
@@ -356,8 +352,7 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Ti
 		return
 	}
 
-	// Находим домик
-	var cottage models.Cottage
+	// Используем найденный домик из первого цикла
 	for _, c := range bc.cottages {
 		if c.ID == cottageID {
 			cottage = c
@@ -508,7 +503,7 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Ti
 				return
 			}
 
-			bc.refreshCalendar()
+			bc.Update()
 			dialog.ShowInformation("Успешно", "Бронирование создано", bc.window)
 		},
 		OnCancel: func() {
