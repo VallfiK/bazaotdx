@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/VallfIK/bazaotdx/internal/models"
 	"github.com/VallfIK/bazaotdx/internal/service"
@@ -57,12 +56,11 @@ func NewBookingCalendar(
 }
 
 // loadData загружает данные для календаря
-func (bc *BookingCalendar) loadData() {
+func (bc *BookingCalendar) loadData() error {
 	// Получаем список домиков
 	cottages, err := bc.cottageService.GetAllCottages()
 	if err != nil {
-		dialog.ShowError(err, bc.window)
-		return
+		return fmt.Errorf("error loading cottages: %v", err)
 	}
 	bc.cottages = cottages
 
@@ -72,10 +70,11 @@ func (bc *BookingCalendar) loadData() {
 
 	calendarData, err := bc.bookingService.GetCalendarData(startDate, endDate)
 	if err != nil {
-		dialog.ShowError(err, bc.window)
-		return
+		return fmt.Errorf("error loading calendar data: %v", err)
 	}
 	bc.calendarData = calendarData
+
+	return nil
 }
 
 // CreateRenderer создает рендерер для календаря
@@ -132,51 +131,151 @@ func (bc *BookingCalendar) CreateRenderer() fyne.WidgetRenderer {
 
 // createCalendarGrid создает сетку календаря
 func (bc *BookingCalendar) createCalendarGrid() *fyne.Container {
-	// Получаем первый день месяца в локальном часовом поясе
-	startDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), 1, 0, 0, 0, 0, time.Local)
-	// Получаем последний день месяца
-	endDate := startDate.AddDate(0, 1, -1)
-	daysInMonth := endDate.Day()
-
 	// Создаем сетку: первый столбец - названия домиков, остальные - дни
-	gridObjects := []fyne.CanvasObject{}
+	grid := container.NewGridWithColumns(len(bc.cottages) + 1)
 
 	// Заголовок - пустая ячейка
-	gridObjects = append(gridObjects, widget.NewLabel(""))
+	grid.Add(widget.NewLabel(""))
 
 	// Заголовки дней
-	for day := 1; day <= daysInMonth; day++ {
-		date := time.Date(startDate.Year(), startDate.Month(), day, 0, 0, 0, 0, time.Local)
-		dayLabel := widget.NewLabel(fmt.Sprintf("%d\n%s", day, bc.getWeekdayShort(date.Weekday())))
-		dayLabel.Alignment = fyne.TextAlignCenter
+	firstDay := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), 1, 0, 0, 0, 0, time.Local)
+	lastDay := firstDay.AddDate(0, 1, -1)
 
-		// Выделяем выходные
-		if date.Weekday() == time.Saturday || date.Weekday() == time.Sunday {
-			dayLabel.TextStyle = fyne.TextStyle{Bold: true}
-		}
-
-		gridObjects = append(gridObjects, dayLabel)
+	// Добавляем пустые ячейки для начала недели
+	for i := time.Monday; i < firstDay.Weekday(); i++ {
+		grid.Add(widget.NewLabel(""))
 	}
 
-	// Строки для каждого домика
+	// Добавляем дни месяца
+	for day := firstDay; !day.After(lastDay); day = day.AddDate(0, 0, 1) {
+		weekday := bc.getWeekdayShort(day.Weekday())
+		grid.Add(widget.NewLabel(fmt.Sprintf("%d\n%s", day.Day(), weekday)))
+	}
+
+	// Добавляем пустые ячейки для конца недели
+	for i := lastDay.Weekday(); i < time.Saturday; i++ {
+		grid.Add(widget.NewLabel(""))
+	}
+
+	// Добавляем заголовки домиков
 	for _, cottage := range bc.cottages {
-		// Название домика
-		cottageLabel := widget.NewLabel(cottage.Name)
-		cottageLabel.TextStyle = fyne.TextStyle{Bold: true}
-		gridObjects = append(gridObjects, cottageLabel)
-
-		// Ячейки для каждого дня
-		for day := 1; day <= daysInMonth; day++ {
-			date := time.Date(startDate.Year(), startDate.Month(), day, 0, 0, 0, 0, time.Local)
-			cell := bc.createCalendarCell(cottage.ID, date)
-			gridObjects = append(gridObjects, cell)
-		}
+		grid.Add(widget.NewLabel(cottage.Name))
 	}
 
-	// Создаем сетку
-	grid := container.New(layout.NewGridLayoutWithColumns(daysInMonth+1), gridObjects...)
+	// Создаем ячейки для каждого дня и каждого домика
+	for _, cottage := range bc.cottages {
+		var currentBookingID int
+		var currentBookingStatus models.BookingStatus
+		var currentBookingCells []fyne.CanvasObject
+
+		// Добавляем пустые ячейки для начала недели
+		for i := time.Monday; i < firstDay.Weekday(); i++ {
+			grid.Add(widget.NewLabel(""))
+		}
+
+		// Создаем ячейки для каждого дня месяца
+		for day := firstDay; !day.After(lastDay); day = day.AddDate(0, 0, 1) {
+			// Получаем статус для текущей ячейки
+			var status models.BookingStatus
+			if dayData, exists := bc.calendarData[day]; exists {
+				if s, ok := dayData[cottage.ID]; ok {
+					status = s
+				}
+			}
+
+			// Если это начало новой брони или конец текущей
+			if status.BookingID != currentBookingID {
+				// Если есть накопленные ячейки текущей брони, создаем объединенную ячейку
+				if len(currentBookingCells) > 0 {
+					grid.Add(bc.createCombinedCell(currentBookingCells, currentBookingStatus))
+					currentBookingCells = []fyne.CanvasObject{} // Сбрасываем список
+				}
+
+				currentBookingID = status.BookingID
+				currentBookingStatus = status
+			}
+
+			// Создаем ячейку и добавляем к текущей брони
+			cell := bc.createCalendarCell(cottage.ID, day)
+			currentBookingCells = append(currentBookingCells, cell)
+		}
+
+		// Добавляем пустые ячейки для конца недели
+		for i := lastDay.Weekday(); i < time.Saturday; i++ {
+			grid.Add(widget.NewLabel(""))
+		}
+
+		// Добавляем оставшиеся ячейки последней брони
+		if len(currentBookingCells) > 0 {
+			grid.Add(bc.createCombinedCell(currentBookingCells, currentBookingStatus))
+		}
+	}
 
 	return grid
+}
+
+// createCombinedCell создает объединенную ячейку для нескольких дней одной брони
+func (bc *BookingCalendar) createCombinedCell(cells []fyne.CanvasObject, status models.BookingStatus) fyne.CanvasObject {
+	// Получаем цвет для статуса
+	bgColor := bc.getStatusColor(status)
+
+	// Создаем фон
+	bg := canvas.NewRectangle(bgColor)
+	bg.SetMinSize(fyne.NewSize(float32(80*len(cells)), 40)) // Увеличиваем ширину в зависимости от количества дней
+
+	// Создаем контент
+	var content fyne.CanvasObject
+	if status.BookingID > 0 {
+		text := ""
+		if status.IsCheckIn {
+			text = "→ " + bc.truncateString(status.GuestName, 8)
+		} else if status.IsCheckOut {
+			text = bc.truncateString(status.GuestName, 8) + " →"
+		} else {
+			text = bc.truncateString(status.GuestName, 10)
+		}
+
+		label := canvas.NewText(text, color.White)
+		label.TextSize = 10
+		label.Alignment = fyne.TextAlignCenter
+		content = label
+	} else {
+		content = widget.NewLabel("")
+	}
+
+	// Создаем контейнер для контента
+	contentContainer := container.NewCenter(content)
+	containerWidth := float32(80 * len(cells))
+	contentContainer.Resize(fyne.NewSize(containerWidth, 40))
+
+	// Создаем кликабельный контейнер
+	clickable := widget.NewButton("", func() {
+		// Получаем данные из первой ячейки
+		firstCell := cells[0].(*fyne.Container)
+		firstContent := firstCell.Objects[1].(*fyne.Container)
+		firstLabel := firstContent.Objects[0].(*canvas.Text)
+		firstDateStr := firstLabel.Text
+
+		// Парсим строку даты в time.Time
+		firstDate, _ := time.Parse("2006-01-02", firstDateStr)
+
+		// Получаем ID бронирования из статуса
+		bookingID := status.BookingID
+
+		// Обрабатываем клик
+		bc.onCellTapped(bookingID, firstDate, status)
+	})
+	clickable.Importance = widget.LowImportance
+	clickable.ExtendBaseWidget(clickable)
+
+	// Объединяем все в один контейнер
+	cell := container.NewStack(
+		bg,
+		contentContainer,
+		clickable,
+	)
+
+	return cell
 }
 
 // createCalendarCell создает ячейку календаря
@@ -228,9 +327,11 @@ func (bc *BookingCalendar) createCalendarCell(cottageID int, date time.Time) fyn
 	clickable.ExtendBaseWidget(clickable)
 
 	// Объединяем все в один контейнер
-	cell := container.NewStack(
+	cell := container.NewBorder(
 		bg,
-		container.NewCenter(content),
+		content,
+		clickable,
+		clickable,
 		clickable,
 	)
 
@@ -271,7 +372,7 @@ func (bc *BookingCalendar) onCellTapped(cottageID int, date time.Time, status mo
 func (bc *BookingCalendar) showBookingDetails(bookingID int) {
 	booking, err := bc.bookingService.GetBookingByID(bookingID)
 	if err != nil {
-		dialog.ShowError(err, bc.window)
+		dialog.ShowError(fmt.Errorf("error loading booking details: %v", err), bc.window)
 		return
 	}
 
