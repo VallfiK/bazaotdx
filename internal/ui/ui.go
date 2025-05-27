@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/VallfIK/bazaotdx/internal/models"
 	"github.com/VallfIK/bazaotdx/internal/service"
@@ -28,133 +29,8 @@ type GuestApp struct {
 	guestService          *service.GuestService
 	cottageService        *service.CottageService
 	tariffService         *service.TariffService
+	bookingService        *service.BookingService
 	updateCottagesContent func()
-}
-
-// DatePickerButton — кастомная кнопка для выбора даты через календарь
-type DatePickerButton struct {
-	widget.BaseWidget
-	selectedDate time.Time
-	label        string
-	button       *widget.Button
-	onDateChange func(time.Time)
-	window       fyne.Window
-}
-
-// NewDatePickerButton создает новую кнопку выбора даты
-func NewDatePickerButton(label string, window fyne.Window, onChange func(time.Time)) *DatePickerButton {
-	dpb := &DatePickerButton{
-		label:        label,
-		window:       window,
-		onDateChange: onChange,
-	}
-
-	dpb.button = widget.NewButton(label, dpb.showCalendar)
-	dpb.ExtendBaseWidget(dpb)
-	return dpb
-}
-
-// showCalendar отображает календарь для выбора даты
-func (dpb *DatePickerButton) showCalendar() {
-	// Определяем начальную дату для календаря
-	initialDate := time.Now()
-	if !dpb.selectedDate.IsZero() {
-		initialDate = dpb.selectedDate
-	}
-
-	// Создаем календарь
-	cal := widget.NewCalendar(initialDate, func(t time.Time) {
-		// Устанавливаем время в зависимости от типа даты
-		var finalTime time.Time
-		if dpb.label == "Дата заезда" {
-			finalTime = time.Date(t.Year(), t.Month(), t.Day(), 14, 0, 0, 0, time.Local)
-		} else {
-			finalTime = time.Date(t.Year(), t.Month(), t.Day(), 12, 0, 0, 0, time.Local)
-		}
-
-		dpb.selectedDate = finalTime
-		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006 15:04")))
-
-		if dpb.onDateChange != nil {
-			dpb.onDateChange(finalTime)
-		}
-	})
-
-	// Создаем кнопки для управления
-	todayBtn := widget.NewButton("Сегодня", func() {
-		// Создаем новый календарь с сегодняшней датой
-		today := time.Now()
-		var finalTime time.Time
-		if dpb.label == "Дата заезда" {
-			finalTime = time.Date(today.Year(), today.Month(), today.Day(), 14, 0, 0, 0, time.Local)
-		} else {
-			finalTime = time.Date(today.Year(), today.Month(), today.Day(), 12, 0, 0, 0, time.Local)
-		}
-
-		dpb.selectedDate = finalTime
-		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006 15:04")))
-
-		if dpb.onDateChange != nil {
-			dpb.onDateChange(finalTime)
-		}
-	})
-
-	tomorrowBtn := widget.NewButton("Завтра", func() {
-		// Создаем новый календарь с завтрашней датой
-		tomorrow := time.Now().AddDate(0, 0, 1)
-		var finalTime time.Time
-		if dpb.label == "Дата заезда" {
-			finalTime = time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 14, 0, 0, 0, time.Local)
-		} else {
-			finalTime = time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 12, 0, 0, 0, time.Local)
-		}
-
-		dpb.selectedDate = finalTime
-		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006 15:04")))
-
-		if dpb.onDateChange != nil {
-			dpb.onDateChange(finalTime)
-		}
-	})
-
-	clearBtn := widget.NewButton("Очистить", func() {
-		dpb.selectedDate = time.Time{}
-		dpb.button.SetText(dpb.label)
-		if dpb.onDateChange != nil {
-			dpb.onDateChange(time.Time{})
-		}
-	})
-
-	// Создаем содержимое диалога
-	content := container.NewVBox(
-		cal,
-		container.NewGridWithColumns(3, todayBtn, tomorrowBtn, clearBtn),
-	)
-
-	// Показываем диалог
-	d := dialog.NewCustom("Выберите дату", "Закрыть", content, dpb.window)
-	d.Resize(fyne.NewSize(300, 400))
-	d.Show()
-}
-
-// GetSelectedDate возвращает выбранную дату
-func (dpb *DatePickerButton) GetSelectedDate() time.Time {
-	return dpb.selectedDate
-}
-
-// SetSelectedDate устанавливает дату программно
-func (dpb *DatePickerButton) SetSelectedDate(t time.Time) {
-	dpb.selectedDate = t
-	if t.IsZero() {
-		dpb.button.SetText(dpb.label)
-	} else {
-		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, t.Format("02.01.2006 15:04")))
-	}
-}
-
-// CreateRenderer возвращает рендерер для виджета
-func (dpb *DatePickerButton) CreateRenderer() fyne.WidgetRenderer {
-	return dpb.button.CreateRenderer()
 }
 
 // NewGuestApp создаёт новое приложение
@@ -162,10 +38,11 @@ func NewGuestApp(
 	guestService *service.GuestService,
 	cottageService *service.CottageService,
 	tariffService *service.TariffService,
+	bookingService *service.BookingService,
 ) *GuestApp {
 	a := app.New()
 	w := a.NewWindow("Учет гостей - База отдыха")
-	w.Resize(fyne.NewSize(800, 600))
+	w.Resize(fyne.NewSize(1200, 800))
 
 	return &GuestApp{
 		app:            a,
@@ -173,6 +50,7 @@ func NewGuestApp(
 		guestService:   guestService,
 		cottageService: cottageService,
 		tariffService:  tariffService,
+		bookingService: bookingService,
 	}
 }
 
@@ -184,11 +62,53 @@ func (a *GuestApp) Run() {
 
 // createUI формирует основное содержание окна с вкладками
 func (a *GuestApp) createUI() {
+	// Создаем виджеты календаря и списка бронирований
+	calendarWidget := NewBookingCalendar(
+		a.bookingService,
+		a.cottageService,
+		a.tariffService,
+		a.window,
+	)
+
+	bookingListWidget := NewBookingListWidget(
+		a.bookingService,
+		a.cottageService,
+		a.window,
+	)
+
+	// Устанавливаем взаимные обновления
+	calendarWidget.SetOnRefresh(func() {
+		bookingListWidget.loadData()
+		if a.updateCottagesContent != nil {
+			a.updateCottagesContent()
+		}
+	})
+
+	bookingListWidget.SetOnRefresh(func() {
+		calendarWidget.refreshCalendar()
+		if a.updateCottagesContent != nil {
+			a.updateCottagesContent()
+		}
+	})
+
+	// Создаем вкладки
 	tabs := container.NewAppTabs(
+		container.NewTabItem("Календарь бронирований", calendarWidget),
+		container.NewTabItem("Список бронирований", bookingListWidget),
 		a.createGuestTab(),
 		a.createCottagesTab(),
 		a.createTariffsTab(),
+		a.createReportsTab(),
 	)
+
+	// Устанавливаем иконки для вкладок
+	tabs.Items[0].Icon = theme.CalendarIcon()
+	tabs.Items[1].Icon = theme.ListIcon()
+	tabs.Items[2].Icon = theme.AccountIcon()
+	tabs.Items[3].Icon = theme.HomeIcon()
+	tabs.Items[4].Icon = theme.SettingsIcon()
+	tabs.Items[5].Icon = theme.DocumentIcon()
+
 	a.window.SetContent(tabs)
 }
 
@@ -549,6 +469,182 @@ func (a *GuestApp) showCottageDetails(c models.Cottage, refreshCallback func()) 
 	// Устанавливаем фиксированный размер модального окна
 	modal.Resize(fyne.NewSize(400, 300))
 	modal.Show()
+}
+
+// createReportsTab создает вкладку отчетов
+func (a *GuestApp) createReportsTab() *container.TabItem {
+	// Кнопки для генерации отчетов
+	occupancyBtn := widget.NewButton("Отчет по заполняемости", func() {
+		a.generateOccupancyReport()
+	})
+
+	revenueBtn := widget.NewButton("Отчет по доходам", func() {
+		a.generateRevenueReport()
+	})
+
+	upcomingBtn := widget.NewButton("Предстоящие заезды", func() {
+		a.showUpcomingArrivals()
+	})
+
+	content := container.NewVBox(
+		widget.NewCard("Отчеты", "Выберите тип отчета для генерации",
+			container.NewVBox(
+				occupancyBtn,
+				revenueBtn,
+				upcomingBtn,
+			),
+		),
+	)
+
+	return container.NewTabItem("Отчеты",
+		container.NewScroll(content),
+	)
+}
+
+// generateOccupancyReport генерирует отчет по заполняемости
+func (a *GuestApp) generateOccupancyReport() {
+	// Выбор периода
+	startDate := time.Now().AddDate(0, -1, 0)
+	endDate := time.Now()
+
+	bookings, err := a.bookingService.GetBookingsByDateRange(startDate, endDate)
+	if err != nil {
+		dialog.ShowError(err, a.window)
+		return
+	}
+
+	cottages, _ := a.cottageService.GetAllCottages()
+
+	// Подсчет статистики
+	totalDays := int(endDate.Sub(startDate).Hours() / 24)
+	occupiedDays := make(map[int]int)
+
+	for _, booking := range bookings {
+		if booking.Status == models.BookingStatusCheckedIn ||
+			booking.Status == models.BookingStatusCheckedOut {
+			days := int(booking.CheckOutDate.Sub(booking.CheckInDate).Hours() / 24)
+			occupiedDays[booking.CottageID] += days
+		}
+	}
+
+	// Формируем отчет
+	report := "ОТЧЕТ ПО ЗАПОЛНЯЕМОСТИ\n"
+	report += fmt.Sprintf("Период: %s - %s\n\n",
+		startDate.Format("02.01.2006"),
+		endDate.Format("02.01.2006"))
+
+	totalOccupancy := 0.0
+	for _, cottage := range cottages {
+		occupied := occupiedDays[cottage.ID]
+		percentage := float64(occupied) / float64(totalDays) * 100
+		totalOccupancy += percentage
+
+		report += fmt.Sprintf("%s: %.1f%% (%d из %d дней)\n",
+			cottage.Name, percentage, occupied, totalDays)
+	}
+
+	avgOccupancy := totalOccupancy / float64(len(cottages))
+	report += fmt.Sprintf("\nСредняя заполняемость: %.1f%%\n", avgOccupancy)
+
+	// Показываем отчет
+	entry := widget.NewMultiLineEntry()
+	entry.SetText(report)
+	entry.Disable()
+
+	d := dialog.NewCustom("Отчет по заполняемости", "Закрыть",
+		container.NewScroll(entry), a.window)
+	d.Resize(fyne.NewSize(500, 600))
+	d.Show()
+}
+
+// generateRevenueReport генерирует отчет по доходам
+func (a *GuestApp) generateRevenueReport() {
+	// Аналогично генерируем отчет по доходам
+	startDate := time.Now().AddDate(0, -1, 0)
+	endDate := time.Now()
+
+	bookings, err := a.bookingService.GetBookingsByDateRange(startDate, endDate)
+	if err != nil {
+		dialog.ShowError(err, a.window)
+		return
+	}
+
+	totalRevenue := 0.0
+	revenueByMonth := make(map[string]float64)
+	revenueByCottage := make(map[int]float64)
+
+	for _, booking := range bookings {
+		if booking.Status != models.BookingStatusCancelled {
+			totalRevenue += booking.TotalCost
+
+			monthKey := booking.CheckInDate.Format("01.2006")
+			revenueByMonth[monthKey] += booking.TotalCost
+			revenueByCottage[booking.CottageID] += booking.TotalCost
+		}
+	}
+
+	report := "ОТЧЕТ ПО ДОХОДАМ\n"
+	report += fmt.Sprintf("Период: %s - %s\n\n",
+		startDate.Format("02.01.2006"),
+		endDate.Format("02.01.2006"))
+
+	report += fmt.Sprintf("Общий доход: %.2f руб.\n\n", totalRevenue)
+
+	report += "По месяцам:\n"
+	for month, revenue := range revenueByMonth {
+		report += fmt.Sprintf("%s: %.2f руб.\n", month, revenue)
+	}
+
+	// Показываем отчет
+	entry := widget.NewMultiLineEntry()
+	entry.SetText(report)
+	entry.Disable()
+
+	d := dialog.NewCustom("Отчет по доходам", "Закрыть",
+		container.NewScroll(entry), a.window)
+	d.Resize(fyne.NewSize(500, 600))
+	d.Show()
+}
+
+// showUpcomingArrivals показывает предстоящие заезды
+func (a *GuestApp) showUpcomingArrivals() {
+	bookings, err := a.bookingService.GetUpcomingBookings()
+	if err != nil {
+		dialog.ShowError(err, a.window)
+		return
+	}
+
+	cottages, _ := a.cottageService.GetAllCottages()
+	cottageMap := make(map[int]string)
+	for _, c := range cottages {
+		cottageMap[c.ID] = c.Name
+	}
+
+	report := "ПРЕДСТОЯЩИЕ ЗАЕЗДЫ\n\n"
+
+	for _, booking := range bookings {
+		report += fmt.Sprintf("%s - %s:\n",
+			booking.CheckInDate.Format("02.01.2006"),
+			booking.CheckOutDate.Format("02.01.2006"))
+		report += fmt.Sprintf("  Гость: %s\n", booking.GuestName)
+		report += fmt.Sprintf("  Домик: %s\n", cottageMap[booking.CottageID])
+		report += fmt.Sprintf("  Телефон: %s\n", booking.Phone)
+		report += fmt.Sprintf("  Стоимость: %.2f руб.\n\n", booking.TotalCost)
+	}
+
+	if len(bookings) == 0 {
+		report += "Нет предстоящих заездов\n"
+	}
+
+	// Показываем отчет
+	entry := widget.NewMultiLineEntry()
+	entry.SetText(report)
+	entry.Disable()
+
+	d := dialog.NewCustom("Предстоящие заезды", "Закрыть",
+		container.NewScroll(entry), a.window)
+	d.Resize(fyne.NewSize(500, 600))
+	d.Show()
 }
 
 // colorForStatus возвращает цвет для фона в зависимости от статуса
