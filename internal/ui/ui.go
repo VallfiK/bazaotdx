@@ -413,6 +413,10 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			costLabel.SetText("Стоимость: 0.00 руб.")
 			updateCottages()
 
+			if a.updateCottagesContent != nil {
+				a.updateCottagesContent()
+			}
+
 			dialog.ShowInformation("Успех", "Регистрация завершена", a.window)
 		},
 	}
