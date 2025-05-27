@@ -219,29 +219,55 @@ func (bc *BookingCalendar) createCalendarCell(cottageID int, date time.Time) fyn
 		content = widget.NewLabel("")
 	}
 
-	// Создаем кнопку для взаимодействия
-	btn := &widget.Button{}
-	btn.OnTapped = func() {
+	// Создаем кликабельный контейнер
+	clickable := widget.NewButton("", func() {
 		bc.onCellTapped(cottageID, date, status)
-	}
+	})
+	clickable.Importance = widget.HighImportance
+	clickable.ExtendBaseWidget(clickable)
 
-	// Комбинируем все элементы
-	cell := container.NewStack(bg, container.NewCenter(content), btn)
+	// Create a custom widget with proper styling
+	cellWidget := widget.NewCustomWidget(
+		func() fyne.CanvasObject {
+			return container.NewBorder(
+				bg,
+				bg,
+				bg,
+				bg,
+				container.NewStack(bg, container.NewCenter(content), clickable),
+			)
+		},
+		func(c fyne.CanvasObject) {
+			c.Refresh()
+		},
+		bg,
+		container.NewStack(bg, container.NewCenter(content), clickable),
+	)
+
+	// Устанавливаем минимальный размер для контейнера
+	cell.Objects[0].(*fyne.Container).SetMinSize(fyne.NewSize(80, 40))
 
 	return cell
 }
 
 // getStatusColor возвращает цвет для статуса
 func (bc *BookingCalendar) getStatusColor(status models.BookingStatus) color.Color {
+	// Если нет бронирования, считаем день свободным
+	if status.BookingID <= 0 {
+		return color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый (свободно)
+	}
+
 	switch status.Status {
 	case models.BookingStatusBooked:
-		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый
+		return color.NRGBA{R: 255, G: 205, B: 83, A: 255} // Светло-желтый (бронь)
 	case models.BookingStatusCheckedIn:
-		return color.NRGBA{R: 220, G: 53, B: 69, A: 255} // Красный
+		return color.NRGBA{R: 52, G: 152, B: 219, A: 255} // Синий (заселен)
 	case models.BookingStatusCheckedOut:
-		return color.NRGBA{R: 108, G: 117, B: 125, A: 255} // Серый
+		return color.NRGBA{R: 108, G: 117, B: 125, A: 255} // Серый (выселен)
+	case models.BookingStatusCancelled:
+		return color.NRGBA{R: 231, G: 76, B: 60, A: 255} // Красный (отменено)
 	default:
-		return color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый
+		return color.NRGBA{R: 108, G: 117, B: 125, A: 255} // Серый (неизвестный статус)
 	}
 }
 

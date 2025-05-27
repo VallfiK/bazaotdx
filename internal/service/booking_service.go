@@ -199,6 +199,23 @@ func (s *BookingService) CancelBooking(bookingID int) error {
 	return s.UpdateBookingStatus(bookingID, models.BookingStatusCancelled)
 }
 
+// CheckOutBooking выселение гостя
+func (s *BookingService) CheckOutBooking(bookingID int) error {
+	// Получаем текущую бронь
+	booking, err := s.GetBookingByID(bookingID)
+	if err != nil {
+		return fmt.Errorf("ошибка получения брони: %w", err)
+	}
+
+	// Проверяем статус брони
+	if booking.Status != models.BookingStatusCheckedIn {
+		return fmt.Errorf("бронь не имеет статуса " + models.BookingStatusCheckedIn)
+	}
+
+	// Обновляем статус на "Выселено"
+	return s.UpdateBookingStatus(bookingID, models.BookingStatusCheckedOut)
+}
+
 // CheckInBooking заселяет гостя
 func (s *BookingService) CheckInBooking(bookingID int) error {
 	// Получаем бронь
