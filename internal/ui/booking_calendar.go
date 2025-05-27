@@ -207,6 +207,7 @@ func (bc *BookingCalendar) createCalendarCell(cottageID int, date time.Time) fyn
 		} else if status.IsCheckOut {
 			text = bc.truncateString(status.GuestName, 8) + " →"
 		} else {
+			// Для промежуточных дней показываем только имя
 			text = bc.truncateString(status.GuestName, 10)
 		}
 
@@ -223,29 +224,15 @@ func (bc *BookingCalendar) createCalendarCell(cottageID int, date time.Time) fyn
 	clickable := widget.NewButton("", func() {
 		bc.onCellTapped(cottageID, date, status)
 	})
-	clickable.Importance = widget.HighImportance
+	clickable.Importance = widget.LowImportance
 	clickable.ExtendBaseWidget(clickable)
 
-	// Create a custom widget with proper styling
-	cellWidget := widget.NewCustomWidget(
-		func() fyne.CanvasObject {
-			return container.NewBorder(
-				bg,
-				bg,
-				bg,
-				bg,
-				container.NewStack(bg, container.NewCenter(content), clickable),
-			)
-		},
-		func(c fyne.CanvasObject) {
-			c.Refresh()
-		},
+	// Объединяем все в один контейнер
+	cell := container.NewStack(
 		bg,
-		container.NewStack(bg, container.NewCenter(content), clickable),
+		container.NewCenter(content),
+		clickable,
 	)
-
-	// Устанавливаем минимальный размер для контейнера
-	cell.Objects[0].(*fyne.Container).SetMinSize(fyne.NewSize(80, 40))
 
 	return cell
 }
@@ -261,13 +248,11 @@ func (bc *BookingCalendar) getStatusColor(status models.BookingStatus) color.Col
 	case models.BookingStatusBooked:
 		return color.NRGBA{R: 255, G: 205, B: 83, A: 255} // Светло-желтый (бронь)
 	case models.BookingStatusCheckedIn:
-		return color.NRGBA{R: 52, G: 152, B: 219, A: 255} // Синий (заселен)
-	case models.BookingStatusCheckedOut:
-		return color.NRGBA{R: 108, G: 117, B: 125, A: 255} // Серый (выселен)
+		return color.NRGBA{R: 0, G: 123, B: 255, A: 255} // Синий (заселен)
 	case models.BookingStatusCancelled:
-		return color.NRGBA{R: 231, G: 76, B: 60, A: 255} // Красный (отменено)
+		return color.NRGBA{R: 220, G: 53, B: 69, A: 255} // Красный (отменено)
 	default:
-		return color.NRGBA{R: 108, G: 117, B: 125, A: 255} // Серый (неизвестный статус)
+		return color.NRGBA{R: 255, G: 205, B: 83, A: 255} // Светло-желтый по умолчанию
 	}
 }
 
@@ -429,7 +414,7 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Ti
 	checkInPicker := NewDatePickerButton(
 		"Дата заезда",
 		bc.window,
-		func(t time.Time) { 
+		func(t time.Time) {
 			checkInDate = t
 			updateCost()
 			// Проверяем доступность при изменении даты заезда
@@ -451,7 +436,7 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Ti
 	checkOutPicker := NewDatePickerButton(
 		"Дата выезда",
 		bc.window,
-		func(t time.Time) { 
+		func(t time.Time) {
 			checkOutDate = t
 			updateCost()
 			// Проверяем доступность при изменении даты выезда
