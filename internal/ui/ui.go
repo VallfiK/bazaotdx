@@ -85,7 +85,7 @@ func (a *GuestApp) createUI() {
 	})
 
 	bookingListWidget.SetOnRefresh(func() {
-		calendarWidget.refreshCalendar()
+		calendarWidget.Update()
 		if a.updateCottagesContent != nil {
 			a.updateCottagesContent()
 		}

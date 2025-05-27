@@ -46,7 +46,7 @@ func NewBookingCalendar(
 		bookingService: bookingService,
 		cottageService: cottageService,
 		tariffService:  tariffService,
-		currentMonth:   time.Now(),
+		currentMonth:   time.Now().Local(),
 		window:         window,
 	}
 
@@ -81,7 +81,11 @@ func (bc *BookingCalendar) loadData() {
 // CreateRenderer создает рендерер для календаря
 func (bc *BookingCalendar) CreateRenderer() fyne.WidgetRenderer {
 	// Заголовок с навигацией по месяцам
-	bc.monthLabel = widget.NewLabel(bc.currentMonth.Format("Январь 2006"))
+	bc.monthLabel = widget.NewLabel(bc.currentMonth.Format("January 2006"))
+	// Устанавливаем русский формат для месяца
+	bc.monthLabel.Text = time.Month(bc.currentMonth.Month()).String() + " " + bc.currentMonth.Format("2006")
+	bc.monthLabel.TextStyle = fyne.TextStyle{Bold: true}
+	bc.monthLabel.Alignment = fyne.TextAlignCenter
 	bc.monthLabel.TextStyle = fyne.TextStyle{Bold: true}
 	bc.monthLabel.Alignment = fyne.TextAlignCenter
 
@@ -98,7 +102,7 @@ func (bc *BookingCalendar) CreateRenderer() fyne.WidgetRenderer {
 	})
 
 	todayBtn := widget.NewButton("Сегодня", func() {
-		bc.currentMonth = time.Now()
+		bc.currentMonth = time.Now().Local()
 		bc.loadData()
 		bc.updateCalendar()
 	})
@@ -128,8 +132,11 @@ func (bc *BookingCalendar) CreateRenderer() fyne.WidgetRenderer {
 
 // createCalendarGrid создает сетку календаря
 func (bc *BookingCalendar) createCalendarGrid() *fyne.Container {
+	// Получаем первый день месяца в локальном часовом поясе
 	startDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), 1, 0, 0, 0, 0, time.Local)
-	daysInMonth := startDate.AddDate(0, 1, -1).Day()
+	// Получаем последний день месяца
+	endDate := startDate.AddDate(0, 1, -1)
+	daysInMonth := endDate.Day()
 
 	// Создаем сетку: первый столбец - названия домиков, остальные - дни
 	gridObjects := []fyne.CanvasObject{}
@@ -314,11 +321,41 @@ func (bc *BookingCalendar) showBookingDetails(bookingID int) {
 
 	d := dialog.NewCustom("Детали бронирования", "Закрыть", content, bc.window)
 	d.Resize(fyne.NewSize(400, 400))
+
 	d.Show()
 }
 
 // showQuickBookingForm показывает форму быстрого бронирования
 func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Time) {
+	// Получаем информацию о домике
+	cottages, err := bc.cottageService.GetAllCottages()
+	if err != nil {
+		dialog.ShowError(err, bc.window)
+		return
+	}
+	var cottage models.Cottage
+	for _, c := range cottages {
+		if c.ID == cottageID {
+			cottage = c
+			break
+		}
+	}
+	if err != nil {
+		dialog.ShowError(err, bc.window)
+		return
+	}
+
+	// Проверяем доступность домика на даты
+	available, err := bc.bookingService.IsCottageAvailable(cottageID, startDate, startDate.AddDate(0, 0, 1))
+	if err != nil {
+		dialog.ShowError(err, bc.window)
+		return
+	}
+	if !available {
+		dialog.ShowError(fmt.Errorf("домик недоступен на выбранные даты"), bc.window)
+		return
+	}
+
 	// Находим домик
 	var cottage models.Cottage
 	for _, c := range bc.cottages {
@@ -326,6 +363,19 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Ti
 			cottage = c
 			break
 		}
+	}
+
+	// Получаем доступные тарифы
+	tariffs, err := bc.tariffService.GetTariffs()
+	if err != nil {
+		dialog.ShowError(err, bc.window)
+		return
+	}
+
+	// Создаем список тарифов для выпадающего списка
+	tariffOptions := make([]string, len(tariffs))
+	for i, tariff := range tariffs {
+		tariffOptions[i] = fmt.Sprintf("%s - %.2f руб./сутки", tariff.Name, tariff.PricePerDay)
 	}
 
 	// Поля формы
@@ -336,30 +386,10 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Ti
 	notesEntry.SetMinRowsVisible(3)
 
 	// Выбор тарифа
-	tariffs, _ := bc.tariffService.GetTariffs()
-	tariffOptions := make([]string, len(tariffs))
-	for i, t := range tariffs {
-		tariffOptions[i] = fmt.Sprintf("%s (%.2f руб./день)", t.Name, t.PricePerDay)
-	}
 	tariffSelect := widget.NewSelect(tariffOptions, nil)
 
-	// Даты
 	checkInDate := startDate
 	checkOutDate := startDate.AddDate(0, 0, 1)
-
-	checkInPicker := NewDatePickerButton(
-		fmt.Sprintf("Заезд: %s", checkInDate.Format("02.01.2006")),
-		bc.window,
-		func(t time.Time) { checkInDate = t },
-	)
-	checkInPicker.SetSelectedDate(checkInDate)
-
-	checkOutPicker := NewDatePickerButton(
-		fmt.Sprintf("Выезд: %s", checkOutDate.Format("02.01.2006")),
-		bc.window,
-		func(t time.Time) { checkOutDate = t },
-	)
-	checkOutPicker.SetSelectedDate(checkOutDate)
 
 	// Расчет стоимости
 	costLabel := widget.NewLabel("Стоимость: -")
@@ -373,6 +403,59 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Ti
 			cost := float64(days) * tariffs[tariffSelect.SelectedIndex()].PricePerDay
 			costLabel.SetText(fmt.Sprintf("Стоимость: %.2f руб. (%d дней)", cost, days))
 		}
+	}
+
+	checkInPicker := NewDatePickerButton(
+		"Дата заезда",
+		bc.window,
+		func(t time.Time) { 
+			checkInDate = t
+			updateCost()
+			// Проверяем доступность при изменении даты заезда
+			if checkOutDate.After(checkInDate) {
+				available, err := bc.bookingService.IsCottageAvailable(cottageID, checkInDate, checkOutDate)
+				if err != nil {
+					dialog.ShowError(err, bc.window)
+					return
+				}
+				if !available {
+					dialog.ShowError(fmt.Errorf("домик недоступен на выбранные даты"), bc.window)
+					return
+				}
+			}
+		},
+	)
+	checkInPicker.SetSelectedDate(checkInDate)
+
+	checkOutPicker := NewDatePickerButton(
+		"Дата выезда",
+		bc.window,
+		func(t time.Time) { 
+			checkOutDate = t
+			updateCost()
+			// Проверяем доступность при изменении даты выезда
+			if checkOutDate.After(checkInDate) {
+				available, err := bc.bookingService.IsCottageAvailable(cottageID, checkInDate, checkOutDate)
+				if err != nil {
+					dialog.ShowError(err, bc.window)
+					return
+				}
+				if !available {
+					dialog.ShowError(fmt.Errorf("домик недоступен на выбранные даты"), bc.window)
+					return
+				}
+			}
+		},
+	)
+	checkOutPicker.SetSelectedDate(checkOutDate)
+
+	checkInPicker.onDateChange = func(t time.Time) {
+		checkInDate = t
+		updateCost()
+	}
+	checkOutPicker.onDateChange = func(t time.Time) {
+		checkOutDate = t
+		updateCost()
 	}
 
 	tariffSelect.OnChanged = func(_ string) {
@@ -491,13 +574,14 @@ func (bc *BookingCalendar) truncateString(s string, maxLen int) string {
 
 // updateCalendar обновляет отображение календаря
 func (bc *BookingCalendar) updateCalendar() {
-	bc.monthLabel.SetText(bc.currentMonth.Format("Январь 2006"))
-	bc.calendarGrid = bc.createCalendarGrid()
-	bc.Refresh()
+	// Обновляем текст месяца
+	bc.monthLabel.Text = time.Month(bc.currentMonth.Month()).String() + " " + bc.currentMonth.Format("2006")
+	// Обновляем сетку календаря
+	bc.calendarGrid.Objects = bc.createCalendarGrid().Objects
 }
 
-// refreshCalendar перезагружает данные и обновляет календарь
-func (bc *BookingCalendar) refreshCalendar() {
+// Update обновляет данные и отображение календаря
+func (bc *BookingCalendar) Update() {
 	bc.loadData()
 	bc.updateCalendar()
 	if bc.onRefresh != nil {

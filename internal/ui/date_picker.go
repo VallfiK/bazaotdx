@@ -52,7 +52,7 @@ func (dpb *DatePickerButton) showCalendar() {
 		}
 
 		dpb.selectedDate = finalTime
-		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006 15:04")))
+		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006")))
 
 		if dpb.onDateChange != nil {
 			dpb.onDateChange(finalTime)
@@ -71,7 +71,7 @@ func (dpb *DatePickerButton) showCalendar() {
 		}
 
 		dpb.selectedDate = finalTime
-		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006 15:04")))
+		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006")))
 
 		if dpb.onDateChange != nil {
 			dpb.onDateChange(finalTime)
@@ -89,7 +89,7 @@ func (dpb *DatePickerButton) showCalendar() {
 		}
 
 		dpb.selectedDate = finalTime
-		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006 15:04")))
+		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, finalTime.Format("02.01.2006")))
 
 		if dpb.onDateChange != nil {
 			dpb.onDateChange(finalTime)
@@ -127,7 +127,7 @@ func (dpb *DatePickerButton) SetSelectedDate(t time.Time) {
 	if t.IsZero() {
 		dpb.button.SetText(dpb.label)
 	} else {
-		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, t.Format("02.01.2006 15:04")))
+		dpb.button.SetText(fmt.Sprintf("%s: %s", dpb.label, t.Format("02.01.2006")))
 	}
 }
 

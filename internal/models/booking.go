@@ -23,6 +23,7 @@ const (
 	BookingStatusCheckedIn  = "checked_in"
 	BookingStatusCheckedOut = "checked_out"
 	BookingStatusCancelled  = "cancelled"
+	BookingStatusTemporary  = "temporary"
 )
 
 // CalendarDay представляет день в календаре

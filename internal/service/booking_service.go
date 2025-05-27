@@ -65,11 +65,12 @@ func (s *BookingService) IsCottageAvailable(cottageID int, checkIn, checkOut tim
 	err := s.db.QueryRow(`
 		SELECT COUNT(*) FROM lesbaza.bookings
 		WHERE cottage_id = $1
-		AND status IN ($2, $3)
-		AND NOT (check_out_date <= $4 OR check_in_date >= $5)`,
+		AND status IN ($2, $3, $4)
+		AND NOT (check_out_date <= $5 OR check_in_date >= $6)`,
 		cottageID,
 		models.BookingStatusBooked,
 		models.BookingStatusCheckedIn,
+		models.BookingStatusTemporary,
 		checkIn,
 		checkOut,
 	).Scan(&count)
@@ -130,13 +131,16 @@ func (s *BookingService) GetCalendarData(startDate, endDate time.Time) (map[time
 		calendar[d] = make(map[int]models.BookingStatus)
 	}
 
-	// Заполняем данными из броней
+	// Заполняем данные бронирований
 	for _, booking := range bookings {
-		// Нормализуем даты
-		checkIn := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(),
-			booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
-		checkOut := time.Date(booking.CheckOutDate.Year(), booking.CheckOutDate.Month(),
-			booking.CheckOutDate.Day(), 0, 0, 0, 0, time.Local)
+		// Получаем даты заезда и выезда в начале дня
+		checkIn := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(), booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
+		checkOut := time.Date(booking.CheckOutDate.Year(), booking.CheckOutDate.Month(), booking.CheckOutDate.Day(), 0, 0, 0, 0, time.Local)
+
+		// Проверяем, что даты корректные
+		if checkOut.Before(checkIn) {
+			return nil, fmt.Errorf("некорректные даты бронирования: дата выезда раньше даты заезда")
+		}
 
 		// Проходим по всем дням брони
 		for d := checkIn; !d.After(checkOut); d = d.AddDate(0, 0, 1) {
