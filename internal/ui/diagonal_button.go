@@ -82,6 +82,13 @@ func (r *diagonalButtonRenderer) Refresh() {
 	canvas.Refresh(r.base)
 }
 
+// getTextColor возвращает подходящий цвет текста в зависимости от фона
+func (r *diagonalButtonRenderer) getTextColor() color.Color {
+	// Для лучшей читаемости используем черный текст
+	// Можно также добавить логику выбора цвета в зависимости от яркости фона
+	return color.NRGBA{R: 0, G: 0, B: 0, A: 255} // Черный текст
+}
+
 // Objects возвращает объекты для рендеринга
 func (r *diagonalButtonRenderer) Objects() []fyne.CanvasObject {
 	size := r.base.Size()
@@ -114,8 +121,8 @@ func (r *diagonalButtonRenderer) Objects() []fyne.CanvasObject {
 		return color.Transparent
 	})
 
-	// Создаем текст
-	label := canvas.NewText(r.base.text, color.White)
+	// Создаем текст с контрастным цветом
+	label := canvas.NewText(r.base.text, r.getTextColor())
 	label.TextSize = 9
 	label.Alignment = fyne.TextAlignCenter
 

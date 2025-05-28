@@ -323,11 +323,11 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 	// День выезда - левая часть показывает текущую бронь (до 12:00), правая - свободна (после 12:00)
 	rightColor = bc.getStatusColor(status)                  // Цвет текущей брони (до 12:00)
 	leftColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый - свободно (после 12:00)
-	text = bc.truncateString(status.GuestName, 6) + " 12:00 ←"
+	text = "12:00 → " + bc.truncateString(status.GuestName, 4)
 
 	button := NewDiagonalButton(rightColor, leftColor, text,
 		func() {
-			// Правая часть - показываем детали текущей брони
+			// Правая часть - показываем детали текущей брони (до 12:00)
 			bc.onCellTapped(cottageID, date, status)
 		},
 		func() {
