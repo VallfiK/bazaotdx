@@ -15,6 +15,53 @@ import (
 	"github.com/VallfIK/bazaotdx/internal/service"
 )
 
+// Пути к изображениям для разных статусов
+const (
+	FreeImage       = "images/free.png"
+	BookedImage     = "images/booked.png"
+	BoughtImage     = "images/bought.png"
+	FreeFirstImage  = "images/freefirst.png"
+	BookedFirstImage = "images/bookedfirst.png"
+	BoughtFirstImage = "images/boughtfirst.png"
+	BookedLastImage  = "images/bookedlast.png"
+	BoughtLastImage  = "images/boughtlast.png"
+)
+
+// getStatusImage возвращает путь к изображению для статуса
+func (bc *BookingCalendar) getStatusImage(status models.BookingStatus, isFirst bool) string {
+	switch status.Status {
+	case "free":
+		if isFirst {
+			return FreeFirstImage
+		}
+		return FreeImage
+	case "booked":
+		if isFirst {
+			return BookedFirstImage
+		}
+		return BookedImage
+	case "bought":
+		if isFirst {
+			return BoughtFirstImage
+		}
+		return BoughtImage
+	default:
+		return FreeImage
+	}
+}
+
+// getStatusImageForBooking возвращает путь к изображению для брони
+func (bc *BookingCalendar) getStatusImageForBooking(booking models.Booking) string {
+	switch booking.Status {
+	case "booked":
+		return BookedImage
+	case "bought":
+		return BoughtImage
+	default:
+		return FreeImage
+	}
+}
+
 var (
 	GreenColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255}
 )
@@ -323,48 +370,33 @@ func (bc *BookingCalendar) checkIfNeedsDiagonal(cottageID int, date time.Time) b
 
 // createRegularCell создает обычную ячейку
 func (bc *BookingCalendar) createRegularCell(cottageID int, date time.Time, status *models.BookingStatus) fyne.CanvasObject {
-	var bgColor color.Color
+	var imagePath string
 	var text string
 
 	if status != nil && status.BookingID > 0 {
-		bgColor = bc.getStatusColor(*status)
+		imagePath = bc.getStatusImage(*status, status.IsCheckIn)
 		if status.IsCheckIn {
 			text = "→ " + bc.truncateString(status.GuestName, 6)
 		} else {
 			text = bc.truncateString(status.GuestName, 8)
 		}
 	} else {
-		// Свободный день
-		bgColor = GreenColor
-		text = "+"
+		imagePath = FreeImage
+		text = "Свободно"
 	}
 
-	// Создаем кликабельный прямоугольник
-	clickableRect := NewClickableRect(bgColor, func() {
-		if status != nil {
-			bc.onCellTapped(cottageID, date, *status)
-		} else {
-			bc.onCellTapped(cottageID, date, models.BookingStatus{})
-		}
-	})
-
-	// Добавляем текст
-	label := canvas.NewText(text, color.White)
-	label.TextSize = 10
-	label.Alignment = fyne.TextAlignCenter
-
-	content := container.NewStack(
-		clickableRect,
-		container.NewCenter(label),
+	// Создаем контейнер для ячейки
+	content := container.NewVBox(
+		canvas.NewImageFromFile(imagePath),
+		canvas.NewText(text, color.NRGBA{R: 0, G: 0, B: 0, A: 255}),
 	)
 
+	// Устанавливаем размеры
 	content.Resize(fyne.NewSize(35, 60))
 	return content
 }
-
-// createDiagonalCell создает диагональную ячейку для дня выезда/заезда
 func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, status *models.BookingStatus) fyne.CanvasObject {
-	var topColor, bottomColor color.Color
+	var topImage, bottomImage string
 	var text string
 
 	// Находим бронь, которая заканчивается в этот день
@@ -373,38 +405,38 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 	// Проверяем, есть ли бронь на заезд в этот же день
 	checkinBooking := bc.findCheckinBooking(cottageID, date)
 
-	// Определяем цвета для диагональной кнопки
+	// Определяем изображения для диагональной кнопки
 	if checkoutBooking != nil {
 		// Есть существующая бронь (выезд до 12:00)
-		bottomColor = bc.getStatusColorForBooking(*checkoutBooking)
+		bottomImage = bc.getStatusImageForBooking(*checkoutBooking)
+	} else if status != nil && status.BookingID > 0 {
+		// Используем статус из календарных данных
+		bottomImage = bc.getStatusImage(*status, false)
 	} else {
-		// Нет брони на выезд
-		bottomColor = color.NRGBA{R: 200, G: 200, B: 200, A: 255} // Серый
+		// Нет брони на выезд - показываем серый цвет
+		bottomImage = FreeImage
 	}
 
 	// Верхняя часть - для заезда после 14:00
 	if checkinBooking != nil {
 		// Есть бронь на заезд в этот день
-		topColor = bc.getStatusColorForBooking(*checkinBooking)
+		topImage = bc.getStatusImageForBooking(*checkinBooking)
 	} else if status != nil && status.BookingID > 0 && status.IsCheckIn {
-		// Используем статус из календарных данных если это день заезда
-		topColor = bc.getStatusColor(*status)
+		// Используем статус из календарных данных для заезда
+		topImage = bc.getStatusImage(*status, true)
 	} else {
 		// Свободно для заезда
-		topColor = GreenColor
+		topImage = FreeFirstImage
 	}
 
 	text = "←12:00\n14:00→"
 
-	button := NewDiagonalButton(topColor, bottomColor, text,
+	button := NewDiagonalButtonImage(topImage, bottomImage, text,
 		func() {
 			// Верхняя часть - клик на заезд (после 14:00)
 			if checkinBooking != nil {
 				// Если есть бронь на заезд, показываем детали
 				bc.showBookingDetails(checkinBooking.ID)
-			} else if status != nil && status.BookingID > 0 && status.IsCheckIn {
-				// Если есть статус заезда, показываем детали
-				bc.showBookingDetails(status.BookingID)
 			} else {
 				// Открываем форму бронирования с этого дня (после 14:00)
 				checkInTime := time.Date(date.Year(), date.Month(), date.Day(), 14, 0, 0, 0, time.Local)
@@ -415,8 +447,6 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 			// Нижняя часть - клик на выезд (до 12:00)
 			if checkoutBooking != nil {
 				bc.showBookingDetails(checkoutBooking.ID)
-			} else if status != nil && status.BookingID > 0 {
-				bc.onCellTapped(cottageID, date, *status)
 			} else {
 				dialog.ShowInformation("Информация",
 					"В этот день происходит выезд из домика до 12:00.\nВы можете забронировать заезд с 14:00.",
@@ -439,13 +469,7 @@ func (bc *BookingCalendar) findCheckinBooking(cottageID int, date time.Time) *mo
 	}
 
 	for _, booking := range bookings {
-		if booking.CottageID != cottageID || booking.Status == models.BookingStatusCancelled {
-			continue
-		}
-
-		checkInDate := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(), booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
-
-		if checkInDate.Equal(date) {
+		if booking.CottageID == cottageID && booking.CheckInDate.Equal(date) && booking.Status != models.BookingStatusCancelled {
 			return &booking
 		}
 	}

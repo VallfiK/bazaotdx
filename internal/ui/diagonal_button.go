@@ -12,23 +12,23 @@ import (
 type DiagonalButton struct {
 	widget.BaseWidget
 
-	leftColor   color.Color
-	rightColor  color.Color
+	leftImage   string
+	rightImage  string
 	leftTapped  func()
 	rightTapped func()
 	text        string
 
 	// Кешируем объекты для рендеринга
-	leftTriangle  *canvas.Rectangle
-	rightTriangle *canvas.Rectangle
+	leftImageObj  *canvas.Image
+	rightImageObj *canvas.Image
 	textLabel     *canvas.Text
 }
 
 // NewDiagonalButton создает новую кнопку с диагональным разделением
-func NewDiagonalButton(leftColor, rightColor color.Color, text string, leftTapped, rightTapped func()) *DiagonalButton {
+func NewDiagonalButtonImage(leftImage, rightImage string, text string, leftTapped, rightTapped func()) *DiagonalButton {
 	db := &DiagonalButton{
-		leftColor:   leftColor,
-		rightColor:  rightColor,
+		leftImage:   leftImage,
+		rightImage:  rightImage,
 		leftTapped:  leftTapped,
 		rightTapped: rightTapped,
 		text:        text,
@@ -36,8 +36,8 @@ func NewDiagonalButton(leftColor, rightColor color.Color, text string, leftTappe
 	db.ExtendBaseWidget(db)
 
 	// Создаем объекты сразу
-	db.leftTriangle = canvas.NewRectangle(leftColor)
-	db.rightTriangle = canvas.NewRectangle(rightColor)
+	db.leftImageObj = canvas.NewImageFromFile(leftImage)
+	db.rightImageObj = canvas.NewImageFromFile(rightImage)
 	db.textLabel = canvas.NewText(text, color.NRGBA{R: 0, G: 0, B: 0, A: 255})
 	db.textLabel.TextSize = 8
 	db.textLabel.Alignment = fyne.TextAlignCenter
@@ -85,12 +85,6 @@ type diagonalButtonRenderer struct {
 
 // Layout не нужен для этого типа рендерера
 func (r *diagonalButtonRenderer) Layout(size fyne.Size) {
-	if r.base.leftTriangle != nil {
-		r.base.leftTriangle.Resize(size)
-	}
-	if r.base.rightTriangle != nil {
-		r.base.rightTriangle.Resize(size)
-	}
 	if r.base.textLabel != nil {
 		r.base.textLabel.Resize(size)
 	}
@@ -103,15 +97,6 @@ func (r *diagonalButtonRenderer) MinSize() fyne.Size {
 
 // Refresh обновляет рендерер
 func (r *diagonalButtonRenderer) Refresh() {
-	// Обновляем цвета
-	if r.base.leftTriangle != nil {
-		r.base.leftTriangle.FillColor = r.base.leftColor
-		r.base.leftTriangle.Refresh()
-	}
-	if r.base.rightTriangle != nil {
-		r.base.rightTriangle.FillColor = r.base.rightColor
-		r.base.rightTriangle.Refresh()
-	}
 	if r.base.textLabel != nil {
 		r.base.textLabel.Text = r.base.text
 		r.base.textLabel.Refresh()
@@ -125,8 +110,8 @@ func (r *diagonalButtonRenderer) Objects() []fyne.CanvasObject {
 		size = r.MinSize()
 	}
 
-	// Создаем маски для треугольников с помощью canvas.Raster
-	leftMask := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+	// Создаем маску для диагонали с помощью canvas.Raster
+	diagonalMask := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
 		if w == 0 || h == 0 {
 			return color.Transparent
 		}
@@ -135,31 +120,23 @@ func (r *diagonalButtonRenderer) Objects() []fyne.CanvasObject {
 		k := float32(h) / float32(w)
 		expectedY := int(float32(x) * k)
 
-		// Если точка выше диагонали - левый треугольник
+		// Если точка выше диагонали - верхняя часть
 		if y < expectedY {
-			return r.base.leftColor
+			return color.White
 		}
-		return color.Transparent
+		// Если точка ниже или на диагонали - нижняя часть
+		return color.White
 	})
 
-	rightMask := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
-		if w == 0 || h == 0 {
-			return color.Transparent
-		}
+	diagonalMask.Resize(size)
 
-		k := float32(h) / float32(w)
-		expectedY := int(float32(x) * k)
+	// Создаем изображения
+	leftImage := canvas.NewImageFromFile(r.base.leftImage)
+	rightImage := canvas.NewImageFromFile(r.base.rightImage)
 
-		// Если точка ниже или на диагонали - правый треугольник
-		if y >= expectedY {
-			return r.base.rightColor
-		}
-		return color.Transparent
-	})
-
-	// Устанавливаем размеры
-	leftMask.Resize(size)
-	rightMask.Resize(size)
+	// Устанавливаем размеры изображений
+	leftImage.Resize(size)
+	rightImage.Resize(size)
 
 	// Создаем текст с черным цветом для лучшей видимости
 	textLabel := canvas.NewText(r.base.text, color.NRGBA{R: 0, G: 0, B: 0, A: 255})
@@ -169,8 +146,9 @@ func (r *diagonalButtonRenderer) Objects() []fyne.CanvasObject {
 
 	// Возвращаем объекты в правильном порядке
 	return []fyne.CanvasObject{
-		leftMask,
-		rightMask,
+		diagonalMask,
+		leftImage,
+		rightImage,
 		textLabel,
 	}
 }
