@@ -370,31 +370,49 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 	// Находим бронь, которая заканчивается в этот день
 	checkoutBooking := bc.findCheckoutBooking(cottageID, date)
 
+	// Проверяем, есть ли бронь на заезд в этот же день
+	checkinBooking := bc.findCheckinBooking(cottageID, date)
+
 	// Определяем цвета для диагональной кнопки
 	if checkoutBooking != nil {
-		// Есть существующая бронь (выезд)
-		bottomColor = bc.getStatusColorForBooking(*checkoutBooking) // Цвет текущей брони (до 12:00)
-		topColor = GreenColor                                       // Зеленый - свободно (после 14:00)
-		text = "←12:00\n14:00→"
+		// Есть существующая бронь (выезд до 12:00)
+		bottomColor = bc.getStatusColorForBooking(*checkoutBooking)
 	} else {
-		// Нет брони на выезд, но возможно есть данные из календаря
-		if status != nil && status.BookingID > 0 {
-			bottomColor = bc.getStatusColor(*status)
-		} else {
-			bottomColor = color.NRGBA{R: 200, G: 200, B: 200, A: 255} // Серый - выезд
-		}
-		topColor = GreenColor // Зеленый - свободно для заезда
-		text = "←12:00\n14:00→"
+		// Нет брони на выезд
+		bottomColor = color.NRGBA{R: 200, G: 200, B: 200, A: 255} // Серый
 	}
+
+	// Верхняя часть - для заезда после 14:00
+	if checkinBooking != nil {
+		// Есть бронь на заезд в этот день
+		topColor = bc.getStatusColorForBooking(*checkinBooking)
+	} else if status != nil && status.BookingID > 0 && status.IsCheckIn {
+		// Используем статус из календарных данных если это день заезда
+		topColor = bc.getStatusColor(*status)
+	} else {
+		// Свободно для заезда
+		topColor = GreenColor
+	}
+
+	text = "←12:00\n14:00→"
 
 	button := NewDiagonalButton(topColor, bottomColor, text,
 		func() {
-			// Верхняя часть - открываем форму бронирования с этого дня (после 14:00)
-			checkInTime := time.Date(date.Year(), date.Month(), date.Day(), 14, 0, 0, 0, time.Local)
-			bc.showQuickBookingForm(cottageID, checkInTime)
+			// Верхняя часть - клик на заезд (после 14:00)
+			if checkinBooking != nil {
+				// Если есть бронь на заезд, показываем детали
+				bc.showBookingDetails(checkinBooking.ID)
+			} else if status != nil && status.BookingID > 0 && status.IsCheckIn {
+				// Если есть статус заезда, показываем детали
+				bc.showBookingDetails(status.BookingID)
+			} else {
+				// Открываем форму бронирования с этого дня (после 14:00)
+				checkInTime := time.Date(date.Year(), date.Month(), date.Day(), 14, 0, 0, 0, time.Local)
+				bc.showQuickBookingForm(cottageID, checkInTime)
+			}
 		},
 		func() {
-			// Нижняя часть - показываем детали текущей брони (до 12:00)
+			// Нижняя часть - клик на выезд (до 12:00)
 			if checkoutBooking != nil {
 				bc.showBookingDetails(checkoutBooking.ID)
 			} else if status != nil && status.BookingID > 0 {
@@ -408,6 +426,31 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 
 	button.Resize(fyne.NewSize(35, 60))
 	return button
+}
+
+// findCheckinBooking находит бронь, которая начинается в указанный день
+func (bc *BookingCalendar) findCheckinBooking(cottageID int, date time.Time) *models.Booking {
+	startDate := date
+	endDate := date.AddDate(0, 0, 1) // Следующий день
+
+	bookings, err := bc.bookingService.GetBookingsByDateRange(startDate, endDate)
+	if err != nil {
+		return nil
+	}
+
+	for _, booking := range bookings {
+		if booking.CottageID != cottageID || booking.Status == models.BookingStatusCancelled {
+			continue
+		}
+
+		checkInDate := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(), booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
+
+		if checkInDate.Equal(date) {
+			return &booking
+		}
+	}
+
+	return nil
 }
 
 // findCheckoutBooking находит бронь, которая заканчивается в указанный день
@@ -453,6 +496,11 @@ func (bc *BookingCalendar) getStatusColorForBooking(booking models.Booking) colo
 
 // getStatusColor возвращает цвет для статуса
 func (bc *BookingCalendar) getStatusColor(status models.BookingStatus) color.Color {
+	// Если это день заезда, используем цвет бронирования
+	if status.IsCheckIn {
+		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый (бронь)
+	}
+
 	switch status.Status {
 	case models.BookingStatusBooked:
 		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый (бронь)
