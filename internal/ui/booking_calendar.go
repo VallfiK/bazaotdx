@@ -45,6 +45,33 @@ type BookingCalendar struct {
 	imagesPath string
 }
 
+func getProjectPath() string {
+	// Получаем путь к исполняемому файлу
+	execPath, err := os.Executable()
+	if err != nil {
+		// Если не удалось получить путь, используем фиксированный
+		return "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx"
+	}
+
+	// Поднимаемся вверх по директориям, пока не найдем go.mod
+	dir := filepath.Dir(execPath)
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			// Достигли корня файловой системы
+			break
+		}
+		dir = parent
+	}
+
+	// Если не нашли go.mod, используем фиксированный путь
+	return "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx"
+}
+
 // SetOnRefresh устанавливает callback для обновления
 func (bc *BookingCalendar) SetOnRefresh(f func()) {
 	bc.onRefresh = f
@@ -97,6 +124,9 @@ func NewBookingCalendar(
 	tariffService *service.TariffService,
 	window fyne.Window,
 ) *BookingCalendar {
+	projectPath := getProjectPath()
+	imagesPath := filepath.Join(projectPath, "images")
+
 	bc := &BookingCalendar{
 		bookingService: bookingService,
 		cottageService: cottageService,
@@ -104,7 +134,7 @@ func NewBookingCalendar(
 		currentMonth:   time.Now().Local(),
 		window:         window,
 		imageCache:     make(map[string]*canvas.Image),
-		imagesPath:     "images", // Путь к папке с изображениями
+		imagesPath:     imagesPath, // Используем абсолютный путь
 	}
 
 	bc.ExtendBaseWidget(bc)

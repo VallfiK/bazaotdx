@@ -31,7 +31,7 @@ func main() {
 	log.Println("🚀 Запуск приложения")
 	log.Printf("🛠️ Путь к проекту: %s", "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx")
 	log.Printf("🔍 Проверка директории images: %s", "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images")
-	
+
 	// Проверяем существование файлов изображений
 	images := []string{
 		"free.png",
@@ -43,7 +43,7 @@ func main() {
 		"bookedlast.png",
 		"boughtlast.png",
 	}
-	
+
 	for _, img := range images {
 		imgPath := filepath.Join("C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images", img)
 		if _, err := os.Stat(imgPath); err != nil {
@@ -52,7 +52,7 @@ func main() {
 			log.Printf("✅ Файл найден: %s", imgPath)
 		}
 	}
-	
+
 	log.Printf("📄 Логи также записываются в файл: %s", "app.log")
 
 	// Инициализация БД
