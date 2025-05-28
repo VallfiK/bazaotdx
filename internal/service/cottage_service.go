@@ -51,6 +51,31 @@ func (s *CottageService) GetAllCottages() ([]models.Cottage, error) {
 	return cottages, nil
 }
 
+func (s *CottageService) CreateCottage(name string) (*models.Cottage, error) {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	var id int
+	if err := tx.QueryRow("INSERT INTO lesbaza.cottages (name, status) VALUES ($1, 'free') RETURNING cottage_id", name).Scan(&id); err != nil {
+		return nil, fmt.Errorf("failed to insert cottage: %w", err)
+	}
+
+	cottage := &models.Cottage{
+		ID:    id,
+		Name:  name,
+		Status: "free",
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return cottage, nil
+}
+
 // AddCottage добавляет новый домик
 func (s *CottageService) AddCottage(name string) error {
 	_, err := s.db.Exec(
