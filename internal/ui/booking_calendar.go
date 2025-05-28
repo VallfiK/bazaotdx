@@ -320,19 +320,21 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 	var leftColor, rightColor color.Color
 	var text string
 
-	// День выезда - левая часть показывает текущую бронь, правая - свободна для новой брони
-	leftColor = bc.getStatusColor(status)  // Цвет текущей брони (до 12:00)
-	rightColor = bc.getStatusColor(status) // Цвет текущей брони (после 12:00)
-	text = bc.truncateString(status.GuestName, 6) + " → до 12:00"
+	// День выезда - левая часть показывает текущую бронь (до 12:00), правая - свободна (после 12:00)
+	rightColor = bc.getStatusColor(status)                  // Цвет текущей брони (до 12:00)
+	leftColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый - свободно (после 12:00)
+	text = bc.truncateString(status.GuestName, 6) + " 12:00 ←"
 
-	button := NewDiagonalButton(leftColor, rightColor, text,
+	button := NewDiagonalButton(rightColor, leftColor, text,
 		func() {
-			// Левая часть - показываем детали текущей брони
+			// Правая часть - показываем детали текущей брони
 			bc.onCellTapped(cottageID, date, status)
 		},
 		func() {
-			// Правая часть - открываем форму бронирования с этого дня
-			bc.showQuickBookingForm(cottageID, date)
+			// Левая часть - открываем форму бронирования с этого дня (после 12:00)
+			// Устанавливаем время заезда на 14:00 того же дня
+			checkInTime := time.Date(date.Year(), date.Month(), date.Day(), 14, 0, 0, 0, time.Local)
+			bc.showQuickBookingForm(cottageID, checkInTime)
 		})
 
 	button.Resize(fyne.NewSize(35, 60))
@@ -362,6 +364,7 @@ func (bc *BookingCalendar) onCellTapped(cottageID int, date time.Time, status mo
 		bc.showBookingDetails(status.BookingID)
 	} else {
 		// Открываем форму быстрого бронирования
+		// Для обычных свободных ячеек передаем только дату (время установится в 14:00)
 		bc.showQuickBookingForm(cottageID, date)
 	}
 }
@@ -445,7 +448,7 @@ func (bc *BookingCalendar) showBookingDetails(bookingID int) {
 }
 
 // showQuickBookingForm показывает форму быстрого бронирования
-func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Time) {
+func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDateTime time.Time) {
 	// Получаем информацию о домике
 	var cottage models.Cottage
 	for _, c := range bc.cottages {
@@ -478,7 +481,16 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDate time.Ti
 	// Выбор тарифа
 	tariffSelect := widget.NewSelect(tariffOptions, nil)
 
-	checkInDate := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 14, 0, 0, 0, time.Local)
+	// Устанавливаем время заезда
+	var checkInDate time.Time
+	if startDateTime.Hour() == 0 && startDateTime.Minute() == 0 {
+		// Если передана только дата, устанавливаем время 14:00
+		checkInDate = time.Date(startDateTime.Year(), startDateTime.Month(), startDateTime.Day(), 14, 0, 0, 0, time.Local)
+	} else {
+		// Используем переданное время
+		checkInDate = startDateTime
+	}
+
 	checkOutDate := checkInDate.AddDate(0, 0, 1)
 	checkOutDate = time.Date(checkOutDate.Year(), checkOutDate.Month(), checkOutDate.Day(), 12, 0, 0, 0, time.Local)
 
