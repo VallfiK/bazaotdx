@@ -3,6 +3,8 @@ package ui
 import (
 	"fmt"
 	"image/color"
+	"os"
+	"path/filepath"
 	"sort"
 	"time"
 
@@ -14,53 +16,6 @@ import (
 	"github.com/VallfIK/bazaotdx/internal/models"
 	"github.com/VallfIK/bazaotdx/internal/service"
 )
-
-// Пути к изображениям для разных статусов
-const (
-	FreeImage       = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\free.png"
-	BookedImage     = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\booked.png"
-	BoughtImage     = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\bought.png"
-	FreeFirstImage  = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\freefirst.png"
-	BookedFirstImage = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\bookedfirst.png"
-	BoughtFirstImage = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\boughtfirst.png"
-	BookedLastImage  = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\bookedlast.png"
-	BoughtLastImage  = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\boughtlast.png"
-)
-
-// getStatusImage возвращает путь к изображению для статуса
-func (bc *BookingCalendar) getStatusImage(status models.BookingStatus, isFirst bool) string {
-	switch status.Status {
-	case "free":
-		if isFirst {
-			return FreeFirstImage
-		}
-		return FreeImage
-	case "booked":
-		if isFirst {
-			return BookedFirstImage
-		}
-		return BookedImage
-	case "bought":
-		if isFirst {
-			return BoughtFirstImage
-		}
-		return BoughtImage
-	default:
-		return FreeImage
-	}
-}
-
-// getStatusImageForBooking возвращает путь к изображению для брони
-func (bc *BookingCalendar) getStatusImageForBooking(booking models.Booking) string {
-	switch booking.Status {
-	case "booked":
-		return BookedImage
-	case "bought":
-		return BoughtImage
-	default:
-		return FreeImage
-	}
-}
 
 var (
 	GreenColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255}
@@ -84,6 +39,10 @@ type BookingCalendar struct {
 	// UI элементы
 	monthLabel   *widget.Label
 	calendarGrid *fyne.Container
+
+	// Кэш изображений
+	imageCache map[string]*canvas.Image
+	imagesPath string
 }
 
 // SetOnRefresh устанавливает callback для обновления
@@ -100,33 +59,36 @@ func (bc *BookingCalendar) Update() {
 	}
 }
 
-// ClickableRect - прямоугольник который можно кликать без hover эффекта
-type ClickableRect struct {
+// ClickableImage - изображение которое можно кликать
+type ClickableImage struct {
 	widget.BaseWidget
-	rect     *canvas.Rectangle
+	image    *canvas.Image
 	onTapped func()
 }
 
-func NewClickableRect(bgColor color.Color, onTapped func()) *ClickableRect {
-	r := &ClickableRect{
-		rect:     canvas.NewRectangle(bgColor),
+func NewClickableImage(imagePath string, onTapped func()) *ClickableImage {
+	img := canvas.NewImageFromFile(imagePath)
+	img.FillMode = canvas.ImageFillStretch
+
+	ci := &ClickableImage{
+		image:    img,
 		onTapped: onTapped,
 	}
-	r.ExtendBaseWidget(r)
-	return r
+	ci.ExtendBaseWidget(ci)
+	return ci
 }
 
-func (r *ClickableRect) CreateRenderer() fyne.WidgetRenderer {
-	return widget.NewSimpleRenderer(r.rect)
+func (ci *ClickableImage) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(ci.image)
 }
 
-func (r *ClickableRect) Tapped(_ *fyne.PointEvent) {
-	if r.onTapped != nil {
-		r.onTapped()
+func (ci *ClickableImage) Tapped(_ *fyne.PointEvent) {
+	if ci.onTapped != nil {
+		ci.onTapped()
 	}
 }
 
-func (r *ClickableRect) TappedSecondary(_ *fyne.PointEvent) {}
+func (ci *ClickableImage) TappedSecondary(_ *fyne.PointEvent) {}
 
 // NewBookingCalendar создает новый календарь бронирования
 func NewBookingCalendar(
@@ -141,12 +103,81 @@ func NewBookingCalendar(
 		tariffService:  tariffService,
 		currentMonth:   time.Now().Local(),
 		window:         window,
+		imageCache:     make(map[string]*canvas.Image),
+		imagesPath:     "images", // Путь к папке с изображениями
 	}
 
 	bc.ExtendBaseWidget(bc)
+	bc.loadImages()
 	bc.loadData()
 
 	return bc
+}
+
+// loadImages загружает изображения в кэш
+func (bc *BookingCalendar) loadImages() {
+	imageFiles := []string{
+		"free.png",
+		"booked.png",
+		"bought.png",
+		"bookedlast.png",
+		"boughtlast.png",
+		"freefirst.png",
+		"boughtfirst.png",
+		"bookedfirst.png",
+	}
+
+	for _, filename := range imageFiles {
+		path := filepath.Join(bc.imagesPath, filename)
+		if _, err := os.Stat(path); err == nil {
+			img := canvas.NewImageFromFile(path)
+			img.FillMode = canvas.ImageFillStretch
+			bc.imageCache[filename] = img
+		}
+	}
+}
+
+// getStatusImage возвращает путь к изображению для статуса
+func (bc *BookingCalendar) getStatusImage(status models.BookingStatus) string {
+	if status.BookingID == 0 {
+		return filepath.Join(bc.imagesPath, "free.png")
+	}
+
+	switch status.Status {
+	case models.BookingStatusBooked:
+		return filepath.Join(bc.imagesPath, "booked.png")
+	case models.BookingStatusCheckedIn:
+		return filepath.Join(bc.imagesPath, "bought.png")
+	default:
+		return filepath.Join(bc.imagesPath, "free.png")
+	}
+}
+
+// getDiagonalImages возвращает пути к изображениям для диагональной кнопки
+func (bc *BookingCalendar) getDiagonalImages(topStatus, bottomStatus string) (string, string) {
+	// Верхняя часть (заезд после 14:00)
+	var topImage string
+	switch topStatus {
+	case models.BookingStatusBooked:
+		topImage = filepath.Join(bc.imagesPath, "bookedfirst.png")
+	case models.BookingStatusCheckedIn:
+		topImage = filepath.Join(bc.imagesPath, "boughtfirst.png")
+	default:
+		topImage = filepath.Join(bc.imagesPath, "freefirst.png")
+	}
+
+	// Нижняя часть (выезд до 12:00)
+	var bottomImage string
+	switch bottomStatus {
+	case models.BookingStatusBooked:
+		bottomImage = filepath.Join(bc.imagesPath, "bookedlast.png")
+	case models.BookingStatusCheckedIn:
+		bottomImage = filepath.Join(bc.imagesPath, "boughtlast.png")
+	default:
+		bottomImage = filepath.Join(bc.imagesPath, "free.png")
+	}
+
+	return topImage, bottomImage
 }
 
 // loadData загружает данные для календаря
@@ -368,35 +399,190 @@ func (bc *BookingCalendar) checkIfNeedsDiagonal(cottageID int, date time.Time) b
 	return hasCheckOut && canCheckIn
 }
 
-// createRegularCell создает обычную ячейку
+// createRegularCell создает обычную ячейку с изображением
 func (bc *BookingCalendar) createRegularCell(cottageID int, date time.Time, status *models.BookingStatus) fyne.CanvasObject {
 	var imagePath string
 	var text string
 
 	if status != nil && status.BookingID > 0 {
-		imagePath = bc.getStatusImage(*status, status.IsCheckIn)
+		imagePath = bc.getStatusImage(*status)
 		if status.IsCheckIn {
 			text = "→ " + bc.truncateString(status.GuestName, 6)
 		} else {
 			text = bc.truncateString(status.GuestName, 8)
 		}
 	} else {
-		imagePath = FreeImage
-		text = "Свободно"
+		// Свободный день
+		imagePath = filepath.Join(bc.imagesPath, "free.png")
+		text = "+"
 	}
 
-	// Создаем контейнер для ячейки
-	content := container.NewVBox(
-		canvas.NewImageFromFile(imagePath),
-		canvas.NewText(text, color.NRGBA{R: 0, G: 0, B: 0, A: 255}),
+	// Создаем кликабельное изображение
+	clickableImg := NewClickableImage(imagePath, func() {
+		if status != nil {
+			bc.onCellTapped(cottageID, date, *status)
+		} else {
+			bc.onCellTapped(cottageID, date, models.BookingStatus{})
+		}
+	})
+
+	// Добавляем текст поверх изображения
+	label := canvas.NewText(text, color.White)
+	label.TextSize = 10
+	label.Alignment = fyne.TextAlignCenter
+
+	content := container.NewStack(
+		clickableImg,
+		container.NewCenter(label),
 	)
 
-	// Устанавливаем размеры
 	content.Resize(fyne.NewSize(35, 60))
 	return content
 }
+
+// DiagonalImageButton представляет кнопку с двумя изображениями по диагонали
+type DiagonalImageButton struct {
+	widget.BaseWidget
+
+	topImage    string
+	bottomImage string
+	leftTapped  func()
+	rightTapped func()
+	text        string
+}
+
+// NewDiagonalImageButton создает новую кнопку с диагональными изображениями
+func NewDiagonalImageButton(topImage, bottomImage string, text string, leftTapped, rightTapped func()) *DiagonalImageButton {
+	db := &DiagonalImageButton{
+		topImage:    topImage,
+		bottomImage: bottomImage,
+		leftTapped:  leftTapped,
+		rightTapped: rightTapped,
+		text:        text,
+	}
+	db.ExtendBaseWidget(db)
+	return db
+}
+
+func (db *DiagonalImageButton) Tapped(evt *fyne.PointEvent) {
+	size := db.Size()
+	if size.Width == 0 || size.Height == 0 {
+		return
+	}
+
+	// Вычисляем, на какую часть кнопки кликнули
+	k := size.Height / size.Width
+	expectedY := evt.Position.X * k
+
+	if evt.Position.Y < expectedY {
+		// Клик на верхнюю часть
+		if db.leftTapped != nil {
+			db.leftTapped()
+		}
+	} else {
+		// Клик на нижнюю часть
+		if db.rightTapped != nil {
+			db.rightTapped()
+		}
+	}
+}
+
+func (db *DiagonalImageButton) TappedSecondary(_ *fyne.PointEvent) {}
+
+func (db *DiagonalImageButton) CreateRenderer() fyne.WidgetRenderer {
+	return &diagonalImageButtonRenderer{
+		base: db,
+	}
+}
+
+type diagonalImageButtonRenderer struct {
+	base *DiagonalImageButton
+}
+
+func (r *diagonalImageButtonRenderer) Layout(size fyne.Size) {}
+
+func (r *diagonalImageButtonRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(35, 60)
+}
+
+func (r *diagonalImageButtonRenderer) Refresh() {}
+
+func (r *diagonalImageButtonRenderer) Objects() []fyne.CanvasObject {
+	size := r.base.Size()
+	if size.Width <= 0 || size.Height <= 0 {
+		size = r.MinSize()
+	}
+
+	// Создаем маски для изображений
+	topMask := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+		if w == 0 || h == 0 {
+			return color.Transparent
+		}
+
+		// Загружаем верхнее изображение
+		topImg := canvas.NewImageFromFile(r.base.topImage)
+		topImg.Resize(fyne.NewSize(float32(w), float32(h)))
+
+		k := float32(h) / float32(w)
+		expectedY := int(float32(x) * k)
+
+		// Если точка выше диагонали - показываем верхнее изображение
+		if y < expectedY {
+			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+		}
+		return color.Transparent
+	})
+
+	bottomMask := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+		if w == 0 || h == 0 {
+			return color.Transparent
+		}
+
+		// Загружаем нижнее изображение
+		bottomImg := canvas.NewImageFromFile(r.base.bottomImage)
+		bottomImg.Resize(fyne.NewSize(float32(w), float32(h)))
+
+		k := float32(h) / float32(w)
+		expectedY := int(float32(x) * k)
+
+		// Если точка ниже или на диагонали - показываем нижнее изображение
+		if y >= expectedY {
+			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+		}
+		return color.Transparent
+	})
+
+	// Загружаем изображения
+	topImg := canvas.NewImageFromFile(r.base.topImage)
+	topImg.Resize(size)
+	topImg.FillMode = canvas.ImageFillStretch
+
+	bottomImg := canvas.NewImageFromFile(r.base.bottomImage)
+	bottomImg.Resize(size)
+	bottomImg.FillMode = canvas.ImageFillStretch
+
+	// Создаем текст
+	textLabel := canvas.NewText(r.base.text, color.White)
+	textLabel.TextSize = 8
+	textLabel.Alignment = fyne.TextAlignCenter
+
+	// Применяем маски к изображениям
+	maskedTop := container.NewStack(topImg, topMask)
+	maskedBottom := container.NewStack(bottomImg, bottomMask)
+
+	// Возвращаем объекты в правильном порядке
+	return []fyne.CanvasObject{
+		maskedBottom,
+		maskedTop,
+		container.NewCenter(textLabel),
+	}
+}
+
+func (r *diagonalImageButtonRenderer) Destroy() {}
+
+// createDiagonalCell создает диагональную ячейку с изображениями
 func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, status *models.BookingStatus) fyne.CanvasObject {
-	var topImage, bottomImage string
+	var topStatus, bottomStatus string
 	var text string
 
 	// Находим бронь, которая заканчивается в этот день
@@ -405,41 +591,34 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 	// Проверяем, есть ли бронь на заезд в этот же день
 	checkinBooking := bc.findCheckinBooking(cottageID, date)
 
-	// Определяем изображения для диагональной кнопки
+	// Определяем статусы для диагональной кнопки
 	if checkoutBooking != nil {
-		// Есть существующая бронь (выезд до 12:00)
-		bottomImage = bc.getStatusImageForBooking(*checkoutBooking)
-	} else if status != nil && status.BookingID > 0 {
-		// Используем статус из календарных данных
-		bottomImage = bc.getStatusImage(*status, false)
+		bottomStatus = checkoutBooking.Status
 	} else {
-		// Нет брони на выезд - показываем серый цвет
-		bottomImage = FreeImage
+		bottomStatus = ""
 	}
 
-	// Верхняя часть - для заезда после 14:00
 	if checkinBooking != nil {
-		// Есть бронь на заезд в этот день
-		topImage = bc.getStatusImageForBooking(*checkinBooking)
+		topStatus = checkinBooking.Status
 	} else if status != nil && status.BookingID > 0 && status.IsCheckIn {
-		// Используем статус из календарных данных для заезда
-		topImage = bc.getStatusImage(*status, true)
+		topStatus = status.Status
 	} else {
-		// Свободно для заезда
-		topImage = FreeFirstImage
+		topStatus = ""
 	}
 
 	text = "←12:00\n14:00→"
 
-	fmt.Printf("Creating diagonal button with images: top=%s, bottom=%s\n", topImage, bottomImage)
-	button := NewDiagonalButtonImage(topImage, bottomImage, text,
+	// Получаем пути к изображениям
+	topImage, bottomImage := bc.getDiagonalImages(topStatus, bottomStatus)
+
+	button := NewDiagonalImageButton(topImage, bottomImage, text,
 		func() {
 			// Верхняя часть - клик на заезд (после 14:00)
 			if checkinBooking != nil {
-				// Если есть бронь на заезд, показываем детали
 				bc.showBookingDetails(checkinBooking.ID)
+			} else if status != nil && status.BookingID > 0 && status.IsCheckIn {
+				bc.showBookingDetails(status.BookingID)
 			} else {
-				// Открываем форму бронирования с этого дня (после 14:00)
 				checkInTime := time.Date(date.Year(), date.Month(), date.Day(), 14, 0, 0, 0, time.Local)
 				bc.showQuickBookingForm(cottageID, checkInTime)
 			}
@@ -448,6 +627,8 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 			// Нижняя часть - клик на выезд (до 12:00)
 			if checkoutBooking != nil {
 				bc.showBookingDetails(checkoutBooking.ID)
+			} else if status != nil && status.BookingID > 0 {
+				bc.onCellTapped(cottageID, date, *status)
 			} else {
 				dialog.ShowInformation("Информация",
 					"В этот день происходит выезд из домика до 12:00.\nВы можете забронировать заезд с 14:00.",
@@ -455,10 +636,7 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 			}
 		})
 
-	button.Resize(fyne.NewSize(191, 62))
-	// Устанавливаем фиксированный размер для кнопки
-	button.SetMinSize(fyne.NewSize(191, 62))
-	button.SetMaxSize(fyne.NewSize(191, 62))
+	button.Resize(fyne.NewSize(35, 60))
 	return button
 }
 
@@ -473,7 +651,13 @@ func (bc *BookingCalendar) findCheckinBooking(cottageID int, date time.Time) *mo
 	}
 
 	for _, booking := range bookings {
-		if booking.CottageID == cottageID && booking.CheckInDate.Equal(date) && booking.Status != models.BookingStatusCancelled {
+		if booking.CottageID != cottageID || booking.Status == models.BookingStatusCancelled {
+			continue
+		}
+
+		checkInDate := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(), booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
+
+		if checkInDate.Equal(date) {
 			return &booking
 		}
 	}
@@ -506,25 +690,8 @@ func (bc *BookingCalendar) findCheckoutBooking(cottageID int, date time.Time) *m
 	return nil
 }
 
-// getStatusColorForBooking возвращает цвет для брони
-func (bc *BookingCalendar) getStatusColorForBooking(booking models.Booking) color.Color {
-	switch booking.Status {
-	case models.BookingStatusBooked:
-		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый (бронь)
-	case models.BookingStatusCheckedIn:
-		return color.NRGBA{R: 255, G: 102, B: 0, A: 255} // Оранжевый (заселен)
-	case models.BookingStatusCancelled:
-		return color.NRGBA{R: 220, G: 53, B: 69, A: 255} // Красный (отменено)
-	case models.BookingStatusCompleted:
-		return GreenColor // Зеленый (завершено = свободно)
-	default:
-		return GreenColor // Зеленый (свободно)
-	}
-}
-
-// getStatusColor возвращает цвет для статуса
+// getStatusColor возвращает цвет для статуса (используется в легенде)
 func (bc *BookingCalendar) getStatusColor(status models.BookingStatus) color.Color {
-	// Если это день заезда, используем цвет бронирования
 	if status.IsCheckIn {
 		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый (бронь)
 	}
@@ -835,25 +1002,26 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDateTime tim
 	d.Show()
 }
 
-// createLegend создает легенду
+// createLegend создает легенду с изображениями
 func (bc *BookingCalendar) createLegend() fyne.CanvasObject {
 	items := []fyne.CanvasObject{
 		widget.NewLabel("Легенда:"),
-		bc.createLegendItem("Свободно", GreenColor),
-		bc.createLegendItem("Забронировано", color.NRGBA{R: 255, G: 193, B: 7, A: 255}), // Желтый
-		bc.createLegendItem("Заселено", color.NRGBA{R: 255, G: 102, B: 0, A: 255}),      // Оранжевый
+		bc.createLegendItem("Свободно", filepath.Join(bc.imagesPath, "free.png")),
+		bc.createLegendItem("Забронировано", filepath.Join(bc.imagesPath, "booked.png")),
+		bc.createLegendItem("Заселено", filepath.Join(bc.imagesPath, "bought.png")),
 		widget.NewLabel("| Диагональ = Выезд/Заезд в один день"),
 	}
 
 	return container.NewHBox(items...)
 }
 
-// createLegendItem создает элемент легенды
-func (bc *BookingCalendar) createLegendItem(text string, color color.Color) fyne.CanvasObject {
-	rect := canvas.NewRectangle(color)
-	rect.SetMinSize(fyne.NewSize(20, 20))
+// createLegendItem создает элемент легенды с изображением
+func (bc *BookingCalendar) createLegendItem(text string, imagePath string) fyne.CanvasObject {
+	img := canvas.NewImageFromFile(imagePath)
+	img.FillMode = canvas.ImageFillStretch
+	img.SetMinSize(fyne.NewSize(20, 20))
 	label := widget.NewLabel(text)
-	return container.NewHBox(rect, label)
+	return container.NewHBox(img, label)
 }
 
 // getWeekdayShort возвращает короткое название дня недели
