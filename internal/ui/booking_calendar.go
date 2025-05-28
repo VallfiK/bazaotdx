@@ -17,14 +17,14 @@ import (
 
 // Пути к изображениям для разных статусов
 const (
-	FreeImage       = "images/free.png"
-	BookedImage     = "images/booked.png"
-	BoughtImage     = "images/bought.png"
-	FreeFirstImage  = "images/freefirst.png"
-	BookedFirstImage = "images/bookedfirst.png"
-	BoughtFirstImage = "images/boughtfirst.png"
-	BookedLastImage  = "images/bookedlast.png"
-	BoughtLastImage  = "images/boughtlast.png"
+	FreeImage       = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\free.png"
+	BookedImage     = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\booked.png"
+	BoughtImage     = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\bought.png"
+	FreeFirstImage  = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\freefirst.png"
+	BookedFirstImage = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\bookedfirst.png"
+	BoughtFirstImage = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\boughtfirst.png"
+	BookedLastImage  = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\bookedlast.png"
+	BoughtLastImage  = "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images\\boughtlast.png"
 )
 
 // getStatusImage возвращает путь к изображению для статуса
@@ -431,6 +431,7 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 
 	text = "←12:00\n14:00→"
 
+	fmt.Printf("Creating diagonal button with images: top=%s, bottom=%s\n", topImage, bottomImage)
 	button := NewDiagonalButtonImage(topImage, bottomImage, text,
 		func() {
 			// Верхняя часть - клик на заезд (после 14:00)
@@ -454,7 +455,10 @@ func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, sta
 			}
 		})
 
-	button.Resize(fyne.NewSize(35, 60))
+	button.Resize(fyne.NewSize(191, 62))
+	// Устанавливаем фиксированный размер для кнопки
+	button.SetMinSize(fyne.NewSize(191, 62))
+	button.SetMaxSize(fyne.NewSize(191, 62))
 	return button
 }
 

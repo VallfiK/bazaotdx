@@ -4,7 +4,10 @@ package main
 
 import (
 	"database/sql"
+	"io"
 	"log"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/VallfIK/bazaotdx/internal/app"
@@ -14,10 +17,50 @@ import (
 )
 
 func main() {
+	// Настройка логирования
+	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("❌ Ошибка при создании файла логов: %v", err)
+	}
+	defer logFile.Close()
+
+	// Перенаправляем логи в файл и консоль
+	multiWriter := io.MultiWriter(os.Stdout, logFile)
+	log.SetOutput(multiWriter)
+
+	log.Println("🚀 Запуск приложения")
+	log.Printf("🛠️ Путь к проекту: %s", "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx")
+	log.Printf("🔍 Проверка директории images: %s", "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images")
+	
+	// Проверяем существование файлов изображений
+	images := []string{
+		"free.png",
+		"booked.png",
+		"bought.png",
+		"freefirst.png",
+		"bookedfirst.png",
+		"boughtfirst.png",
+		"bookedlast.png",
+		"boughtlast.png",
+	}
+	
+	for _, img := range images {
+		imgPath := filepath.Join("C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images", img)
+		if _, err := os.Stat(imgPath); err != nil {
+			log.Printf("❌ Ошибка: Файл не найден: %s", imgPath)
+		} else {
+			log.Printf("✅ Файл найден: %s", imgPath)
+		}
+	}
+	
+	log.Printf("📄 Логи также записываются в файл: %s", "app.log")
+
 	// Инициализация БД
 	database, err := db.NewPostgresDB()
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("❌ Ошибка подключения к БД: %v", err)
+	} else {
+		log.Println("✅ Успешное подключение к БД")
 	}
 	defer database.Close()
 
