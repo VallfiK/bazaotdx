@@ -317,24 +317,26 @@ func (bc *BookingCalendar) createRegularCell(cottageID int, date time.Time, stat
 
 // createDiagonalCell создает диагональную ячейку для дня выезда
 func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, status models.BookingStatus) fyne.CanvasObject {
-	var leftColor, rightColor color.Color
+	var topColor, bottomColor color.Color
 	var text string
 
-	// День выезда - левая часть показывает текущую бронь (до 12:00), правая - свободна (после 12:00)
-	rightColor = bc.getStatusColor(status)                  // Цвет текущей брони (до 12:00)
-	leftColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый - свободно (после 12:00)
-	text = "12:00 → " + bc.truncateString(status.GuestName, 4)
+	// День выезда:
+	// Нижняя часть (bottom) - текущая бронь до выезда в 12:00
+	// Верхняя часть (top) - свободно для нового заезда с 14:00
+	bottomColor = bc.getStatusColor(status)              // Цвет текущей брони (до 12:00)
+	topColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый - свободно (после 14:00)
+	text = "←12:00\n14:00→"
 
-	button := NewDiagonalButton(rightColor, leftColor, text,
+	button := NewDiagonalButton(topColor, bottomColor, text,
 		func() {
-			// Правая часть - показываем детали текущей брони (до 12:00)
-			bc.onCellTapped(cottageID, date, status)
-		},
-		func() {
-			// Левая часть - открываем форму бронирования с этого дня (после 12:00)
+			// Верхняя часть - открываем форму бронирования с этого дня (после 14:00)
 			// Устанавливаем время заезда на 14:00 того же дня
 			checkInTime := time.Date(date.Year(), date.Month(), date.Day(), 14, 0, 0, 0, time.Local)
 			bc.showQuickBookingForm(cottageID, checkInTime)
+		},
+		func() {
+			// Нижняя часть - показываем детали текущей брони (до 12:00)
+			bc.onCellTapped(cottageID, date, status)
 		})
 
 	button.Resize(fyne.NewSize(35, 60))
