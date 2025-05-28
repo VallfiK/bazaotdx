@@ -214,7 +214,7 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 		var err error
 		tariffs, err = a.tariffService.GetTariffs()
 		if err != nil {
-			dialog.ShowError(fmt.Errorf("Ошибка загрузки тарифов"), a.window)
+			dialog.ShowError(fmt.Errorf("ошибка загрузки тарифов"), a.window)
 			return
 		}
 
@@ -231,7 +231,7 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 		var err error
 		cottages, err = a.cottageService.GetFreeCottages()
 		if err != nil {
-			dialog.ShowError(fmt.Errorf("Ошибка загрузки домиков"), a.window)
+			dialog.ShowError(fmt.Errorf("ошибка загрузки домиков"), a.window)
 			return
 		}
 
@@ -279,12 +279,12 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			if nameEntry.Text == "" || emailEntry.Text == "" || phoneEntry.Text == "" ||
 				cottageSelect.Selected == "" || checkIn.IsZero() || checkOut.IsZero() ||
 				tariffSelect.SelectedIndex() < 0 {
-				dialog.ShowError(fmt.Errorf("Заполните все обязательные поля"), a.window)
+				dialog.ShowError(fmt.Errorf("заполните все обязательные поля"), a.window)
 				return
 			}
 
 			if checkOut.Before(checkIn) {
-				dialog.ShowError(fmt.Errorf("Дата выезда раньше заезда"), a.window)
+				dialog.ShowError(fmt.Errorf("дата выезда раньше заезда"), a.window)
 				return
 			}
 
@@ -300,7 +300,7 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			}
 
 			if !found {
-				dialog.ShowError(fmt.Errorf("Домик недоступен"), a.window)
+				dialog.ShowError(fmt.Errorf("домик недоступен"), a.window)
 				updateCottages()
 				return
 			}
@@ -317,7 +317,7 @@ func (a *GuestApp) createGuestTab() *container.TabItem {
 			}
 
 			if err := a.guestService.RegisterGuest(guest, cottageID); err != nil {
-				dialog.ShowError(fmt.Errorf("Ошибка регистрации: %v", err), a.window)
+				dialog.ShowError(fmt.Errorf("ошибка регистрации: %v", err), a.window)
 				return
 			}
 
