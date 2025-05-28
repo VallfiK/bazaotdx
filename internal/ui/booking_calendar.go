@@ -238,41 +238,30 @@ func (bc *BookingCalendar) createCottageRow(cottage models.Cottage, daysInMonth 
 // createCalendarCell создает ячейку календаря
 func (bc *BookingCalendar) createCalendarCell(cottageID int, date time.Time) fyne.CanvasObject {
 	// Проверяем наличие двух бронирований на этот день
-	var checkInStatus *models.BookingStatus
-	var checkOutStatus *models.BookingStatus
+	var status *models.BookingStatus
 	
 	// Проверяем текущий день
 	if dayData, exists := bc.calendarData[date]; exists {
 		for _, s := range dayData {
-			if s.IsCheckIn {
-				checkInStatus = &s
-			} else if s.IsCheckOut {
-				checkOutStatus = &s
-			}
+			status = &s
+			break
 		}
 	}
 
-	// Создаем контейнер для ячейки
-	cell := container.NewGridWithColumns(2)
+	// Создаем кнопку с диагональным разделением
+	button := bc.createCellPart(cottageID, date, status)
 	
-	// Создаем левую и правую части ячейки
-	leftPart := bc.createCellPart(cottageID, date, checkInStatus, true)
-	rightPart := bc.createCellPart(cottageID, date, checkOutStatus, false)
-	
-	cell.Add(leftPart)
-	cell.Add(rightPart)
-	
-	return cell
+	return button
 }
 
-// createCellPart создает левую или правую часть ячейки
-func (bc *BookingCalendar) createCellPart(cottageID int, date time.Time, status *models.BookingStatus, isLeft bool) fyne.CanvasObject {
-	// Определяем цвет и текст для части
-	var bgColor color.Color
+// createCellPart создает ячейку с диагональным разделением
+func (bc *BookingCalendar) createCellPart(cottageID int, date time.Time, status *models.BookingStatus) fyne.CanvasObject {
+	// Определяем цвета для левой и правой сторон
+	var leftColor, rightColor color.Color
 	var text string
 	
 	if status != nil {
-		bgColor = bc.getStatusColor(*status)
+		leftColor = bc.getStatusColor(*status)
 		if status.IsCheckIn {
 			text = "→ " + bc.truncateString(status.GuestName, 6)
 		} else if status.IsCheckOut {
@@ -282,34 +271,33 @@ func (bc *BookingCalendar) createCellPart(cottageID int, date time.Time, status 
 		}
 	} else {
 		// Если нет статуса, используем цвет и текст для свободного дня
-		bgColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый для свободных дней
+		leftColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый для свободных дней
+		rightColor = leftColor
 		text = "+"
 	}
 
-	// Создаем кликабельный прямоугольник
-	clickableRect := NewClickableRect(bgColor, func() {
+	// Создаем кнопку с диагональным разделением
+	button := NewDiagonalButton(leftColor, rightColor, text, func() {
+		// Обработчик для левой стороны
 		if status != nil {
 			bc.onCellTapped(cottageID, date, *status)
 		} else {
 			bc.onCellTapped(cottageID, date, models.BookingStatus{})
 		}
+	}, func() {
+		// Обработчик для правой стороны
+		if status != nil && status.IsCheckOut {
+			// Если это день выезда, создаем новую бронь
+			bc.showQuickBookingForm(cottageID, date)
+		} else {
+			bc.onCellTapped(cottageID, date, *status)
+		}
 	})
 
-	// Создаем текстовый элемент
-	label := canvas.NewText(text, color.White)
-	label.TextSize = 9
-	label.Alignment = fyne.TextAlignCenter
-
-	// Объединяем в контейнер
-	content := container.NewStack(
-		clickableRect,
-		container.NewCenter(label),
-	)
-
 	// Устанавливаем размер
-	content.Resize(fyne.NewSize(35, 60)) // 35px - половина ширины ячейки
+	button.Resize(fyne.NewSize(35, 60))
 	
-	return content
+	return button
 }
 
 // analyzeBookingBlocks анализирует дни месяца и группирует их в блоки
