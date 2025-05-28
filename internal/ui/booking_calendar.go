@@ -690,26 +690,6 @@ func (bc *BookingCalendar) findCheckoutBooking(cottageID int, date time.Time) *m
 	return nil
 }
 
-// getStatusColor возвращает цвет для статуса (используется в легенде)
-func (bc *BookingCalendar) getStatusColor(status models.BookingStatus) color.Color {
-	if status.IsCheckIn {
-		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый (бронь)
-	}
-
-	switch status.Status {
-	case models.BookingStatusBooked:
-		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый (бронь)
-	case models.BookingStatusCheckedIn:
-		return color.NRGBA{R: 255, G: 102, B: 0, A: 255} // Оранжевый (заселен)
-	case models.BookingStatusCancelled:
-		return color.NRGBA{R: 220, G: 53, B: 69, A: 255} // Красный (отменено)
-	case models.BookingStatusCompleted:
-		return GreenColor // Зеленый (завершено = свободно)
-	default:
-		return GreenColor // Зеленый (свободно)
-	}
-}
-
 // onCellTapped обрабатывает клик по ячейке
 func (bc *BookingCalendar) onCellTapped(cottageID int, date time.Time, status models.BookingStatus) {
 	if status.BookingID > 0 {

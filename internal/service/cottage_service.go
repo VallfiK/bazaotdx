@@ -33,18 +33,6 @@ func (s *CottageService) GetFreeCottages() ([]models.Cottage, error) {
 	return cottages, nil
 }
 
-func (s *CottageService) AddCottage(name string) error {
-	// Добавляем явное указание всех колонок
-	_, err := s.db.Exec(
-		"INSERT INTO lesbaza.cottages (name, status) VALUES ($1, 'free')",
-		name,
-	)
-	if err != nil {
-		return fmt.Errorf("ошибка добавления домика: %w", err)
-	}
-	return nil
-}
-
 func (s *CottageService) GetAllCottages() ([]models.Cottage, error) {
 	rows, err := s.db.Query("SELECT cottage_id, name, status FROM lesbaza.cottages ORDER BY cottage_id")
 	if err != nil {
@@ -61,6 +49,31 @@ func (s *CottageService) GetAllCottages() ([]models.Cottage, error) {
 		cottages = append(cottages, c)
 	}
 	return cottages, nil
+}
+
+// AddCottage добавляет новый домик
+func (s *CottageService) AddCottage(name string) error {
+	_, err := s.db.Exec(
+		"INSERT INTO lesbaza.cottages (name, status) VALUES ($1, 'free')",
+		name,
+	)
+	if err != nil {
+		return fmt.Errorf("ошибка добавления домика: %w", err)
+	}
+	return nil
+}
+
+// UpdateCottageStatus обновляет статус домика
+func (s *CottageService) UpdateCottageStatus(cottageID int, status string) error {
+	_, err := s.db.Exec(
+		"UPDATE lesbaza.cottages SET status = $1 WHERE cottage_id = $2",
+		status,
+		cottageID,
+	)
+	if err != nil {
+		return fmt.Errorf("ошибка обновления статуса домика: %w", err)
+	}
+	return nil
 }
 
 // DeleteCottage удаляет домик по ID

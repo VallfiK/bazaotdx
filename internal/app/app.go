@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -122,114 +123,163 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 	nameEntry := widget.NewEntry()
 	nameEntry.PlaceHolder = "Введите название домика"
 
-	// Список домиков
-	var cottageList *widget.List
-	var cottages []models.Cottage
+	// Функция обновления списка домиков
+	var updateCottageList func()
+
+	// Фильтр по статусу
+	statusFilter := widget.NewSelect([]string{"Все", "Свободные", "Занятые"}, "Все")
+	statusFilter.OnChanged = func() {
+		updateCottageList()
+	}
+
+	// Форма поиска
+	searchEntry := widget.NewEntry()
+	searchEntry.SetPlaceHolder("Поиск по названию...")
+	searchEntry.OnChanged = func() {
+		updateCottageList()
+	}
+
+	// Контейнер для списка домиков
+	cottagesContainer := container.NewVBox()
+	cottagesContainer.Objects = make([]fyne.CanvasObject, 0)
 
 	// Функция обновления списка домиков
-	updateCottageList := func() {
-		var err error
-		cottages, err = a.cottageService.GetAllCottages()
+	updateCottageList = func() {
+		cottages, err := a.cottageService.GetAllCottages()
 		if err != nil {
 			dialog.ShowError(err, a.window)
 			return
 		}
-		a.cottages = cottages // Обновляем локальную копию
-		if cottageList != nil {
-			cottageList.Refresh()
+
+		filteredCottages := make([]models.Cottage, 0)
+		for _, cottage := range cottages {
+			if statusFilter.Selected() == "Свободные" && cottage.Status != "free" {
+				continue
+			}
+			if statusFilter.Selected() == "Занятые" && cottage.Status != "occupied" {
+				continue
+			}
+			if searchEntry.Text != "" && !strings.Contains(strings.ToLower(cottage.Name), strings.ToLower(searchEntry.Text)) {
+				continue
+			}
+			filteredCottages = append(filteredCottages, cottage)
+		}
+
+		// Очищаем контейнер
+		cottagesContainer.Objects = cottagesContainer.Objects[:0]
+
+		// Добавляем домики
+		for _, cottage := range filteredCottages {
+			// Контейнер для каждого домика
+			cottageContainer := container.NewHBox(
+				widget.NewLabel(fmt.Sprintf("%d. %s", cottage.ID, cottage.Name)),
+			)
+
+			// Добавляем кнопки
+			editBtn := widget.NewButton("Изменить", func() {
+				a.showEditCottageDialog(cottage, updateCottageList)
+			})
+			deleteBtn := widget.NewButton("Удалить", func() {
+				if cottage.Status == "occupied" {
+					dialog.ShowError(
+						fmt.Errorf("невозможно удалить занятый домик"),
+						a.window,
+					)
+					return
+				}
+
+				dialog.ShowConfirm("Подтверждение",
+					fmt.Sprintf("Вы уверены, что хотите удалить домик '%s' (ID: %d)?", cottage.Name, cottage.ID),
+					func(ok bool) {
+						if ok {
+							err := a.cottageService.DeleteCottage(cottage.ID)
+							if err != nil {
+								dialog.ShowError(err, a.window)
+								return
+							}
+							updateCottageList()
+						}
+					},
+					a.window)
+			})
+
+			// Booking button with proper state handling
+			bookingBtn := widget.NewButton("Заселить", func() {
+				// Update cottage status
+				newStatus := "occupied"
+				if cottage.Status == "occupied" {
+					newStatus = "free"
+				}
+				
+				err := a.cottageService.UpdateCottageStatus(cottage.ID, newStatus)
+				if err != nil {
+					dialog.ShowError(err, a.window)
+					return
+				}
+				
+				// Update button text
+				bookingBtn.SetText(newStatus)
+				bookingBtn.Refresh()
+				updateCottageList()
+			})
+
+			cottageContainer.Add(editBtn)
+			cottageContainer.Add(deleteBtn)
+			cottageContainer.Add(bookingBtn)
+
+			cottagesContainer.Add(cottageContainer)
 		}
 	}
 
-	// Создаем список домиков
-	cottageList = widget.NewList(
-		func() int {
-			return len(cottages)
-		},
-		func() fyne.CanvasObject {
-			// Create a simple HBox with all elements
-			return container.NewHBox(
-				widget.NewLabel("ID: "),
-				widget.NewLabel(""),
-			)
-		},
-		func(id widget.ListItemID, item fyne.CanvasObject) {
-			if id >= len(cottages) {
-				return
-			}
-			cottage := cottages[id]
+	// Форма добавления нового домика
+	nameEntry := widget.NewEntry()
+	nameEntry.PlaceHolder = "Введите название домика"
 
-			// Get the container and update the ID label
-			container := item.(*fyne.Container)
-			if container == nil || len(container.Objects) < 2 {
-				return
-			}
-
-			// Update the ID label
-			if label, ok := container.Objects[1].(*widget.Label); ok {
-				label.SetText(fmt.Sprintf("%d", cottage.ID))
-			}
-
-			// Add buttons if not already present
-			if len(container.Objects) < 4 {
-				editBtn := widget.NewButton("Изменить", func() {
-					a.showEditCottageDialog(cottage, updateCottageList)
-				})
-				deleteBtn := widget.NewButton("Удалить", func() {
-					if cottage.Status == "occupied" {
-						dialog.ShowError(
-							fmt.Errorf("невозможно удалить занятый домик"),
-							a.window,
-						)
+	// Создаем контейнер с фильтром и списком
+	content := container.NewVBox(
+		statusFilter,
+		searchEntry,
+		container.NewCard("Добавить новый домик", "",
+			container.NewVBox(
+				nameEntry,
+				widget.NewButton("Добавить", func() {
+					if nameEntry.Text == "" {
+						dialog.ShowError(fmt.Errorf("введите название домика"), a.window)
 						return
 					}
 
-					dialog.ShowConfirm("Подтверждение",
-						fmt.Sprintf("Вы уверены, что хотите удалить домик '%s' (ID: %d)?", cottage.Name, cottage.ID),
-						func(ok bool) {
-							if ok {
-								err := a.cottageService.DeleteCottage(cottage.ID)
-								if err != nil {
-									dialog.ShowError(err, a.window)
-									return
-								}
-								updateCottageList()
-							}
-						},
-						a.window)
-				})
-				container.Add(editBtn)
-				container.Add(deleteBtn)
-			}
-		},
+					cottage := models.Cottage{
+						Name:  nameEntry.Text,
+						Status: "free",
+					}
+					err := a.cottageService.CreateCottage(cottage)
+					if err != nil {
+						dialog.ShowError(err, a.window)
+						return
+					}
+
+					// Очищаем поле ввода
+					nameEntry.SetText("")
+					updateCottageList()
+
+					// Обновляем календарь после добавления домика
+					if a.calendarWidget != nil {
+						a.calendarWidget.Update()
+					}
+
+					dialog.ShowInformation("Успешно",
+						fmt.Sprintf("Домик '%s' добавлен", nameEntry.Text),
+						a.window,
+					)
+				}),
+			),
+		),
+		cottagesContainer,
 	)
 
 	// Изначально загружаем домики
 	updateCottageList()
 
-	// Форма добавления нового домика
-	form := widget.NewCard("Добавить новый домик", "",
-		container.NewVBox(
-			nameEntry,
-			widget.NewButton("Добавить", func() {
-				if nameEntry.Text == "" {
-					dialog.ShowError(fmt.Errorf("введите название домика"), a.window)
-					return
-				}
-
-				err := a.cottageService.AddCottage(nameEntry.Text)
-				if err != nil {
-					dialog.ShowError(err, a.window)
-					return
-				}
-
-				// Очищаем поле
-				nameEntry.SetText("")
-
-				updateCottageList()
-
-				// Обновляем календарь после добавления домика
-				if a.calendarWidget != nil {
-					a.calendarWidget.Update()
 				}
 
 				dialog.ShowInformation("Успешно",

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func createImage(color color.Color, text string, filename string) error {
+func createImage(color color.Color, filename string) error {
 	// Создаем новый изображение 32x32 пикселя
 	img := image.NewRGBA(image.Rect(0, 0, 32, 32))
 	
@@ -29,7 +29,7 @@ func createImage(color color.Color, text string, filename string) error {
 
 func init() {
 	// Создаем изображения с разными цветами
-	createImage(color.RGBA{R: 0, G: 255, B: 0, A: 255}, "Св", "free.png")
-	createImage(color.RGBA{R: 255, G: 0, B: 0, A: 255}, "З", "booked.png")
-	createImage(color.RGBA{R: 0, G: 255, B: 0, A: 255}, "Св", "freefirst.png")
+	createImage(color.RGBA{R: 0, G: 255, B: 0, A: 255}, "free.png")
+	createImage(color.RGBA{R: 255, G: 0, B: 0, A: 255}, "booked.png")
+	createImage(color.RGBA{R: 0, G: 255, B: 0, A: 255}, "freefirst.png")
 }
