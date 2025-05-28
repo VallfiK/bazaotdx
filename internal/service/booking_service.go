@@ -145,33 +145,34 @@ func (s *BookingService) GetCalendarData(startDate, endDate time.Time) (map[time
 			continue // Пропускаем некорректные брони
 		}
 
-		// Проходим по всем дням брони включая последний день
-		for d := checkIn; d.Before(checkOut) || d.Equal(checkOut); d = d.AddDate(0, 0, 1) {
+		// Проходим по всем дням брони
+		for d := checkIn; !d.After(checkOut); d = d.AddDate(0, 0, 1) {
 			if dayMap, exists := calendar[d]; exists {
 				isCheckIn := d.Equal(checkIn)
 				isCheckOut := d.Equal(checkOut)
 
-				// ВАЖНО: записываем статус только для конкретного домика
-				dayMap[booking.CottageID] = models.BookingStatus{
-					Status:     booking.Status,
-					BookingID:  booking.ID,
-					GuestName:  booking.GuestName,
-					IsPartDay:  isCheckIn || isCheckOut,
-					IsCheckIn:  isCheckIn,
-					IsCheckOut: isCheckOut,
+				// Для дня выезда показываем особый статус
+				if isCheckOut && !isCheckIn {
+					// Это только день выезда (не совпадает с днем заезда)
+					dayMap[booking.CottageID] = models.BookingStatus{
+						Status:     booking.Status,
+						BookingID:  booking.ID,
+						GuestName:  booking.GuestName,
+						IsPartDay:  true,
+						IsCheckIn:  false,
+						IsCheckOut: true,
+					}
+				} else {
+					// Обычный день брони или день заезда
+					dayMap[booking.CottageID] = models.BookingStatus{
+						Status:     booking.Status,
+						BookingID:  booking.ID,
+						GuestName:  booking.GuestName,
+						IsPartDay:  isCheckIn || isCheckOut,
+						IsCheckIn:  isCheckIn,
+						IsCheckOut: false, // Не показываем как день выезда, если это также день заезда
+					}
 				}
-			}
-		}
-
-		// Добавляем день выезда отдельно (только если он в диапазоне)
-		if dayMap, exists := calendar[checkOut]; exists {
-			dayMap[booking.CottageID] = models.BookingStatus{
-				Status:     booking.Status,
-				BookingID:  booking.ID,
-				GuestName:  booking.GuestName,
-				IsPartDay:  true,
-				IsCheckIn:  false,
-				IsCheckOut: true,
 			}
 		}
 	}
@@ -275,16 +276,34 @@ func (s *BookingService) CheckInBooking(bookingID int) error {
 
 // GetAvailableCottagesForDates получает доступные домики на даты
 func (s *BookingService) GetAvailableCottagesForDates(checkIn, checkOut time.Time) ([]models.Cottage, error) {
+	// Получаем все домики
+	allCottagesRows, err := s.db.Query(`
+		SELECT cottage_id, name, status 
+		FROM lesbaza.cottages 
+		ORDER BY name`)
+	if err != nil {
+		return nil, err
+	}
+	defer allCottagesRows.Close()
+
+	var allCottages []models.Cottage
+	cottageMap := make(map[int]models.Cottage)
+
+	for allCottagesRows.Next() {
+		var c models.Cottage
+		if err := allCottagesRows.Scan(&c.ID, &c.Name, &c.Status); err != nil {
+			return nil, err
+		}
+		allCottages = append(allCottages, c)
+		cottageMap[c.ID] = c
+	}
+
+	// Получаем занятые домики
 	rows, err := s.db.Query(`
-		SELECT c.cottage_id, c.name, c.status
-		FROM lesbaza.cottages c
-		WHERE c.cottage_id NOT IN (
-			SELECT DISTINCT cottage_id 
-			FROM lesbaza.bookings
-			WHERE status IN ($1, $2)
-			AND NOT (check_out_date <= $3 OR check_in_date >= $4)
-		)
-		ORDER BY c.name`,
+		SELECT DISTINCT b.cottage_id, b.check_in_date, b.check_out_date
+		FROM lesbaza.bookings b
+		WHERE b.status IN ($1, $2)
+		AND NOT (b.check_out_date < $3 OR b.check_in_date > $4)`,
 		models.BookingStatusBooked,
 		models.BookingStatusCheckedIn,
 		checkIn,
@@ -295,17 +314,49 @@ func (s *BookingService) GetAvailableCottagesForDates(checkIn, checkOut time.Tim
 	}
 	defer rows.Close()
 
-	var cottages []models.Cottage
+	// Проверяем каждую бронь на конфликт
+	occupiedCottages := make(map[int]bool)
+
 	for rows.Next() {
-		var c models.Cottage
-		err := rows.Scan(&c.ID, &c.Name, &c.Status)
-		if err != nil {
+		var cottageID int
+		var existingCheckIn, existingCheckOut time.Time
+
+		if err := rows.Scan(&cottageID, &existingCheckIn, &existingCheckOut); err != nil {
 			return nil, err
 		}
-		cottages = append(cottages, c)
+
+		// Проверяем, есть ли реальный конфликт
+		hasConflict := true
+
+		// Если новый заезд в день выезда существующей брони
+		if checkIn.Format("2006-01-02") == existingCheckOut.Format("2006-01-02") {
+			if checkIn.Hour() >= 14 && existingCheckOut.Hour() <= 12 {
+				hasConflict = false // Нет конфликта - можно заселиться после выезда
+			}
+		}
+
+		// Если новый выезд в день заезда существующей брони
+		if hasConflict && checkOut.Format("2006-01-02") == existingCheckIn.Format("2006-01-02") {
+			if checkOut.Hour() <= 12 && existingCheckIn.Hour() >= 14 {
+				hasConflict = false // Нет конфликта - можно выселиться до заезда
+			}
+		}
+
+		// Если есть конфликт, помечаем домик как занятый
+		if hasConflict {
+			occupiedCottages[cottageID] = true
+		}
 	}
 
-	return cottages, nil
+	// Формируем список доступных домиков
+	var availableCottages []models.Cottage
+	for _, cottage := range allCottages {
+		if !occupiedCottages[cottage.ID] {
+			availableCottages = append(availableCottages, cottage)
+		}
+	}
+
+	return availableCottages, nil
 }
 
 // GetUpcomingBookings получает предстоящие брони

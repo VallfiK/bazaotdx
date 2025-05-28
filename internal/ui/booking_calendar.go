@@ -14,6 +14,10 @@ import (
 	"github.com/VallfIK/bazaotdx/internal/service"
 )
 
+var (
+	GreenColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255}
+)
+
 // BookingCalendar представляет календарный виджет для бронирования
 type BookingCalendar struct {
 	widget.BaseWidget
@@ -32,6 +36,20 @@ type BookingCalendar struct {
 	// UI элементы
 	monthLabel   *widget.Label
 	calendarGrid *fyne.Container
+}
+
+// SetOnRefresh устанавливает callback для обновления
+func (bc *BookingCalendar) SetOnRefresh(f func()) {
+	bc.onRefresh = f
+}
+
+// Update обновляет данные и отображение календаря
+func (bc *BookingCalendar) Update() {
+	bc.loadData()
+	bc.updateCalendar()
+	if bc.onRefresh != nil {
+		bc.onRefresh()
+	}
 }
 
 // ClickableRect - прямоугольник который можно кликать без hover эффекта
@@ -300,31 +318,21 @@ func (bc *BookingCalendar) createRegularCell(cottageID int, date time.Time, stat
 // createDiagonalCell создает диагональную ячейку для дня выезда
 func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, status models.BookingStatus) fyne.CanvasObject {
 	var leftColor, rightColor color.Color
-	
-	// Если это последний день бронирования (выезд)
-	if status.IsCheckOut {
-		leftColor = bc.getStatusColor(status) // Желтый для времени до выезда
-		rightColor = bc.getStatusColor(status) // Желтый для времени до выезда (так как бронь еще действует до 12:00)
-	} else {
-		// Если это первый день бронирования (заселение)
-		if status.IsCheckIn {
-			leftColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый для времени до заселения
-			rightColor = bc.getStatusColor(status) // Желтый для времени бронирования
-		} else {
-			// Если это обычный день бронирования
-			leftColor = bc.getStatusColor(status) // Желтый для текущей брони
-			rightColor = bc.getStatusColor(status) // Желтый для текущей брони
-		}
-	}
-	text := bc.truncateString(status.GuestName, 6) + " →"
+	var text string
+
+	// День выезда - левая часть показывает текущую бронь, правая - свободна для новой брони
+	leftColor = bc.getStatusColor(status)  // Цвет текущей брони (до 12:00)
+	rightColor = bc.getStatusColor(status) // Цвет текущей брони (после 12:00)
+	text = bc.truncateString(status.GuestName, 6) + " → до 12:00"
 
 	button := NewDiagonalButton(leftColor, rightColor, text,
 		func() {
-			// Обе стороны показывают детали текущей брони
+			// Левая часть - показываем детали текущей брони
 			bc.onCellTapped(cottageID, date, status)
 		},
 		func() {
-			bc.onCellTapped(cottageID, date, status)
+			// Правая часть - открываем форму бронирования с этого дня
+			bc.showQuickBookingForm(cottageID, date)
 		})
 
 	button.Resize(fyne.NewSize(35, 60))
@@ -640,18 +648,4 @@ func (bc *BookingCalendar) updateCalendar() {
 	bc.updateMonthLabel()
 	bc.calendarGrid.Objects = bc.createCalendarGrid().Objects
 	bc.calendarGrid.Refresh()
-}
-
-// Update обновляет данные и отображение календаря
-func (bc *BookingCalendar) Update() {
-	bc.loadData()
-	bc.updateCalendar()
-	if bc.onRefresh != nil {
-		bc.onRefresh()
-	}
-}
-
-// SetOnRefresh устанавливает callback для обновления
-func (bc *BookingCalendar) SetOnRefresh(f func()) {
-	bc.onRefresh = f
 }

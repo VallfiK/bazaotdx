@@ -32,6 +32,32 @@ func NewDiagonalButton(leftColor, rightColor color.Color, text string, leftTappe
 	return db
 }
 
+func (db *DiagonalButton) Tapped(evt *fyne.PointEvent) {
+	size := db.Size()
+
+	// Вычисляем, на какую часть кнопки кликнули
+	// Диагональ идет из левого верхнего угла в правый нижний
+	// Если точка выше диагонали - левая часть, ниже - правая
+
+	k := size.Height / size.Width
+	expectedY := evt.Position.X * k
+
+	if evt.Position.Y < expectedY {
+		// Клик на левую часть (верхний треугольник)
+		if db.leftTapped != nil {
+			db.leftTapped()
+		}
+	} else {
+		// Клик на правую часть (нижний треугольник)
+		if db.rightTapped != nil {
+			db.rightTapped()
+		}
+	}
+}
+
+// TappedSecondary обрабатывает правый клик
+func (db *DiagonalButton) TappedSecondary(_ *fyne.PointEvent) {}
+
 // CreateRenderer создает рендерер для кнопки
 func (db *DiagonalButton) CreateRenderer() fyne.WidgetRenderer {
 	return &diagonalButtonRenderer{
