@@ -117,6 +117,9 @@ func (s *BookingService) GetBookingsByDateRange(startDate, endDate time.Time) ([
 }
 
 // GetCalendarData получает данные для календаря
+// Добавьте эти исправления в booking_service.go
+
+// GetCalendarData получает данные для календаря
 func (s *BookingService) GetCalendarData(startDate, endDate time.Time) (map[time.Time]map[int]models.BookingStatus, error) {
 	bookings, err := s.GetBookingsByDateRange(startDate, endDate)
 	if err != nil {
@@ -139,16 +142,17 @@ func (s *BookingService) GetCalendarData(startDate, endDate time.Time) (map[time
 
 		// Проверяем, что даты корректные
 		if checkOut.Before(checkIn) {
-			return nil, fmt.Errorf("некорректные даты бронирования: дата выезда раньше даты заезда")
+			continue // Пропускаем некорректные брони
 		}
 
 		// Проходим по всем дням брони
-		for d := checkIn; !d.After(checkOut); d = d.AddDate(0, 0, 1) {
-			if _, exists := calendar[d]; exists {
+		for d := checkIn; d.Before(checkOut); d = d.AddDate(0, 0, 1) {
+			if dayMap, exists := calendar[d]; exists {
 				isCheckIn := d.Equal(checkIn)
-				isCheckOut := d.Equal(checkOut)
+				isCheckOut := d.Equal(checkOut.AddDate(0, 0, -1)) // День выезда - это последний день проживания
 
-				calendar[d][booking.CottageID] = models.BookingStatus{
+				// ВАЖНО: записываем статус только для конкретного домика
+				dayMap[booking.CottageID] = models.BookingStatus{
 					Status:     booking.Status,
 					BookingID:  booking.ID,
 					GuestName:  booking.GuestName,
@@ -156,6 +160,18 @@ func (s *BookingService) GetCalendarData(startDate, endDate time.Time) (map[time
 					IsCheckIn:  isCheckIn,
 					IsCheckOut: isCheckOut,
 				}
+			}
+		}
+
+		// Добавляем день выезда отдельно (только если он в диапазоне)
+		if dayMap, exists := calendar[checkOut]; exists {
+			dayMap[booking.CottageID] = models.BookingStatus{
+				Status:     booking.Status,
+				BookingID:  booking.ID,
+				GuestName:  booking.GuestName,
+				IsPartDay:  true,
+				IsCheckIn:  false,
+				IsCheckOut: true,
 			}
 		}
 	}

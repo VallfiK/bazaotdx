@@ -92,9 +92,16 @@ func (bc *BookingCalendar) loadData() error {
 	}
 	bc.cottages = cottages
 
-	// Получаем данные бронирования
+	// Получаем данные бронирования - только с текущего дня
+	today := time.Now().Local().Truncate(24 * time.Hour)
 	startDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), 1, 0, 0, 0, 0, time.Local)
-	endDate := startDate.AddDate(0, 1, -1)
+
+	// Если месяц текущий, начинаем с сегодняшнего дня
+	if startDate.Before(today) {
+		startDate = today
+	}
+
+	endDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month()+1, 1, 0, 0, 0, 0, time.Local).AddDate(0, 0, -1)
 
 	calendarData, err := bc.bookingService.GetCalendarData(startDate, endDate)
 	if err != nil {
@@ -165,33 +172,31 @@ func (bc *BookingCalendar) updateMonthLabel() {
 	bc.monthLabel.SetText(fmt.Sprintf("%s %d", month, year))
 }
 
-// BookingBlock представляет объединенный блок дней для одной брони
-type BookingBlock struct {
-	StartDay int
-	EndDay   int
-	Status   models.BookingStatus
-	Width    int // Количество дней
-}
-
-// createCalendarGrid создает правильную сетку календаря с объединенными ячейками
+// createCalendarGrid создает сетку календаря
 func (bc *BookingCalendar) createCalendarGrid() *fyne.Container {
+	today := time.Now().Local().Truncate(24 * time.Hour)
 	firstDay := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), 1, 0, 0, 0, 0, time.Local)
 	lastDay := firstDay.AddDate(0, 1, -1)
 
-	// Подсчитываем количество дней в месяце
-	daysInMonth := lastDay.Day()
+	// Определяем диапазон дней для отображения
+	startDay := 1
+	if firstDay.Before(today) {
+		startDay = today.Day()
+	}
+
+	daysToShow := lastDay.Day() - startDay + 1
 
 	// Создаем основной контейнер
 	mainContainer := container.NewVBox()
 
 	// Создаем заголовок с днями недели
-	daysHeader := container.NewGridWithColumns(daysInMonth + 1)
+	daysHeader := container.NewGridWithColumns(daysToShow + 1)
 
 	// Первая ячейка - заголовок "Домик"
 	daysHeader.Add(widget.NewCard("", "", widget.NewLabel("Домик")))
 
-	// Добавляем заголовки дней
-	for day := 1; day <= daysInMonth; day++ {
+	// Добавляем заголовки дней (только текущие и будущие)
+	for day := startDay; day <= lastDay.Day(); day++ {
 		currentDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), day, 0, 0, 0, 0, time.Local)
 		weekday := bc.getWeekdayShort(currentDate.Weekday())
 
@@ -206,9 +211,9 @@ func (bc *BookingCalendar) createCalendarGrid() *fyne.Container {
 
 	mainContainer.Add(daysHeader)
 
-	// Создаем строки для каждого домика с объединенными ячейками
+	// Создаем строки для каждого домика
 	for _, cottage := range bc.cottages {
-		cottageRow := bc.createCottageRow(cottage, daysInMonth)
+		cottageRow := bc.createCottageRow(cottage, startDay, lastDay.Day())
 		mainContainer.Add(cottageRow)
 	}
 
@@ -216,9 +221,11 @@ func (bc *BookingCalendar) createCalendarGrid() *fyne.Container {
 }
 
 // createCottageRow создает строку для домика
-func (bc *BookingCalendar) createCottageRow(cottage models.Cottage, daysInMonth int) *fyne.Container {
-	// Создаем сетку для строки (1 колонка для названия + колонка для каждого дня)
-	row := container.NewGridWithColumns(daysInMonth + 1)
+func (bc *BookingCalendar) createCottageRow(cottage models.Cottage, startDay, endDay int) *fyne.Container {
+	daysToShow := endDay - startDay + 1
+
+	// Создаем сетку для строки
+	row := container.NewGridWithColumns(daysToShow + 1)
 
 	// Первая ячейка - название домика
 	cottageNameCard := widget.NewCard("", "", widget.NewLabel(cottage.Name))
@@ -226,7 +233,7 @@ func (bc *BookingCalendar) createCottageRow(cottage models.Cottage, daysInMonth 
 	row.Add(cottageNameCard)
 
 	// Добавляем ячейки для каждого дня
-	for day := 1; day <= daysInMonth; day++ {
+	for day := startDay; day <= endDay; day++ {
 		currentDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), day, 0, 0, 0, 0, time.Local)
 		cell := bc.createCalendarCell(cottage.ID, currentDate)
 		row.Add(cell)
@@ -237,191 +244,91 @@ func (bc *BookingCalendar) createCottageRow(cottage models.Cottage, daysInMonth 
 
 // createCalendarCell создает ячейку календаря
 func (bc *BookingCalendar) createCalendarCell(cottageID int, date time.Time) fyne.CanvasObject {
-	// Проверяем наличие двух бронирований на этот день
+	// Получаем статус для этого домика и дня
 	var status *models.BookingStatus
-	
-	// Проверяем текущий день
+
 	if dayData, exists := bc.calendarData[date]; exists {
-		for _, s := range dayData {
-			status = &s
-			break
+		if cottageStatus, ok := dayData[cottageID]; ok {
+			status = &cottageStatus
 		}
 	}
 
-	// Создаем кнопку с диагональным разделением
-	button := bc.createCellPart(cottageID, date, status)
-	
-	return button
+	// Создаем кнопку
+	if status != nil && status.IsCheckOut {
+		// День выезда - диагональная кнопка
+		return bc.createDiagonalCell(cottageID, date, *status)
+	} else {
+		// Обычная кнопка
+		return bc.createRegularCell(cottageID, date, status)
+	}
 }
 
-// createCellPart создает ячейку с диагональным разделением
-func (bc *BookingCalendar) createCellPart(cottageID int, date time.Time, status *models.BookingStatus) fyne.CanvasObject {
-	// Определяем цвета для левой и правой сторон
-	var leftColor, rightColor color.Color
+// createRegularCell создает обычную ячейку
+func (bc *BookingCalendar) createRegularCell(cottageID int, date time.Time, status *models.BookingStatus) fyne.CanvasObject {
+	var bgColor color.Color
 	var text string
-	
-	if status != nil {
-		leftColor = bc.getStatusColor(*status)
+
+	if status != nil && status.BookingID > 0 {
+		bgColor = bc.getStatusColor(*status)
 		if status.IsCheckIn {
 			text = "→ " + bc.truncateString(status.GuestName, 6)
-		} else if status.IsCheckOut {
-			text = bc.truncateString(status.GuestName, 6) + " →"
 		} else {
 			text = bc.truncateString(status.GuestName, 8)
 		}
 	} else {
-		// Если нет статуса, используем цвет и текст для свободного дня
-		leftColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый для свободных дней
-		rightColor = leftColor
+		// Свободный день
+		bgColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый
 		text = "+"
 	}
 
-	// Создаем кнопку с диагональным разделением
-	button := NewDiagonalButton(leftColor, rightColor, text, func() {
-		// Обработчик для левой стороны
+	// Создаем кликабельный прямоугольник
+	clickableRect := NewClickableRect(bgColor, func() {
 		if status != nil {
 			bc.onCellTapped(cottageID, date, *status)
 		} else {
 			bc.onCellTapped(cottageID, date, models.BookingStatus{})
 		}
-	}, func() {
-		// Обработчик для правой стороны
-		if status != nil && status.IsCheckOut {
-			// Если это день выезда, создаем новую бронь
-			bc.showQuickBookingForm(cottageID, date)
-		} else {
-			bc.onCellTapped(cottageID, date, *status)
-		}
 	})
 
-	// Устанавливаем размер
-	button.Resize(fyne.NewSize(35, 60))
-	
-	return button
-}
-
-// analyzeBookingBlocks анализирует дни месяца и группирует их в блоки
-func (bc *BookingCalendar) analyzeBookingBlocks(cottageID int, daysInMonth int) []BookingBlock {
-	var blocks []BookingBlock
-	var currentBlock *BookingBlock
-
-	for day := 1; day <= daysInMonth; day++ {
-		currentDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), day, 0, 0, 0, 0, time.Local)
-
-		// Получаем статус для текущего дня
-		var status models.BookingStatus
-		if dayData, exists := bc.calendarData[currentDate]; exists {
-			if s, ok := dayData[cottageID]; ok {
-				status = s
-			}
-		}
-
-		// Если это начало нового блока
-		if currentBlock == nil ||
-			currentBlock.Status.BookingID != status.BookingID ||
-			(currentBlock.Status.BookingID == 0 && status.BookingID == 0) {
-
-			// Сохраняем предыдущий блок
-			if currentBlock != nil {
-				blocks = append(blocks, *currentBlock)
-			}
-
-			// Начинаем новый блок
-			currentBlock = &BookingBlock{
-				StartDay: day,
-				EndDay:   day,
-				Status:   status,
-				Width:    1,
-			}
-		} else {
-			// Продолжаем текущий блок
-			currentBlock.EndDay = day
-			currentBlock.Width++
-		}
-	}
-
-	// Добавляем последний блок
-	if currentBlock != nil {
-		blocks = append(blocks, *currentBlock)
-	}
-
-	return blocks
-}
-
-// createMergedCell создает объединенную ячейку для нескольких дней одной брони
-func (bc *BookingCalendar) createMergedCell(block BookingBlock, width float32) fyne.CanvasObject {
-	bgColor := bc.getStatusColor(block.Status)
-
-	// Создаем кликабельный прямоугольник без hover эффекта
-	clickableRect := NewClickableRect(bgColor, func() {
-		// Получаем первый день блока для передачи в обработчик
-		firstDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), block.StartDay, 0, 0, 0, 0, time.Local)
-		bc.onCellTapped(0, firstDate, block.Status) // cottageID не нужен, так как передаем booking
-	})
-
-	// Создаем текст для отображения
-	var text string
-	if block.Status.BookingID > 0 {
-		if block.Status.IsCheckIn {
-			text = "→ " + bc.truncateString(block.Status.GuestName, 10)
-		} else if block.Status.IsCheckOut {
-			text = bc.truncateString(block.Status.GuestName, 10) + " →"
-		} else {
-			text = bc.truncateString(block.Status.GuestName, 12)
-		}
-	}
-
-	// Добавляем информацию о датах
-	if block.Width > 1 {
-		text += fmt.Sprintf(" (%d-%d)", block.StartDay, block.EndDay)
-	} else {
-		text += fmt.Sprintf(" (%d)", block.StartDay)
-	}
-
+	// Добавляем текст
 	label := canvas.NewText(text, color.White)
 	label.TextSize = 10
 	label.Alignment = fyne.TextAlignCenter
 
-	// Объединяем в контейнер
 	content := container.NewStack(
 		clickableRect,
 		container.NewCenter(label),
 	)
 
-	content.Resize(fyne.NewSize(width, 60))
+	content.Resize(fyne.NewSize(35, 60))
 	return content
 }
 
-// createSingleCell создает одиночную ячейку (для свободных дней)
-func (bc *BookingCalendar) createSingleCell(cottageID int, date time.Time, width float32) fyne.CanvasObject {
-	bgColor := color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый для свободных дней
+// createDiagonalCell создает диагональную ячейку для дня выезда
+func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, status models.BookingStatus) fyne.CanvasObject {
+	// Левая сторона - текущее бронирование (выезд)
+	leftColor := bc.getStatusColor(status)
+	// Правая сторона - свободно для новой брони
+	rightColor := color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый
 
-	// Создаем кликабельный прямоугольник
-	clickableRect := NewClickableRect(bgColor, func() {
-		bc.onCellTapped(cottageID, date, models.BookingStatus{})
-	})
+	text := bc.truncateString(status.GuestName, 6) + " →"
 
-	// Плюс для добавления брони
-	plusLabel := canvas.NewText("+", color.NRGBA{R: 255, G: 255, B: 255, A: 150})
-	plusLabel.TextSize = 16
-	plusLabel.Alignment = fyne.TextAlignCenter
+	button := NewDiagonalButton(leftColor, rightColor, text,
+		func() {
+			// Левая сторона - показать детали текущей брони
+			bc.onCellTapped(cottageID, date, status)
+		},
+		func() {
+			// Правая сторона - создать новую бронь с этого дня
+			bc.showQuickBookingForm(cottageID, date)
+		})
 
-	content := container.NewStack(
-		clickableRect,
-		container.NewCenter(plusLabel),
-	)
-
-	content.Resize(fyne.NewSize(width, 60))
-	return content
+	button.Resize(fyne.NewSize(35, 60))
+	return button
 }
 
 // getStatusColor возвращает цвет для статуса
 func (bc *BookingCalendar) getStatusColor(status models.BookingStatus) color.Color {
-	// Если нет бронирования, считаем день свободным
-	if status.BookingID <= 0 {
-		return color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый (свободно)
-	}
-
 	switch status.Status {
 	case models.BookingStatusBooked:
 		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый (бронь)
@@ -432,7 +339,7 @@ func (bc *BookingCalendar) getStatusColor(status models.BookingStatus) color.Col
 	case models.BookingStatusCancelled:
 		return color.NRGBA{R: 220, G: 53, B: 69, A: 255} // Красный (отменено)
 	default:
-		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый по умолчанию
+		return color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый (свободно)
 	}
 }
 
