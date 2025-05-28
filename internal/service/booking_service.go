@@ -145,11 +145,11 @@ func (s *BookingService) GetCalendarData(startDate, endDate time.Time) (map[time
 			continue // Пропускаем некорректные брони
 		}
 
-		// Проходим по всем дням брони
-		for d := checkIn; d.Before(checkOut); d = d.AddDate(0, 0, 1) {
+		// Проходим по всем дням брони включая последний день
+		for d := checkIn; d.Before(checkOut) || d.Equal(checkOut); d = d.AddDate(0, 0, 1) {
 			if dayMap, exists := calendar[d]; exists {
 				isCheckIn := d.Equal(checkIn)
-				isCheckOut := d.Equal(checkOut.AddDate(0, 0, -1)) // День выезда - это последний день проживания
+				isCheckOut := d.Equal(checkOut)
 
 				// ВАЖНО: записываем статус только для конкретного домика
 				dayMap[booking.CottageID] = models.BookingStatus{

@@ -92,15 +92,8 @@ func (bc *BookingCalendar) loadData() error {
 	}
 	bc.cottages = cottages
 
-	// Получаем данные бронирования - только с текущего дня
-	today := time.Now().Local().Truncate(24 * time.Hour)
+	// Получаем данные бронирования для всего месяца
 	startDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month(), 1, 0, 0, 0, 0, time.Local)
-
-	// Если месяц текущий, начинаем с сегодняшнего дня
-	if startDate.Before(today) {
-		startDate = today
-	}
-
 	endDate := time.Date(bc.currentMonth.Year(), bc.currentMonth.Month()+1, 1, 0, 0, 0, 0, time.Local).AddDate(0, 0, -1)
 
 	calendarData, err := bc.bookingService.GetCalendarData(startDate, endDate)
@@ -306,21 +299,32 @@ func (bc *BookingCalendar) createRegularCell(cottageID int, date time.Time, stat
 
 // createDiagonalCell создает диагональную ячейку для дня выезда
 func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, status models.BookingStatus) fyne.CanvasObject {
-	// Левая сторона - текущее бронирование (выезд)
-	leftColor := bc.getStatusColor(status)
-	// Правая сторона - свободно для новой брони
-	rightColor := color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый
-
+	var leftColor, rightColor color.Color
+	
+	// Если это последний день бронирования (выезд)
+	if status.IsCheckOut {
+		leftColor = bc.getStatusColor(status) // Желтый для времени до выезда
+		rightColor = bc.getStatusColor(status) // Желтый для времени до выезда (так как бронь еще действует до 12:00)
+	} else {
+		// Если это первый день бронирования (заселение)
+		if status.IsCheckIn {
+			leftColor = color.NRGBA{R: 40, G: 167, B: 69, A: 255} // Зеленый для времени до заселения
+			rightColor = bc.getStatusColor(status) // Желтый для времени бронирования
+		} else {
+			// Если это обычный день бронирования
+			leftColor = bc.getStatusColor(status) // Желтый для текущей брони
+			rightColor = bc.getStatusColor(status) // Желтый для текущей брони
+		}
+	}
 	text := bc.truncateString(status.GuestName, 6) + " →"
 
 	button := NewDiagonalButton(leftColor, rightColor, text,
 		func() {
-			// Левая сторона - показать детали текущей брони
+			// Обе стороны показывают детали текущей брони
 			bc.onCellTapped(cottageID, date, status)
 		},
 		func() {
-			// Правая сторона - создать новую бронь с этого дня
-			bc.showQuickBookingForm(cottageID, date)
+			bc.onCellTapped(cottageID, date, status)
 		})
 
 	button.Resize(fyne.NewSize(35, 60))
