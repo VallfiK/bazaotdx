@@ -146,10 +146,10 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 			return len(cottages)
 		},
 		func() fyne.CanvasObject {
+			// Create a simple HBox with all elements
 			return container.NewHBox(
-				widget.NewLabel("Домик"),
-				widget.NewLabel("Статус"),
-				widget.NewButton("Удалить", nil),
+				widget.NewLabel("ID: "),
+				widget.NewLabel(""),
 			)
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
@@ -158,29 +158,47 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 			}
 			cottage := cottages[id]
 
-			hbox := item.(*fyne.Container)
-			nameLabel := hbox.Objects[0].(*widget.Label)
-			statusLabel := hbox.Objects[1].(*widget.Label)
-			deleteBtn := hbox.Objects[2].(*widget.Button)
-
-			nameLabel.SetText(cottage.Name)
-
-			statusText := "Свободен"
-			if cottage.Status == "occupied" {
-				statusText = "Занят"
+			// Get the container and update the ID label
+			container := item.(*fyne.Container)
+			if container == nil || len(container.Objects) < 2 {
+				return
 			}
-			statusLabel.SetText(statusText)
 
-			deleteBtn.OnTapped = func() {
-				dialog.ShowConfirm("Подтверждение",
-					fmt.Sprintf("Удалить домик '%s'?", cottage.Name),
-					func(ok bool) {
-						if ok {
-							// Здесь нужно добавить метод удаления домика в CottageService
-							// Пока что показываем предупреждение
-							dialog.ShowInformation("Информация", "Функция удаления домиков будет добавлена позже", a.window)
-						}
-					}, a.window)
+			// Update the ID label
+			if label, ok := container.Objects[1].(*widget.Label); ok {
+				label.SetText(fmt.Sprintf("%d", cottage.ID))
+			}
+
+			// Add buttons if not already present
+			if len(container.Objects) < 4 {
+				editBtn := widget.NewButton("Изменить", func() {
+					a.showEditCottageDialog(cottage, updateCottageList)
+				})
+				deleteBtn := widget.NewButton("Удалить", func() {
+					if cottage.Status == "occupied" {
+						dialog.ShowError(
+							fmt.Errorf("невозможно удалить занятый домик"),
+							a.window,
+						)
+						return
+					}
+
+					dialog.ShowConfirm("Подтверждение",
+						fmt.Sprintf("Вы уверены, что хотите удалить домик '%s' (ID: %d)?", cottage.Name, cottage.ID),
+						func(ok bool) {
+							if ok {
+								err := a.cottageService.DeleteCottage(cottage.ID)
+								if err != nil {
+									dialog.ShowError(err, a.window)
+									return
+								}
+								updateCottageList()
+							}
+						},
+						a.window)
+				})
+				container.Add(editBtn)
+				container.Add(deleteBtn)
 			}
 		},
 	)
@@ -189,35 +207,38 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 	updateCottageList()
 
 	// Форма добавления нового домика
-	form := &widget.Form{
-		Items: []*widget.FormItem{
-			{Text: "Название домика", Widget: nameEntry},
-		},
-		OnSubmit: func() {
-			if nameEntry.Text == "" {
-				dialog.ShowError(fmt.Errorf("введите название домика"), a.window)
-				return
-			}
+	form := widget.NewCard("Добавить новый домик", "",
+		container.NewVBox(
+			nameEntry,
+			widget.NewButton("Добавить", func() {
+				if nameEntry.Text == "" {
+					dialog.ShowError(fmt.Errorf("введите название домика"), a.window)
+					return
+				}
 
-			err := a.cottageService.AddCottage(nameEntry.Text)
-			if err != nil {
-				dialog.ShowError(err, a.window)
-				return
-			}
+				err := a.cottageService.AddCottage(nameEntry.Text)
+				if err != nil {
+					dialog.ShowError(err, a.window)
+					return
+				}
 
-			// Очищаем поле
-			nameEntry.SetText("")
+				// Очищаем поле
+				nameEntry.SetText("")
 
-			updateCottageList()
+				updateCottageList()
 
-			// Обновляем календарь после добавления домика
-			if a.calendarWidget != nil {
-				a.calendarWidget.Update()
-			}
+				// Обновляем календарь после добавления домика
+				if a.calendarWidget != nil {
+					a.calendarWidget.Update()
+				}
 
-			dialog.ShowInformation("Успешно", "Домик добавлен", a.window)
-		},
-	}
+				dialog.ShowInformation("Успешно",
+					fmt.Sprintf("Домик '%s' добавлен", nameEntry.Text),
+					a.window,
+				)
+			}),
+		),
+	)
 
 	// Кнопка обновления
 	refreshBtn := widget.NewButton("Обновить список", func() {
@@ -225,14 +246,83 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 		dialog.ShowInformation("Успешно", "Список обновлен", a.window)
 	})
 
-	content := container.NewVBox(
-		form,
-		refreshBtn,
-		widget.NewLabel("Список домиков:"),
-		cottageList,
+	// Статистика
+	statsLabel := widget.NewLabel("")
+	updateStats := func() {
+		total := len(cottages)
+		free := 0
+		occupied := 0
+		for _, c := range cottages {
+			if c.Status == "free" {
+				free++
+			} else {
+				occupied++
+			}
+		}
+		statsLabel.SetText(fmt.Sprintf("Всего домиков: %d | Свободно: %d | Занято: %d",
+			total, free, occupied))
+	}
+	updateStats()
+
+	// Создаем контейнер со скроллом для списка
+	listScroll := container.NewScroll(cottageList)
+	listScroll.SetMinSize(fyne.NewSize(600, 400))
+
+	content := container.NewBorder(
+		container.NewVBox(
+			form,
+			container.NewHBox(refreshBtn, statsLabel),
+			widget.NewSeparator(),
+		),
+		nil, nil, nil,
+		listScroll,
 	)
 
 	return container.NewTabItem("Домики", content)
+}
+
+// showEditCottageDialog показывает диалог редактирования домика
+func (a *GuestApp) showEditCottageDialog(cottage models.Cottage, onUpdate func()) {
+	nameEntry := widget.NewEntry()
+	nameEntry.SetText(cottage.Name)
+
+	form := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "ID домика", Widget: widget.NewLabel(fmt.Sprintf("%d", cottage.ID))},
+			{Text: "Название", Widget: nameEntry},
+			{Text: "Статус", Widget: widget.NewLabel(func() string {
+				if cottage.Status == "occupied" {
+					return "Занят"
+				}
+				return "Свободен"
+			}())},
+		},
+		OnSubmit: func() {
+			if nameEntry.Text == "" {
+				dialog.ShowError(fmt.Errorf("название не может быть пустым"), a.window)
+				return
+			}
+
+			err := a.cottageService.UpdateCottageName(cottage.ID, nameEntry.Text)
+			if err != nil {
+				dialog.ShowError(err, a.window)
+				return
+			}
+
+			onUpdate()
+
+			// Обновляем календарь после изменения названия
+			if a.calendarWidget != nil {
+				a.calendarWidget.Update()
+			}
+
+			dialog.ShowInformation("Успешно", "Название домика обновлено", a.window)
+		},
+	}
+
+	d := dialog.NewCustom("Редактировать домик", "Отмена", form, a.window)
+	d.Resize(fyne.NewSize(400, 300))
+	d.Show()
 }
 
 func (a *GuestApp) createTariffsTab() *container.TabItem {
