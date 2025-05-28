@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -240,7 +241,7 @@ func (blw *BookingListWidget) showBookingActions(booking models.Booking) {
 	}
 
 	content := container.NewVBox(
-		widget.NewCard("Информация о брони", "", 
+		widget.NewCard("Информация о брони", "",
 			container.NewVBox(
 				widget.NewLabel(fmt.Sprintf("Гость: %s", booking.GuestName)),
 				widget.NewLabel(fmt.Sprintf("Телефон: %s", booking.Phone)),
@@ -305,19 +306,20 @@ func (blw *BookingListWidget) showBookingActions(booking models.Booking) {
 	d := dialog.NewCustom("Действия с бронированием", "Закрыть", content, blw.window)
 	d.Resize(fyne.NewSize(500, 500))
 	d.Show()
+}
 
 // getStatusText возвращает текст статуса
 func (blw *BookingListWidget) getStatusText(status string) string {
 	switch status {
-	case BookingStatusBooked:
+	case models.BookingStatusBooked:
 		return "Забронировано"
-	case BookingStatusCheckedIn:
+	case models.BookingStatusCheckedIn:
 		return "Заселено"
-	case BookingStatusCancelled:
+	case models.BookingStatusCancelled:
 		return "Отменено"
-	case BookingStatusTemporary:
+	case models.BookingStatusTemporary:
 		return "Временное"
-	case BookingStatusBlocked:
+	case models.BookingStatusBlocked:
 		return "Заблокировано"
 	default:
 		return status
@@ -334,4 +336,9 @@ func (blw *BookingListWidget) triggerRefresh() {
 	if blw.onRefresh != nil {
 		blw.onRefresh()
 	}
+}
+
+// Refresh обновляет данные виджета
+func (blw *BookingListWidget) Refresh() {
+	blw.loadData()
 }

@@ -19,11 +19,12 @@ type Booking struct {
 
 // BookingStatus константы для статусов
 const (
-	BookingStatusBooked     = "booked"
-	BookingStatusCheckedIn  = "checked_in"
-	BookingStatusCancelled  = "cancelled"
-	BookingStatusTemporary  = "temporary"
-	BookingStatusBlocked    = "blocked"
+	BookingStatusBooked    = "booked"
+	BookingStatusCheckedIn = "checked_in"
+	BookingStatusCancelled = "cancelled"
+	BookingStatusTemporary = "temporary"
+	BookingStatusBlocked   = "blocked"
+	BookingStatusCompleted = "completed" // Добавляем новый статус для завершенных бронирований
 )
 
 // CalendarDay представляет день в календаре

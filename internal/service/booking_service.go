@@ -9,13 +9,13 @@ import (
 )
 
 type BookingService struct {
-	db          *sql.DB
+	db            *sql.DB
 	tariffService *TariffService
 }
 
 func NewBookingService(db *sql.DB) *BookingService {
 	return &BookingService{
-		db:          db,
+		db:            db,
 		tariffService: NewTariffService(db),
 	}
 }
@@ -40,7 +40,7 @@ func (s *BookingService) CreateBooking(booking models.Booking) (*models.Booking,
 	// Рассчитываем стоимость
 	checkInDateOnly := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(), booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
 	checkOutDateOnly := time.Date(booking.CheckOutDate.Year(), booking.CheckOutDate.Month(), booking.CheckOutDate.Day(), 0, 0, 0, 0, time.Local)
-	days := int(checkOutDateOnly.Sub(checkInDateOnly).Hours() / 24) + 1
+	days := int(checkOutDateOnly.Sub(checkInDateOnly).Hours()/24) + 1
 	totalCost := float64(days) * tariff.PricePerDay
 
 	// Создаем бронь
@@ -165,24 +165,145 @@ func (s *BookingService) GetCalendarData(startDate, endDate time.Time) (map[time
 		}
 
 		// Проходим по всем дням брони
-		for d := checkIn; !d.After(checkOut); d = d.AddDate(0, 0, 1) {
+		for d := checkIn; d.Before(checkOut); d = d.AddDate(0, 0, 1) {
 			if dayMap, exists := calendar[d]; exists {
 				isCheckIn := d.Equal(checkIn)
+				isCheckOut := d.Equal(checkOut.AddDate(0, 0, -1)) // Последний день проживания
 
-				// Добавляем статус для всех дней брони
+				// Добавляем статус для дня брони
 				dayMap[booking.CottageID] = models.BookingStatus{
 					Status:     booking.Status,
 					BookingID:  booking.ID,
 					GuestName:  booking.GuestName,
-					IsPartDay:  false,
+					IsPartDay:  isCheckIn || isCheckOut,
 					IsCheckIn:  isCheckIn,
-					IsCheckOut: false,
+					IsCheckOut: isCheckOut,
 				}
+			}
+		}
+
+		// Отдельно обрабатываем день выезда (если он в пределах календаря)
+		if dayMap, exists := calendar[checkOut]; exists {
+			// В день выезда помечаем специальным статусом для диагональной кнопки
+			dayMap[booking.CottageID] = models.BookingStatus{
+				Status:     booking.Status,
+				BookingID:  booking.ID,
+				GuestName:  booking.GuestName,
+				IsPartDay:  true,
+				IsCheckIn:  false,
+				IsCheckOut: true,
 			}
 		}
 	}
 
 	return calendar, nil
+}
+
+// CheckOutBooking выселяет гостя (завершает бронирование)
+func (s *BookingService) CheckOutBooking(bookingID int) error {
+	// Получаем бронь
+	booking, err := s.GetBookingByID(bookingID)
+	if err != nil {
+		return err
+	}
+
+	if booking.Status != models.BookingStatusCheckedIn {
+		return fmt.Errorf("можно выселить только заселенного гостя")
+	}
+
+	// Начинаем транзакцию
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Обновляем статус брони на "отменено" (можно использовать существующий статус)
+	_, err = tx.Exec(
+		"UPDATE lesbaza.bookings SET status = $1 WHERE booking_id = $2",
+		"completed", bookingID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Освобождаем домик
+	_, err = tx.Exec(
+		"UPDATE lesbaza.cottages SET status = 'free' WHERE cottage_id = $1",
+		booking.CottageID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Удаляем из таблицы гостей, если есть
+	_, err = tx.Exec(
+		"DELETE FROM lesbaza.guests WHERE cottage_id = $1",
+		booking.CottageID,
+	)
+	if err != nil {
+		// Это не критичная ошибка, продолжаем
+		// tx.Rollback()
+		// return err
+	}
+
+	return tx.Commit()
+}
+
+// UpdateCheckOutDate обновляет дату выезда (для раннего выселения)
+func (s *BookingService) UpdateCheckOutDate(bookingID int, newCheckOutDate time.Time, reason string) error {
+	// Получаем бронь
+	booking, err := s.GetBookingByID(bookingID)
+	if err != nil {
+		return err
+	}
+
+	if booking.Status != models.BookingStatusCheckedIn {
+		return fmt.Errorf("можно изменить дату выезда только для заселенного гостя")
+	}
+
+	// Проверяем, что новая дата не раньше даты заезда
+	checkInDate := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(), booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
+	newCheckOutDateOnly := time.Date(newCheckOutDate.Year(), newCheckOutDate.Month(), newCheckOutDate.Day(), 0, 0, 0, 0, time.Local)
+	
+	if newCheckOutDateOnly.Before(checkInDate) {
+		return fmt.Errorf("дата выезда не может быть раньше даты заезда")
+	}
+
+	// Получаем тариф для пересчета стоимости
+	tariff, err := s.tariffService.GetTariffByID(booking.TariffID)
+	if err != nil {
+		return fmt.Errorf("ошибка получения тарифа: %w", err)
+	}
+
+	// Пересчитываем стоимость
+	days := int(newCheckOutDateOnly.Sub(checkInDate).Hours() / 24) + 1
+	if days <= 0 {
+		days = 1
+	}
+	newTotalCost := float64(days) * tariff.PricePerDay
+
+	// Формируем примечание
+	note := fmt.Sprintf("Изменена дата выезда с %s на %s", 
+		booking.CheckOutDate.Format("02.01.2006"), 
+		newCheckOutDate.Format("02.01.2006"))
+	if reason != "" {
+		note += fmt.Sprintf(". Причина: %s", reason)
+	}
+
+	// Обновляем в базе данных
+	_, err = s.db.Exec(`
+		UPDATE lesbaza.bookings 
+		SET check_out_date = $1, total_cost = $2, notes = COALESCE(notes, '') || $3
+		WHERE booking_id = $4`,
+		newCheckOutDate, newTotalCost, ". "+note, bookingID,
+	)
+	if err != nil {
+		return fmt.Errorf("ошибка обновления даты выезда: %w", err)
+	}
+
+	return nil
 }
 
 // UpdateBookingStatus обновляет статус брони
@@ -196,32 +317,30 @@ func (s *BookingService) UpdateBookingStatus(bookingID int, status string) error
 
 // GetBookingByID получает бронь по ID
 func (s *BookingService) GetBookingByID(bookingID int) (*models.Booking, error) {
-	var b models.Booking
+	var booking models.Booking
 	err := s.db.QueryRow(`
-		SELECT booking_id, cottage_id, guest_name, phone, email, 
-		       check_in_date, check_out_date, status, created_at, notes,
-		       COALESCE(tariff_id, 0), COALESCE(total_cost, 0)
-		FROM lesbaza.bookings
-		WHERE booking_id = $1`, bookingID,
+		SELECT b.booking_id, b.cottage_id, b.guest_name, b.phone, b.email, 
+		       b.check_in_date, b.check_out_date, b.status, b.created_at, 
+		       b.notes, b.tariff_id, b.total_cost
+		FROM lesbaza.bookings b
+		WHERE b.booking_id = $1`,
+		bookingID,
 	).Scan(
-		&b.ID, &b.CottageID, &b.GuestName, &b.Phone, &b.Email,
-		&b.CheckInDate, &b.CheckOutDate, &b.Status, &b.CreatedAt, &b.Notes,
-		&b.TariffID, &b.TotalCost,
+		&booking.ID, &booking.CottageID, &booking.GuestName, &booking.Phone, &booking.Email,
+		&booking.CheckInDate, &booking.CheckOutDate, &booking.Status, &booking.CreatedAt,
+		&booking.Notes, &booking.TariffID, &booking.TotalCost,
 	)
-
 	if err != nil {
 		return nil, err
 	}
 
-	return &b, nil
+	return &booking, nil
 }
 
 // CancelBooking отменяет бронь
 func (s *BookingService) CancelBooking(bookingID int) error {
 	return s.UpdateBookingStatus(bookingID, models.BookingStatusCancelled)
 }
-
-
 
 // CheckInBooking заселяет гостя
 func (s *BookingService) CheckInBooking(bookingID int) error {
@@ -241,10 +360,37 @@ func (s *BookingService) CheckInBooking(bookingID int) error {
 		return err
 	}
 
-	// Обновляем статус брони
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	// Обновляем статус брони на "заселен"
 	_, err = tx.Exec(
 		"UPDATE lesbaza.bookings SET status = $1 WHERE booking_id = $2",
 		models.BookingStatusCheckedIn, bookingID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Занятым делаем домик
+	_, err = tx.Exec(
+		"UPDATE lesbaza.cottages SET status = 'occupied' WHERE cottage_id = $1",
+		booking.CottageID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Добавляем гостя в таблицу гостей
+	_, err = tx.Exec(
+		"INSERT INTO lesbaza.guests (cottage_id, guest_name, phone, email, check_in_date) VALUES ($1, $2, $3, $4, $5)",
+		booking.CottageID, booking.GuestName, booking.Phone, booking.Email, booking.CheckInDate,
 	)
 	if err != nil {
 		tx.Rollback()
@@ -256,124 +402,214 @@ func (s *BookingService) CheckInBooking(bookingID int) error {
 
 // GetAvailableCottagesForDates получает доступные домики на даты
 func (s *BookingService) GetAvailableCottagesForDates(checkIn, checkOut time.Time) ([]models.Cottage, error) {
-	// Получаем все домики
-	allCottagesRows, err := s.db.Query(`
-		SELECT cottage_id, name, status 
-		FROM lesbaza.cottages 
-		ORDER BY name`)
-	if err != nil {
-		return nil, err
-	}
-	defer allCottagesRows.Close()
-
-	var allCottages []models.Cottage
-	cottageMap := make(map[int]models.Cottage)
-
-	for allCottagesRows.Next() {
-		var c models.Cottage
-		if err := allCottagesRows.Scan(&c.ID, &c.Name, &c.Status); err != nil {
-			return nil, err
-		}
-		allCottages = append(allCottages, c)
-		cottageMap[c.ID] = c
-	}
-
-	// Получаем занятые домики
+	var cottages []models.Cottage
 	rows, err := s.db.Query(`
-		SELECT DISTINCT b.cottage_id, b.check_in_date, b.check_out_date
-		FROM lesbaza.bookings b
-		WHERE b.status IN ($1, $2)
-		AND NOT (b.check_out_date < $3 OR b.check_in_date > $4)`,
-		models.BookingStatusBooked,
-		models.BookingStatusCheckedIn,
-		checkIn,
-		checkOut,
-	)
+		SELECT c.cottage_id, c.name, c.status
+		FROM lesbaza.cottages c
+		WHERE c.cottage_id NOT IN (
+			SELECT b.cottage_id
+			FROM lesbaza.bookings b
+			WHERE b.status != 'cancelled'
+			AND (
+				($1 BETWEEN b.check_in_date AND b.check_out_date)
+				OR ($2 BETWEEN b.check_in_date AND b.check_out_date)
+				OR (b.check_in_date BETWEEN $1 AND $2)
+			)
+		)
+	`, checkIn, checkOut)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// Проверяем каждую бронь на конфликт
-	occupiedCottages := make(map[int]bool)
-
 	for rows.Next() {
-		var cottageID int
-		var existingCheckIn, existingCheckOut time.Time
-
-		if err := rows.Scan(&cottageID, &existingCheckIn, &existingCheckOut); err != nil {
+		var cottage models.Cottage
+		err := rows.Scan(&cottage.ID, &cottage.Name, &cottage.Status)
+		if err != nil {
 			return nil, err
 		}
-
-		// Проверяем, есть ли реальный конфликт
-		hasConflict := true
-
-		// Если новый заезд в день выезда существующей брони
-		if checkIn.Format("2006-01-02") == existingCheckOut.Format("2006-01-02") {
-			if checkIn.Hour() >= 14 && existingCheckOut.Hour() <= 12 {
-				hasConflict = false // Нет конфликта - можно заселиться после выезда
-			}
-		}
-
-		// Если новый выезд в день заезда существующей брони
-		if hasConflict && checkOut.Format("2006-01-02") == existingCheckIn.Format("2006-01-02") {
-			if checkOut.Hour() <= 12 && existingCheckIn.Hour() >= 14 {
-				hasConflict = false // Нет конфликта - можно выселиться до заезда
-			}
-		}
-
-		// Если есть конфликт, помечаем домик как занятый
-		if hasConflict {
-			occupiedCottages[cottageID] = true
-		}
+		cottages = append(cottages, cottage)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
-	// Формируем список доступных домиков
-	var availableCottages []models.Cottage
-	for _, cottage := range allCottages {
-		if !occupiedCottages[cottage.ID] {
-			availableCottages = append(availableCottages, cottage)
-		}
-	}
-
-	return availableCottages, nil
+	return cottages, nil
 }
 
 // GetUpcomingBookings получает предстоящие брони
 func (s *BookingService) GetUpcomingBookings() ([]models.Booking, error) {
-	today := time.Now().Truncate(24 * time.Hour)
-	return s.GetBookingsByStatus(models.BookingStatusBooked, today)
-}
-
-// GetBookingsByStatus получает брони по статусу
-func (s *BookingService) GetBookingsByStatus(status string, afterDate time.Time) ([]models.Booking, error) {
+	var bookings []models.Booking
 	rows, err := s.db.Query(`
-		SELECT booking_id, cottage_id, guest_name, phone, email, 
-		       check_in_date, check_out_date, status, created_at, notes,
-		       COALESCE(tariff_id, 0), COALESCE(total_cost, 0)
-		FROM lesbaza.bookings
-		WHERE status = $1 AND check_in_date >= $2
-		ORDER BY check_in_date`,
-		status, afterDate,
-	)
+		SELECT b.booking_id, b.cottage_id, b.guest_name, b.phone, b.email, 
+		       b.check_in_date, b.check_out_date, b.status, b.created_at, 
+		       b.notes, b.tariff_id, b.total_cost
+		FROM lesbaza.bookings b
+		WHERE b.status = 'booked' AND b.check_in_date >= CURRENT_DATE
+		ORDER BY b.check_in_date ASC
+	`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var bookings []models.Booking
 	for rows.Next() {
-		var b models.Booking
+		var booking models.Booking
 		err := rows.Scan(
-			&b.ID, &b.CottageID, &b.GuestName, &b.Phone, &b.Email,
-			&b.CheckInDate, &b.CheckOutDate, &b.Status, &b.CreatedAt, &b.Notes,
-			&b.TariffID, &b.TotalCost,
+			&booking.ID, &booking.CottageID, &booking.GuestName, &booking.Phone, &booking.Email,
+			&booking.CheckInDate, &booking.CheckOutDate, &booking.Status, &booking.CreatedAt,
+			&booking.Notes, &booking.TariffID, &booking.TotalCost,
 		)
 		if err != nil {
 			return nil, err
 		}
-		bookings = append(bookings, b)
+		bookings = append(bookings, booking)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return bookings, nil
+}
+
+// GetBookingsByStatus получает брони по статусу
+func (s *BookingService) GetBookingsByStatus(status string, afterDate time.Time) ([]models.Booking, error) {
+	var bookings []models.Booking
+	rows, err := s.db.Query(`
+		SELECT b.booking_id, b.cottage_id, b.guest_name, b.phone, b.email, 
+		       b.check_in_date, b.check_out_date, b.status, b.created_at, 
+		       b.notes, b.tariff_id, b.total_cost
+		FROM lesbaza.bookings b
+		WHERE b.status = $1 AND b.check_in_date >= $2
+		ORDER BY b.check_in_date ASC
+	`, status, afterDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var booking models.Booking
+		err := rows.Scan(
+			&booking.ID, &booking.CottageID, &booking.GuestName, &booking.Phone, &booking.Email,
+			&booking.CheckInDate, &booking.CheckOutDate, &booking.Status, &booking.CreatedAt,
+			&booking.Notes, &booking.TariffID, &booking.TotalCost,
+		)
+		if err != nil {
+			return nil, err
+		}
+		bookings = append(bookings, booking)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return bookings, nil
+}
+
+// CheckOutBooking выселяет гостя (завершает бронирование)
+func (s *BookingService) CheckOutBooking(bookingID int) error {
+	// Получаем бронь
+	booking, err := s.GetBookingByID(bookingID)
+	if err != nil {
+		return err
+	}
+
+	if booking.Status != models.BookingStatusCheckedIn {
+		return fmt.Errorf("можно выселить только заселенного гостя")
+	}
+
+	// Начинаем транзакцию
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Обновляем статус брони на "отменено" (можно использовать существующий статус)
+	_, err = tx.Exec(
+		"UPDATE lesbaza.bookings SET status = $1 WHERE booking_id = $2",
+		"completed", bookingID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Освобождаем домик
+	_, err = tx.Exec(
+		"UPDATE lesbaza.cottages SET status = 'free' WHERE cottage_id = $1",
+		booking.CottageID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Удаляем из таблицы гостей, если есть
+	_, err = tx.Exec(
+		"DELETE FROM lesbaza.guests WHERE cottage_id = $1",
+		booking.CottageID,
+	)
+	if err != nil {
+		// Это не критичная ошибка, продолжаем
+		// tx.Rollback()
+		// return err
+	}
+
+	return tx.Commit()
+}
+
+// UpdateCheckOutDate обновляет дату выезда (для раннего выселения)
+func (s *BookingService) UpdateCheckOutDate(bookingID int, newCheckOutDate time.Time, reason string) error {
+	// Получаем бронь
+	booking, err := s.GetBookingByID(bookingID)
+	if err != nil {
+		return err
+	}
+
+	if booking.Status != models.BookingStatusCheckedIn {
+		return fmt.Errorf("можно изменить дату выезда только для заселенного гостя")
+	}
+
+	// Проверяем, что новая дата не раньше даты заезда
+	checkInDate := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(), booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
+	newCheckOutDateOnly := time.Date(newCheckOutDate.Year(), newCheckOutDate.Month(), newCheckOutDate.Day(), 0, 0, 0, 0, time.Local)
+	
+	if newCheckOutDateOnly.Before(checkInDate) {
+		return fmt.Errorf("дата выезда не может быть раньше даты заезда")
+	}
+
+	// Получаем тариф для пересчета стоимости
+	tariff, err := s.tariffService.GetTariffByID(booking.TariffID)
+	if err != nil {
+		return fmt.Errorf("ошибка получения тарифа: %w", err)
+	}
+
+	// Пересчитываем стоимость
+	days := int(newCheckOutDateOnly.Sub(checkInDate).Hours() / 24) + 1
+	if days <= 0 {
+		days = 1
+	}
+	newTotalCost := float64(days) * tariff.PricePerDay
+
+	// Формируем примечание
+	note := fmt.Sprintf("Изменена дата выезда с %s на %s", 
+		booking.CheckOutDate.Format("02.01.2006"), 
+		newCheckOutDate.Format("02.01.2006"))
+	if reason != "" {
+		note += fmt.Sprintf(". Причина: %s", reason)
+	}
+
+	// Обновляем в базе данных
+	_, err = s.db.Exec(`
+		UPDATE lesbaza.bookings 
+		SET check_out_date = $1, total_cost = $2, notes = COALESCE(notes, '') || $3
+		WHERE booking_id = $4`,
+		newCheckOutDate, newTotalCost, ". "+note, bookingID,
+	)
+	if err != nil {
+		return fmt.Errorf("ошибка обновления даты выезда: %w", err)
+	}
+
+	return nil
 }

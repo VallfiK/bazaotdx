@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/VallfIK/bazaotdx/internal/models"
 	"github.com/VallfIK/bazaotdx/internal/service"
+	"github.com/VallfIK/bazaotdx/internal/ui"
 )
 
 // GuestApp — основное приложение для учёта гостей
@@ -25,7 +26,11 @@ type GuestApp struct {
 	tariffService         *service.TariffService
 	bookingService        *service.BookingService
 	updateCottagesContent func()
-	cottages             []models.Cottage
+	cottages              []models.Cottage
+
+	// UI виджеты
+	calendarWidget    *ui.BookingCalendar
+	bookingListWidget *ui.BookingListWidget
 }
 
 // NewGuestApp создаёт новое приложение
@@ -37,7 +42,7 @@ func NewGuestApp(
 ) *GuestApp {
 	a := app.New()
 	w := a.NewWindow("Учет гостей - База отдыха")
-	w.Resize(fyne.NewSize(1200, 800))
+	w.Resize(fyne.NewSize(1400, 900))
 
 	app := &GuestApp{
 		app:            a,
@@ -47,14 +52,14 @@ func NewGuestApp(
 		tariffService:  tariffService,
 		bookingService: bookingService,
 	}
-	
+
 	// Load cottages
 	var err error
 	app.cottages, err = app.cottageService.GetAllCottages()
 	if err != nil {
 		log.Printf("Error loading cottages: %v", err)
 	}
-	
+
 	return app
 }
 
@@ -66,31 +71,39 @@ func (a *GuestApp) Run() {
 
 // createUI формирует основное содержание окна с вкладками
 func (a *GuestApp) createUI() {
-	// Создаем виджеты календаря и списка бронирований
-	calendarWidget := widget.NewList(
-		func() int {
-			// TODO: Implement calendar widget
-			return 0
-		},
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Loading...")
-		},
-		func(id widget.ListItemID, item fyne.CanvasObject) {
-			// TODO: Implement calendar item rendering
-		},
+	// Создаем календарный виджет
+	a.calendarWidget = ui.NewBookingCalendar(
+		a.bookingService,
+		a.cottageService,
+		a.tariffService,
+		a.window,
 	)
 
-	bookingListWidget := a.createBookingList()
+	// Создаем виджет списка бронирований
+	a.bookingListWidget = ui.NewBookingListWidget(
+		a.bookingService,
+		a.cottageService,
+		a.window,
+	)
 
 	// Устанавливаем взаимные обновления
-	bookingListWidget.OnSelected = func(id widget.ListItemID) {
-		// TODO: Implement refresh logic
-	}
+	a.calendarWidget.SetOnRefresh(func() {
+		a.bookingListWidget.Refresh()
+	})
 
-	// Создаем вкладки (убираем ненужные)
+	a.bookingListWidget.SetOnRefresh(func() {
+		a.calendarWidget.Update()
+	})
+
+	// Создаем разделенную панель для календаря и списка бронирований
+	calendarTab := container.NewHSplit(a.calendarWidget, a.bookingListWidget)
+	calendarTab.SetOffset(0.7) // 70% для календаря, 30% для списка
+
+	// Создаем вкладки
 	tabs := container.NewAppTabs(
-		container.NewTabItem("Календарь", container.NewHSplit(calendarWidget, bookingListWidget)),
+		container.NewTabItem("Календарь", calendarTab),
 		a.createTariffsTab(),
+		a.createCottagesTab(),
 		a.createReportsTab(),
 	)
 
@@ -98,133 +111,136 @@ func (a *GuestApp) createUI() {
 	a.window.SetContent(tabs)
 
 	// Устанавливаем иконки для вкладок
-	tabs.Items[0].Icon = theme.CalendarIcon()
-	tabs.Items[1].Icon = theme.ListIcon()
-	tabs.Items[2].Icon = theme.SettingsIcon()
+	tabs.Items[0].Icon = theme.ViewFullScreenIcon()
+	tabs.Items[1].Icon = theme.SettingsIcon()
+	tabs.Items[2].Icon = theme.HomeIcon()
 	tabs.Items[3].Icon = theme.DocumentIcon()
 }
 
-// createBookingList создает виджет списка бронирований
-func (a *GuestApp) createBookingList() *widget.List {
-	// Создаем список бронирований
-	list := widget.NewList(
+// createCottagesTab создает вкладку управления домиками
+func (a *GuestApp) createCottagesTab() *container.TabItem {
+	nameEntry := widget.NewEntry()
+	nameEntry.PlaceHolder = "Введите название домика"
+
+	// Список домиков
+	var cottageList *widget.List
+	var cottages []models.Cottage
+
+	// Функция обновления списка домиков
+	updateCottageList := func() {
+		var err error
+		cottages, err = a.cottageService.GetAllCottages()
+		if err != nil {
+			dialog.ShowError(err, a.window)
+			return
+		}
+		a.cottages = cottages // Обновляем локальную копию
+		if cottageList != nil {
+			cottageList.Refresh()
+		}
+	}
+
+	// Создаем список домиков
+	cottageList = widget.NewList(
 		func() int {
-			bookings, err := a.bookingService.GetBookingsByStatus(models.BookingStatusBooked, time.Now())
-			if err != nil {
-				log.Printf("Error loading bookings: %v", err)
-				return 0
-			}
-			return len(bookings)
+			return len(cottages)
 		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("Loading...")
+			return container.NewHBox(
+				widget.NewLabel("Домик"),
+				widget.NewLabel("Статус"),
+				widget.NewButton("Удалить", nil),
+			)
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
-			bookings, err := a.bookingService.GetBookingsByStatus(models.BookingStatusBooked, time.Now())
-			if err != nil {
-				log.Printf("Error loading bookings: %v", err)
+			if id >= len(cottages) {
 				return
 			}
-			if id < 0 || id >= widget.ListItemID(len(bookings)) {
-				return
+			cottage := cottages[id]
+
+			hbox := item.(*fyne.Container)
+			nameLabel := hbox.Objects[0].(*widget.Label)
+			statusLabel := hbox.Objects[1].(*widget.Label)
+			deleteBtn := hbox.Objects[2].(*widget.Button)
+
+			nameLabel.SetText(cottage.Name)
+
+			statusText := "Свободен"
+			if cottage.Status == "occupied" {
+				statusText = "Занят"
 			}
-			booking := bookings[id]
-			label := item.(*widget.Label)
-			label.SetText(fmt.Sprintf("%s - %s", booking.GuestName, booking.Status))
+			statusLabel.SetText(statusText)
+
+			deleteBtn.OnTapped = func() {
+				dialog.ShowConfirm("Подтверждение",
+					fmt.Sprintf("Удалить домик '%s'?", cottage.Name),
+					func(ok bool) {
+						if ok {
+							// Здесь нужно добавить метод удаления домика в CottageService
+							// Пока что показываем предупреждение
+							dialog.ShowInformation("Информация", "Функция удаления домиков будет добавлена позже", a.window)
+						}
+					}, a.window)
+			}
 		},
 	)
 
-	// Добавляем кнопки управления
-	list.OnSelected = func(id widget.ListItemID) {
-		bookings, err := a.bookingService.GetBookingsByStatus(models.BookingStatusBooked, time.Now())
-		if err != nil {
-			log.Printf("Error loading bookings: %v", err)
-			return
-		}
-		if id < 0 || id >= widget.ListItemID(len(bookings)) {
-			return
-		}
-		booking := bookings[id]
-		a.showBookingActions(booking)
+	// Изначально загружаем домики
+	updateCottageList()
+
+	// Форма добавления нового домика
+	form := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "Название домика", Widget: nameEntry},
+		},
+		OnSubmit: func() {
+			if nameEntry.Text == "" {
+				dialog.ShowError(fmt.Errorf("введите название домика"), a.window)
+				return
+			}
+
+			err := a.cottageService.AddCottage(nameEntry.Text)
+			if err != nil {
+				dialog.ShowError(err, a.window)
+				return
+			}
+
+			// Очищаем поле
+			nameEntry.SetText("")
+
+			updateCottageList()
+
+			// Обновляем календарь после добавления домика
+			if a.calendarWidget != nil {
+				a.calendarWidget.Update()
+			}
+
+			dialog.ShowInformation("Успешно", "Домик добавлен", a.window)
+		},
 	}
 
-	return list
-}
+	// Кнопка обновления
+	refreshBtn := widget.NewButton("Обновить список", func() {
+		updateCottageList()
+		dialog.ShowInformation("Успешно", "Список обновлен", a.window)
+	})
 
-func (a *GuestApp) showBookingActions(booking models.Booking) {
-	// Находим название домика
-	cottageName := ""
-	for _, c := range a.cottages {
-		if c.ID == booking.CottageID {
-			cottageName = c.Name
-			break
-		}
-	}
-
-	// Создаем контент для диалога
 	content := container.NewVBox(
-		widget.NewCard("Информация о брони", "",
-			container.NewVBox(
-				widget.NewLabel(fmt.Sprintf("Гость: %s", booking.GuestName)),
-				widget.NewLabel(fmt.Sprintf("Телефон: %s", booking.Phone)),
-				widget.NewLabel(fmt.Sprintf("Email: %s", booking.Email)),
-				widget.NewLabel(fmt.Sprintf("Домик: %s", cottageName)),
-				widget.NewLabel(fmt.Sprintf("Заезд: %s", booking.CheckInDate.Format("02.01.2006 15:04"))),
-				widget.NewLabel(fmt.Sprintf("Выезд: %s", booking.CheckOutDate.Format("02.01.2006 15:04"))),
-				widget.NewLabel(fmt.Sprintf("Статус: %s", booking.Status)),
-				widget.NewLabel(fmt.Sprintf("Стоимость: %.2f руб.", booking.TotalCost)),
-				widget.NewLabel(fmt.Sprintf("Создано: %s", booking.CreatedAt.Format("02.01.2006 15:04"))),
-			),
-		),
+		form,
+		refreshBtn,
+		widget.NewLabel("Список домиков:"),
+		cottageList,
 	)
 
-	// Кнопки действий
-	actions := container.NewHBox()
-
-	switch booking.Status {
-	case models.BookingStatusBooked:
-		actions.Add(widget.NewButton("Заселить", func() {
-			dialog.ShowConfirm("Подтверждение", "Заселить гостя?", func(ok bool) {
-				if ok {
-					err := a.bookingService.CheckInBooking(booking.ID)
-					if err != nil {
-						dialog.ShowError(err, a.window)
-						return
-					}
-					a.createUI()
-					dialog.ShowInformation("Успешно", "Гость заселен", a.window)
-				}
-			}, a.window)
-		}))
-
-		actions.Add(widget.NewButton("Отменить", func() {
-			dialog.ShowConfirm("Подтверждение", "Отменить бронирование?", func(ok bool) {
-				if ok {
-					err := a.bookingService.CancelBooking(booking.ID)
-					if err != nil {
-						dialog.ShowError(err, a.window)
-						return
-					}
-					a.createUI()
-					dialog.ShowInformation("Успешно", "Бронирование отменено", a.window)
-				}
-			}, a.window)
-		}))
-
-	case models.BookingStatusCheckedIn:
-		// Добавьте действия для заселенных гостей
-	}
-
-	content.Add(actions)
-
-	d := dialog.NewCustom("Действия с бронированием", "Закрыть", content, a.window)
-	d.Resize(fyne.NewSize(500, 500))
-	d.Show()
+	return container.NewTabItem("Домики", content)
 }
 
 func (a *GuestApp) createTariffsTab() *container.TabItem {
 	nameEntry := widget.NewEntry()
+	nameEntry.PlaceHolder = "Введите название тарифа"
+
 	priceEntry := widget.NewEntry()
+	priceEntry.PlaceHolder = "Введите цену за день"
 
 	// Список тарифов
 	var tariffList *widget.List
@@ -252,6 +268,7 @@ func (a *GuestApp) createTariffsTab() *container.TabItem {
 			return container.NewHBox(
 				widget.NewLabel("Тариф"),
 				widget.NewLabel("Цена"),
+				widget.NewButton("Изменить", nil),
 				widget.NewButton("Удалить", nil),
 			)
 		},
@@ -264,10 +281,15 @@ func (a *GuestApp) createTariffsTab() *container.TabItem {
 			hbox := item.(*fyne.Container)
 			nameLabel := hbox.Objects[0].(*widget.Label)
 			priceLabel := hbox.Objects[1].(*widget.Label)
-			deleteBtn := hbox.Objects[2].(*widget.Button)
+			editBtn := hbox.Objects[2].(*widget.Button)
+			deleteBtn := hbox.Objects[3].(*widget.Button)
 
 			nameLabel.SetText(tariff.Name)
 			priceLabel.SetText(fmt.Sprintf("%.2f руб./день", tariff.PricePerDay))
+
+			editBtn.OnTapped = func() {
+				a.showEditTariffDialog(tariff, updateTariffList)
+			}
 
 			deleteBtn.OnTapped = func() {
 				dialog.ShowConfirm("Подтверждение",
@@ -308,6 +330,11 @@ func (a *GuestApp) createTariffsTab() *container.TabItem {
 				return
 			}
 
+			if price <= 0 {
+				dialog.ShowError(fmt.Errorf("цена должна быть больше нуля"), a.window)
+				return
+			}
+
 			err = a.tariffService.CreateTariff(nameEntry.Text, price)
 			if err != nil {
 				dialog.ShowError(err, a.window)
@@ -323,7 +350,66 @@ func (a *GuestApp) createTariffsTab() *container.TabItem {
 		},
 	}
 
-	return container.NewTabItem("Тарифы", container.NewVBox(form, tariffList))
+	// Кнопка обновления
+	refreshBtn := widget.NewButton("Обновить список", func() {
+		updateTariffList()
+		dialog.ShowInformation("Успешно", "Список обновлен", a.window)
+	})
+
+	content := container.NewVBox(
+		form,
+		refreshBtn,
+		widget.NewLabel("Список тарифов:"),
+		tariffList,
+	)
+
+	return container.NewTabItem("Тарифы", content)
+}
+
+// showEditTariffDialog показывает диалог редактирования тарифа
+func (a *GuestApp) showEditTariffDialog(tariff models.Tariff, onUpdate func()) {
+	nameEntry := widget.NewEntry()
+	nameEntry.SetText(tariff.Name)
+
+	priceEntry := widget.NewEntry()
+	priceEntry.SetText(fmt.Sprintf("%.2f", tariff.PricePerDay))
+
+	form := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "Название тарифа", Widget: nameEntry},
+			{Text: "Цена за день (руб.)", Widget: priceEntry},
+		},
+		OnSubmit: func() {
+			if nameEntry.Text == "" || priceEntry.Text == "" {
+				dialog.ShowError(fmt.Errorf("заполните все поля"), a.window)
+				return
+			}
+
+			price, err := strconv.ParseFloat(priceEntry.Text, 64)
+			if err != nil {
+				dialog.ShowError(fmt.Errorf("неверный формат цены"), a.window)
+				return
+			}
+
+			if price <= 0 {
+				dialog.ShowError(fmt.Errorf("цена должна быть больше нуля"), a.window)
+				return
+			}
+
+			err = a.tariffService.UpdateTariff(tariff.ID, nameEntry.Text, price)
+			if err != nil {
+				dialog.ShowError(err, a.window)
+				return
+			}
+
+			onUpdate()
+			dialog.ShowInformation("Успешно", "Тариф обновлен", a.window)
+		},
+	}
+
+	d := dialog.NewCustom("Редактировать тариф", "Отмена", form, a.window)
+	d.Resize(fyne.NewSize(400, 300))
+	d.Show()
 }
 
 func (a *GuestApp) createReportsTab() *container.TabItem {
@@ -331,33 +417,124 @@ func (a *GuestApp) createReportsTab() *container.TabItem {
 	occupancyBtn := widget.NewButton("Отчет о заполняемости", func() {
 		a.generateOccupancyReport()
 	})
-	
+
 	revenueBtn := widget.NewButton("Отчет о доходах", func() {
 		a.generateRevenueReport()
 	})
-	
+
 	upcomingBtn := widget.NewButton("Предстоящие заезды", func() {
 		a.showUpcomingArrivals()
 	})
-	
+
+	// Статистика по текущему месяцу
+	statsLabel := widget.NewLabel("Загрузка статистики...")
+	a.updateStats(statsLabel)
+
 	// Создаем контейнер с кнопками
 	content := container.NewVBox(
-		widget.NewLabel("Выберите тип отчета:"),
+		widget.NewCard("Статистика", "", statsLabel),
+		widget.NewLabel("Отчеты:"),
 		container.NewHBox(occupancyBtn, revenueBtn),
 		upcomingBtn,
 	)
-	
+
 	return container.NewTabItem("Отчеты", content)
 }
 
+// updateStats обновляет статистику
+func (a *GuestApp) updateStats(label *widget.Label) {
+	go func() {
+		// Получаем статистику за текущий месяц
+		now := time.Now()
+		startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+		endOfMonth := startOfMonth.AddDate(0, 1, -1)
+
+		bookings, err := a.bookingService.GetBookingsByDateRange(startOfMonth, endOfMonth)
+		if err != nil {
+			label.SetText("Ошибка загрузки статистики")
+			return
+		}
+
+		totalBookings := len(bookings)
+		var totalRevenue float64
+		activeBookings := 0
+
+		for _, booking := range bookings {
+			if booking.Status != models.BookingStatusCancelled {
+				totalRevenue += booking.TotalCost
+				activeBookings++
+			}
+		}
+
+		statsText := fmt.Sprintf(`Статистика за %s %d:
+• Всего бронирований: %d
+• Активных бронирований: %d  
+• Общий доход: %.2f руб.
+• Средний чек: %.2f руб.`,
+			a.getMonthName(now.Month()), now.Year(),
+			totalBookings, activeBookings, totalRevenue,
+			func() float64 {
+				if activeBookings > 0 {
+					return totalRevenue / float64(activeBookings)
+				}
+				return 0
+			}())
+
+		label.SetText(statsText)
+	}()
+}
+
+// getMonthName возвращает название месяца на русском
+func (a *GuestApp) getMonthName(month time.Month) string {
+	months := []string{
+		"", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+		"Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+	}
+	return months[month]
+}
+
 func (a *GuestApp) generateOccupancyReport() {
-	// TODO: Реализовать генерацию отчета по заполняемости
+	dialog.ShowInformation("Информация", "Отчет о заполняемости будет реализован в следующей версии", a.window)
 }
 
 func (a *GuestApp) generateRevenueReport() {
-	// TODO: Реализовать генерацию отчета по доходам
+	dialog.ShowInformation("Информация", "Отчет о доходах будет реализован в следующей версии", a.window)
 }
 
 func (a *GuestApp) showUpcomingArrivals() {
-	// TODO: Реализовать просмотр предстоящих заездов
+	bookings, err := a.bookingService.GetUpcomingBookings()
+	if err != nil {
+		dialog.ShowError(err, a.window)
+		return
+	}
+
+	if len(bookings) == 0 {
+		dialog.ShowInformation("Информация", "Нет предстоящих заездов", a.window)
+		return
+	}
+
+	content := container.NewVBox()
+	for _, booking := range bookings {
+		cottageName := ""
+		for _, c := range a.cottages {
+			if c.ID == booking.CottageID {
+				cottageName = c.Name
+				break
+			}
+		}
+
+		card := widget.NewCard(
+			fmt.Sprintf("%s - %s", booking.GuestName, cottageName),
+			fmt.Sprintf("Заезд: %s", booking.CheckInDate.Format("02.01.2006")),
+			widget.NewLabel(fmt.Sprintf("Телефон: %s", booking.Phone)),
+		)
+		content.Add(card)
+	}
+
+	scroll := container.NewScroll(content)
+	scroll.SetMinSize(fyne.NewSize(500, 400))
+
+	d := dialog.NewCustom("Предстоящие заезды", "Закрыть", scroll, a.window)
+	d.Resize(fyne.NewSize(600, 500))
+	d.Show()
 }
