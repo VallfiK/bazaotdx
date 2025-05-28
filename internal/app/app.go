@@ -149,8 +149,9 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 			total, free, occupied))
 	}
 
-	// Функция обновления списка домиков
-	updateCottageList := func() {
+	// Функция обновления списка домиков (объявляем ДО инициализации cottageList)
+	var updateCottageList func()
+	updateCottageList = func() {
 		cottages, err := a.cottageService.GetAllCottages()
 		if err != nil {
 			dialog.ShowError(err, a.window)
@@ -176,90 +177,13 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 			filteredCottages = append(filteredCottages, cottage)
 		}
 
-		cottageList.Refresh()
+		if cottageList != nil {
+			cottageList.Refresh()
+		}
 		updateStats()
 	}
 
-	// Устанавливаем обработчик для статус фильтра
-	statusFilter.OnChanged = func(selected string) {
-		updateCottageList()
-	}
-
-	// Сохраняем функцию обновления в поле структуры
-	a.updateCottagesContent = updateCottageList
-
-	// Изначально загружаем домики
-	updateCottageList()
-
-	// Форма поиска
-	searchEntry.OnChanged = func(text string) {
-		updateCottageList()
-	}
-
-	// Форма добавления нового домика
-	nameEntry := widget.NewEntry()
-	nameEntry.PlaceHolder = "Введите название домика"
-
-	addForm := widget.NewForm(
-		widget.NewFormItem("Название", nameEntry),
-	)
-
-	addBtn := widget.NewButton("Добавить домик", func() {
-		if nameEntry.Text == "" {
-			dialog.ShowError(fmt.Errorf("введите название домика"), a.window)
-			return
-		}
-
-		cottage := models.Cottage{
-			Name:   nameEntry.Text,
-			Status: "free",
-		}
-		err := a.cottageService.CreateCottage(cottage)
-		if err != nil {
-			dialog.ShowError(err, a.window)
-			return
-		}
-
-		// Очищаем поле ввода
-		nameEntry.SetText("")
-		updateCottageList()
-
-		// Обновляем календарь после добавления домика
-		if a.calendarWidget != nil {
-			a.calendarWidget.Update()
-		}
-
-		dialog.ShowInformation("Успешно",
-			fmt.Sprintf("Домик '%s' добавлен", cottage.Name),
-			a.window,
-		)
-	})
-
-	// Кнопка обновления
-	refreshBtn := widget.NewButton("Обновить список", func() {
-		updateCottageList()
-		dialog.ShowInformation("Успешно", "Список обновлен", a.window)
-	})
-
-	// Статистика
-	statsLabel = widget.NewLabel("")
-	updateStats = func() {
-		cottages, _ := a.cottageService.GetAllCottages()
-		total := len(cottages)
-		free := 0
-		occupied := 0
-		for _, c := range cottages {
-			if c.Status == "free" {
-				free++
-			} else {
-				occupied++
-			}
-		}
-		statsLabel.SetText(fmt.Sprintf("Всего домиков: %d | Свободно: %d | Занято: %d",
-			total, free, occupied))
-	}
-
-	// Список домиков
+	// Инициализируем список ПОСЛЕ объявления updateCottageList
 	cottageList = widget.NewList(
 		func() int {
 			return len(filteredCottages)
@@ -322,6 +246,64 @@ func (a *GuestApp) createCottagesTab() *container.TabItem {
 			}
 		},
 	)
+
+	// Устанавливаем обработчик для статус фильтра
+	statusFilter.OnChanged = func(selected string) {
+		updateCottageList()
+	}
+
+	// Сохраняем функцию обновления в поле структуры
+	a.updateCottagesContent = updateCottageList
+
+	// Форма поиска
+	searchEntry.OnChanged = func(text string) {
+		updateCottageList()
+	}
+
+	// Форма добавления нового домика
+	nameEntry := widget.NewEntry()
+	nameEntry.PlaceHolder = "Введите название домика"
+
+	addForm := widget.NewForm(
+		widget.NewFormItem("Название", nameEntry),
+	)
+
+	addBtn := widget.NewButton("Добавить домик", func() {
+		if nameEntry.Text == "" {
+			dialog.ShowError(fmt.Errorf("введите название домика"), a.window)
+			return
+		}
+
+		cottage := models.Cottage{
+			Name:   nameEntry.Text,
+			Status: "free",
+		}
+		err := a.cottageService.CreateCottage(cottage)
+		if err != nil {
+			dialog.ShowError(err, a.window)
+			return
+		}
+
+		// Очищаем поле ввода
+		nameEntry.SetText("")
+		updateCottageList()
+
+		// Обновляем календарь после добавления домика
+		if a.calendarWidget != nil {
+			a.calendarWidget.Update()
+		}
+
+		dialog.ShowInformation("Успешно",
+			fmt.Sprintf("Домик '%s' добавлен", cottage.Name),
+			a.window,
+		)
+	})
+
+	// Кнопка обновления
+	refreshBtn := widget.NewButton("Обновить список", func() {
+		updateCottageList()
+		dialog.ShowInformation("Успешно", "Список обновлен", a.window)
+	})
 
 	// Изначально загружаем домики
 	updateCottageList()

@@ -210,6 +210,12 @@ func (bc *BookingCalendar) getDiagonalImages(topStatus, bottomStatus string) (st
 	return topImage, bottomImage
 }
 
+func (bc *BookingCalendar) hasAnyBookingOnDate(cottageID int, date time.Time) bool {
+	checkoutBooking := bc.findCheckoutBooking(cottageID, date)
+	checkinBooking := bc.findCheckinBooking(cottageID, date)
+	return checkoutBooking != nil || checkinBooking != nil
+}
+
 // loadData загружает данные для календаря
 func (bc *BookingCalendar) loadData() error {
 	// Получаем список домиков
@@ -380,8 +386,12 @@ func (bc *BookingCalendar) createCalendarCell(cottageID int, date time.Time) fyn
 		}
 	}
 
-	// Проверяем, нужна ли диагональная кнопка
-	needsDiagonal := bc.checkIfNeedsDiagonal(cottageID, date)
+	// Проверяем, есть ли заезды/выезды в этот день
+	hasCheckOut := bc.findCheckoutBooking(cottageID, date) != nil
+	hasCheckIn := bc.findCheckinBooking(cottageID, date) != nil
+
+	// Диагональная кнопка нужна если есть заезд ИЛИ выезд в этот день
+	needsDiagonal := hasCheckOut || hasCheckIn
 
 	if needsDiagonal {
 		return bc.createDiagonalCell(cottageID, date, status)
@@ -392,41 +402,120 @@ func (bc *BookingCalendar) createCalendarCell(cottageID int, date time.Time) fyn
 
 // checkIfNeedsDiagonal проверяет, нужна ли диагональная кнопка для этого дня
 func (bc *BookingCalendar) checkIfNeedsDiagonal(cottageID int, date time.Time) bool {
-	// Получаем все брони для этого домика
-	startDate := date.AddDate(0, 0, -1) // Проверяем день до
-	endDate := date.AddDate(0, 0, 1)    // И день после
+	// Получаем все брони для этого домика в расширенном диапазоне
+	startDate := date.AddDate(0, 0, -7) // Проверяем неделю до
+	endDate := date.AddDate(0, 0, 7)    // И неделю после
 
 	bookings, err := bc.bookingService.GetBookingsByDateRange(startDate, endDate)
 	if err != nil {
 		return false
 	}
 
-	// Проверяем, есть ли бронь которая заканчивается в этот день
 	hasCheckOut := false
-	// И может ли быть новая бронь в этот же день
-	canCheckIn := true
+	hasCheckIn := false
 
 	for _, booking := range bookings {
-		if booking.CottageID != cottageID {
+		if booking.CottageID != cottageID || booking.Status == models.BookingStatusCancelled {
 			continue
 		}
 
 		bookingCheckOut := time.Date(booking.CheckOutDate.Year(), booking.CheckOutDate.Month(), booking.CheckOutDate.Day(), 0, 0, 0, 0, time.Local)
 		bookingCheckIn := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(), booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
 
-		// Если бронь заканчивается в этот день
-		if bookingCheckOut.Equal(date) && booking.Status != models.BookingStatusCancelled {
+		// Проверяем выезд в этот день
+		if bookingCheckOut.Equal(date) {
 			hasCheckOut = true
 		}
 
-		// Если есть бронь которая покрывает этот день полностью
-		if bookingCheckIn.Equal(date) && booking.Status != models.BookingStatusCancelled {
-			canCheckIn = false
+		// Проверяем заезд в этот день
+		if bookingCheckIn.Equal(date) {
+			hasCheckIn = true
 		}
 	}
 
-	// Диагональная кнопка нужна, если есть выезд И можно заселиться
-	return hasCheckOut && canCheckIn
+	// Диагональная кнопка нужна если:
+	// 1. Есть только выезд (можно добавить заезд)
+	// 2. Есть только заезд (был выезд ранее в тот же день)
+	// 3. Есть и выезд и заезд в один день
+	return hasCheckOut || hasCheckIn
+}
+
+// createDiagonalCell создает диагональную ячейку с изображениями
+func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, status *models.BookingStatus) fyne.CanvasObject {
+	// Находим все брони для этого дня
+	checkoutBooking := bc.findCheckoutBooking(cottageID, date)
+	checkinBooking := bc.findCheckinBooking(cottageID, date)
+
+	var topStatus, bottomStatus string
+	var text string
+
+	// Определяем статусы для верхней и нижней части
+	if checkinBooking != nil {
+		topStatus = checkinBooking.Status
+	} else {
+		topStatus = "" // Свободно для заезда
+	}
+
+	if checkoutBooking != nil {
+		bottomStatus = checkoutBooking.Status
+	} else {
+		bottomStatus = "" // Свободно для выезда
+	}
+
+	// Формируем текст
+	if checkinBooking != nil && checkoutBooking != nil {
+		// И заезд и выезд в один день
+		checkoutGuest := bc.truncateString(checkoutBooking.GuestName, 6)
+		checkinGuest := bc.truncateString(checkinBooking.GuestName, 6)
+		text = fmt.Sprintf("←%s\n%s→", checkoutGuest, checkinGuest)
+	} else if checkoutBooking != nil {
+		// Только выезд
+		checkoutGuest := bc.truncateString(checkoutBooking.GuestName, 6)
+		text = fmt.Sprintf("←%s\n14:00→", checkoutGuest)
+	} else if checkinBooking != nil {
+		// Только заезд
+		checkinGuest := bc.truncateString(checkinBooking.GuestName, 6)
+		text = fmt.Sprintf("←12:00\n%s→", checkinGuest)
+	} else {
+		// Свободный день (не должно происходить для диагональной кнопки)
+		text = "←12:00\n14:00→"
+	}
+
+	// Получаем пути к изображениям
+	topImage, bottomImage := bc.getDiagonalImages(topStatus, bottomStatus)
+
+	button := NewDiagonalImageButton(topImage, bottomImage, text,
+		func() {
+			// Верхняя часть - клик на заезд (после 14:00)
+			if checkinBooking != nil {
+				bc.showBookingDetails(checkinBooking.ID)
+			} else {
+				// Проверяем, свободно ли время для заезда
+				checkInTime := time.Date(date.Year(), date.Month(), date.Day(), 14, 0, 0, 0, time.Local)
+				// Проверяем что нет брони которая начинается в этот день после 14:00
+				available, err := bc.bookingService.IsCottageAvailable(cottageID, checkInTime, checkInTime.AddDate(0, 0, 1))
+				if err != nil {
+					dialog.ShowError(err, bc.window)
+					return
+				}
+				if available {
+					bc.showQuickBookingForm(cottageID, checkInTime)
+				} else {
+					dialog.ShowInformation("Информация", "Время заезда после 14:00 уже занято", bc.window)
+				}
+			}
+		},
+		func() {
+			// Нижняя часть - клик на выезд (до 12:00)
+			if checkoutBooking != nil {
+				bc.showBookingDetails(checkoutBooking.ID)
+			} else {
+				dialog.ShowInformation("Информация", "В этот день нет выезда до 12:00", bc.window)
+			}
+		})
+
+	button.Resize(fyne.NewSize(35, 60))
+	return button
 }
 
 // createRegularCell создает обычную ячейку с изображением
@@ -611,64 +700,6 @@ func (r *diagonalImageButtonRenderer) Objects() []fyne.CanvasObject {
 func (r *diagonalImageButtonRenderer) Destroy() {}
 
 // createDiagonalCell создает диагональную ячейку с изображениями
-func (bc *BookingCalendar) createDiagonalCell(cottageID int, date time.Time, status *models.BookingStatus) fyne.CanvasObject {
-	var topStatus, bottomStatus string
-	var text string
-
-	// Находим бронь, которая заканчивается в этот день
-	checkoutBooking := bc.findCheckoutBooking(cottageID, date)
-
-	// Проверяем, есть ли бронь на заезд в этот же день
-	checkinBooking := bc.findCheckinBooking(cottageID, date)
-
-	// Определяем статусы для диагональной кнопки
-	if checkoutBooking != nil {
-		bottomStatus = checkoutBooking.Status
-	} else {
-		bottomStatus = ""
-	}
-
-	if checkinBooking != nil {
-		topStatus = checkinBooking.Status
-	} else if status != nil && status.BookingID > 0 && status.IsCheckIn {
-		topStatus = status.Status
-	} else {
-		topStatus = ""
-	}
-
-	text = "←12:00\n14:00→"
-
-	// Получаем пути к изображениям
-	topImage, bottomImage := bc.getDiagonalImages(topStatus, bottomStatus)
-
-	button := NewDiagonalImageButton(topImage, bottomImage, text,
-		func() {
-			// Верхняя часть - клик на заезд (после 14:00)
-			if checkinBooking != nil {
-				bc.showBookingDetails(checkinBooking.ID)
-			} else if status != nil && status.BookingID > 0 && status.IsCheckIn {
-				bc.showBookingDetails(status.BookingID)
-			} else {
-				checkInTime := time.Date(date.Year(), date.Month(), date.Day(), 14, 0, 0, 0, time.Local)
-				bc.showQuickBookingForm(cottageID, checkInTime)
-			}
-		},
-		func() {
-			// Нижняя часть - клик на выезд (до 12:00)
-			if checkoutBooking != nil {
-				bc.showBookingDetails(checkoutBooking.ID)
-			} else if status != nil && status.BookingID > 0 {
-				bc.onCellTapped(cottageID, date, *status)
-			} else {
-				dialog.ShowInformation("Информация",
-					"В этот день происходит выезд из домика до 12:00.\nВы можете забронировать заезд с 14:00.",
-					bc.window)
-			}
-		})
-
-	button.Resize(fyne.NewSize(35, 60))
-	return button
-}
 
 // findCheckinBooking находит бронь, которая начинается в указанный день
 func (bc *BookingCalendar) findCheckinBooking(cottageID int, date time.Time) *models.Booking {
