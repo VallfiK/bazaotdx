@@ -43,16 +43,16 @@ func main() {
 // backgroundTasks выполняет фоновые задачи
 func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
 	for {
-		// Автоматическое удаление старых бронирований
+		// Автоматическое удаление старых отмененных и завершенных бронирований (старше 30 дней)
 		_, err := db.Exec(`
 			DELETE FROM lesbaza.bookings 
-			WHERE status = $1 AND check_out_date <= NOW() - INTERVAL '24 hours'
-		`, models.BookingStatusCancelled)
+			WHERE status IN ($1, $2) AND created_at <= NOW() - INTERVAL '30 days'
+		`, models.BookingStatusCancelled, models.BookingStatusCompleted)
 		if err != nil {
 			log.Printf("Error auto-delete old bookings: %v", err)
 		}
 
-		// Автоматическое выселение гостей
+		// Автоматическое выселение гостей из таблицы guests
 		_, err = db.Exec(`
 			DELETE FROM lesbaza.guests 
 			WHERE check_out_date <= NOW() - INTERVAL '2 hours'
@@ -92,7 +92,7 @@ func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
 			}
 		}
 
-		// Автоматическое удаление старых заселенных бронирований
+		// Автоматическое завершение просроченных заселенных бронирований
 		rows, err = db.Query(`
 			SELECT booking_id 
 			FROM lesbaza.bookings 
@@ -110,25 +110,13 @@ func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
 			}
 			rows.Close()
 
-			// Отменяем старые заселенные бронирования
+			// Выселяем просроченные брони
 			for _, id := range bookingIDs {
-				_, err := db.Exec(`
-					UPDATE lesbaza.bookings 
-					SET status = $1 
-					WHERE booking_id = $2`,
-					models.BookingStatusCancelled, id,
-				)
-				if err == nil {
-					// Освобождаем домик
-					_, err = db.Exec(`
-						UPDATE lesbaza.cottages c
-						SET status = 'free'
-						FROM lesbaza.bookings b
-						WHERE b.booking_id = $1
-						AND c.cottage_id = b.cottage_id`,
-						id,
-					)
-					log.Printf("Auto cancelled booking %d", id)
+				err := bookingService.CheckOutBooking(id)
+				if err != nil {
+					log.Printf("Auto checkout error for booking %d: %v", id, err)
+				} else {
+					log.Printf("Auto checked out booking %d", id)
 				}
 			}
 		}

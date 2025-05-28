@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"image/color"
+	"sort"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -222,8 +223,15 @@ func (bc *BookingCalendar) createCalendarGrid() *fyne.Container {
 
 	mainContainer.Add(daysHeader)
 
+	// Сортируем домики по ID
+	cottages := make([]models.Cottage, len(bc.cottages))
+	copy(cottages, bc.cottages)
+	sort.Slice(cottages, func(i, j int) bool {
+		return cottages[i].ID < cottages[j].ID
+	})
+
 	// Создаем строки для каждого домика
-	for _, cottage := range bc.cottages {
+	for _, cottage := range cottages {
 		cottageRow := bc.createCottageRow(cottage, startDay, lastDay.Day())
 		mainContainer.Add(cottageRow)
 	}
@@ -436,8 +444,8 @@ func (bc *BookingCalendar) getStatusColorForBooking(booking models.Booking) colo
 		return color.NRGBA{R: 255, G: 102, B: 0, A: 255} // Оранжевый (заселен)
 	case models.BookingStatusCancelled:
 		return color.NRGBA{R: 220, G: 53, B: 69, A: 255} // Красный (отменено)
-	case "completed":
-		return color.NRGBA{R: 108, G: 117, B: 125, A: 255} // Серый (завершено)
+	case models.BookingStatusCompleted:
+		return GreenColor // Зеленый (завершено = свободно)
 	default:
 		return GreenColor // Зеленый (свободно)
 	}
@@ -449,11 +457,11 @@ func (bc *BookingCalendar) getStatusColor(status models.BookingStatus) color.Col
 	case models.BookingStatusBooked:
 		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый (бронь)
 	case models.BookingStatusCheckedIn:
-		return color.NRGBA{R: 255, G: 102, B: 0, A: 255} // Более насыщенный оранжевый (заселен)
+		return color.NRGBA{R: 255, G: 102, B: 0, A: 255} // Оранжевый (заселен)
 	case models.BookingStatusCancelled:
 		return color.NRGBA{R: 220, G: 53, B: 69, A: 255} // Красный (отменено)
-	case "completed":
-		return color.NRGBA{R: 108, G: 117, B: 125, A: 255} // Серый (завершено)
+	case models.BookingStatusCompleted:
+		return GreenColor // Зеленый (завершено = свободно)
 	default:
 		return GreenColor // Зеленый (свободно)
 	}
