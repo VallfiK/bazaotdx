@@ -9,11 +9,15 @@ import (
 )
 
 type BookingService struct {
-	db *sql.DB
+	db          *sql.DB
+	tariffService *TariffService
 }
 
 func NewBookingService(db *sql.DB) *BookingService {
-	return &BookingService{db: db}
+	return &BookingService{
+		db:          db,
+		tariffService: NewTariffService(db),
+	}
 }
 
 // CreateBooking создает новую бронь
@@ -26,6 +30,18 @@ func (s *BookingService) CreateBooking(booking models.Booking) (*models.Booking,
 	if !available {
 		return nil, fmt.Errorf("домик недоступен на выбранные даты")
 	}
+
+	// Получаем тариф
+	tariff, err := s.tariffService.GetTariffByID(booking.TariffID)
+	if err != nil {
+		return nil, fmt.Errorf("ошибка получения тарифа: %w", err)
+	}
+
+	// Рассчитываем стоимость
+	checkInDateOnly := time.Date(booking.CheckInDate.Year(), booking.CheckInDate.Month(), booking.CheckInDate.Day(), 0, 0, 0, 0, time.Local)
+	checkOutDateOnly := time.Date(booking.CheckOutDate.Year(), booking.CheckOutDate.Month(), booking.CheckOutDate.Day(), 0, 0, 0, 0, time.Local)
+	days := int(checkOutDateOnly.Sub(checkInDateOnly).Hours() / 24) + 1
+	totalCost := float64(days) * tariff.PricePerDay
 
 	// Создаем бронь
 	var bookingID int
@@ -45,7 +61,7 @@ func (s *BookingService) CreateBooking(booking models.Booking) (*models.Booking,
 		time.Now(),
 		booking.Notes,
 		booking.TariffID,
-		booking.TotalCost,
+		totalCost,
 	).Scan(&bookingID)
 
 	if err != nil {
@@ -66,13 +82,16 @@ func (s *BookingService) IsCottageAvailable(cottageID int, checkIn, checkOut tim
 		SELECT COUNT(*) FROM lesbaza.bookings
 		WHERE cottage_id = $1
 		AND status IN ($2, $3, $4)
-		AND NOT (check_out_date <= $5 OR check_in_date >= $6)`,
+		AND NOT (check_out_date <= $5 OR check_in_date >= $6)
+		AND NOT (status = $7 AND check_in_date > $8)`, // Исключаем отмененные дни после текущей даты
 		cottageID,
 		models.BookingStatusBooked,
 		models.BookingStatusCheckedIn,
 		models.BookingStatusTemporary,
 		checkIn,
 		checkOut,
+		models.BookingStatusCancelled,
+		time.Now(),
 	).Scan(&count)
 
 	if err != nil {
@@ -149,29 +168,15 @@ func (s *BookingService) GetCalendarData(startDate, endDate time.Time) (map[time
 		for d := checkIn; !d.After(checkOut); d = d.AddDate(0, 0, 1) {
 			if dayMap, exists := calendar[d]; exists {
 				isCheckIn := d.Equal(checkIn)
-				isCheckOut := d.Equal(checkOut)
 
-				// Для дня выезда показываем особый статус
-				if isCheckOut && !isCheckIn {
-					// Это только день выезда (не совпадает с днем заезда)
-					dayMap[booking.CottageID] = models.BookingStatus{
-						Status:     booking.Status,
-						BookingID:  booking.ID,
-						GuestName:  booking.GuestName,
-						IsPartDay:  true,
-						IsCheckIn:  false,
-						IsCheckOut: true,
-					}
-				} else {
-					// Обычный день брони или день заезда
-					dayMap[booking.CottageID] = models.BookingStatus{
-						Status:     booking.Status,
-						BookingID:  booking.ID,
-						GuestName:  booking.GuestName,
-						IsPartDay:  isCheckIn || isCheckOut,
-						IsCheckIn:  isCheckIn,
-						IsCheckOut: false, // Не показываем как день выезда, если это также день заезда
-					}
+				// Добавляем статус для всех дней брони
+				dayMap[booking.CottageID] = models.BookingStatus{
+					Status:     booking.Status,
+					BookingID:  booking.ID,
+					GuestName:  booking.GuestName,
+					IsPartDay:  false,
+					IsCheckIn:  isCheckIn,
+					IsCheckOut: false,
 				}
 			}
 		}
@@ -216,22 +221,7 @@ func (s *BookingService) CancelBooking(bookingID int) error {
 	return s.UpdateBookingStatus(bookingID, models.BookingStatusCancelled)
 }
 
-// CheckOutBooking выселение гостя
-func (s *BookingService) CheckOutBooking(bookingID int) error {
-	// Получаем текущую бронь
-	booking, err := s.GetBookingByID(bookingID)
-	if err != nil {
-		return fmt.Errorf("ошибка получения брони: %w", err)
-	}
 
-	// Проверяем статус брони
-	if booking.Status != models.BookingStatusCheckedIn {
-		return fmt.Errorf("бронь не имеет статуса " + models.BookingStatusCheckedIn)
-	}
-
-	// Обновляем статус на "Выселено"
-	return s.UpdateBookingStatus(bookingID, models.BookingStatusCheckedOut)
-}
 
 // CheckInBooking заселяет гостя
 func (s *BookingService) CheckInBooking(bookingID int) error {
@@ -255,16 +245,6 @@ func (s *BookingService) CheckInBooking(bookingID int) error {
 	_, err = tx.Exec(
 		"UPDATE lesbaza.bookings SET status = $1 WHERE booking_id = $2",
 		models.BookingStatusCheckedIn, bookingID,
-	)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Обновляем статус домика
-	_, err = tx.Exec(
-		"UPDATE lesbaza.cottages SET status = 'occupied' WHERE cottage_id = $1",
-		booking.CottageID,
 	)
 	if err != nil {
 		tx.Rollback()

@@ -349,9 +349,7 @@ func (bc *BookingCalendar) getStatusColor(status models.BookingStatus) color.Col
 	case models.BookingStatusBooked:
 		return color.NRGBA{R: 255, G: 193, B: 7, A: 255} // Желтый (бронь)
 	case models.BookingStatusCheckedIn:
-		return color.NRGBA{R: 0, G: 123, B: 255, A: 255} // Синий (заселен)
-	case models.BookingStatusCheckedOut:
-		return color.NRGBA{R: 108, G: 117, B: 125, A: 255} // Серый (выселен)
+		return color.NRGBA{R: 255, G: 102, B: 0, A: 255} // Более насыщенный оранжевый (заселен)
 	case models.BookingStatusCancelled:
 		return color.NRGBA{R: 220, G: 53, B: 69, A: 255} // Красный (отменено)
 	default:
@@ -431,15 +429,7 @@ func (bc *BookingCalendar) showBookingDetails(bookingID int) {
 			}, bc.window)
 		}))
 	case models.BookingStatusCheckedIn:
-		actions.Add(widget.NewButton("Выселить", func() {
-			err := bc.bookingService.CheckOutBooking(booking.ID)
-			if err != nil {
-				dialog.ShowError(err, bc.window)
-				return
-			}
-			bc.Update()
-			dialog.ShowInformation("Успешно", "Гость выселен", bc.window)
-		}))
+	// Здесь можно добавить кнопку "Изменить даты"
 	}
 
 	content.Add(actions)
@@ -498,15 +488,30 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDateTime tim
 
 	// Расчет стоимости
 	costLabel := widget.NewLabel("Стоимость: -")
+	advanceLabel := widget.NewLabel("")
+	remainingLabel := widget.NewLabel("")
 
 	updateCost := func() {
 		if tariffSelect.SelectedIndex() >= 0 {
-			days := int(checkOutDate.Sub(checkInDate).Hours() / 24)
+			// Use only the date part without time
+			checkInDateOnly := time.Date(checkInDate.Year(), checkInDate.Month(), checkInDate.Day(), 0, 0, 0, 0, time.Local)
+			checkOutDateOnly := time.Date(checkOutDate.Year(), checkOutDate.Month(), checkOutDate.Day(), 0, 0, 0, 0, time.Local)
+			
+			// Calculate days as the difference between dates
+			days := int(checkOutDateOnly.Sub(checkInDateOnly).Hours() / 24) + 1
 			if days <= 0 {
 				days = 1
 			}
-			cost := float64(days) * tariffs[tariffSelect.SelectedIndex()].PricePerDay
-			costLabel.SetText(fmt.Sprintf("Стоимость: %.2f руб. (%d дней)", cost, days))
+			
+			// Calculate costs
+			totalCost := float64(days) * tariffs[tariffSelect.SelectedIndex()].PricePerDay
+			advancePayment := totalCost * 0.3 // 30% предоплата
+			remainingAmount := totalCost - advancePayment
+
+			// Create cost labels
+			costLabel.SetText(fmt.Sprintf("Стоимость: %.2f руб. (%d дней)", totalCost, days))
+			advanceLabel.SetText(fmt.Sprintf("Предоплата (30%%): %.2f руб.", advancePayment))
+			remainingLabel.SetText(fmt.Sprintf("Остаток: %.2f руб.", remainingAmount))
 		}
 	}
 
@@ -545,6 +550,8 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDateTime tim
 			{Text: "Дата выезда", Widget: checkOutPicker.button},
 			{Text: "Тариф", Widget: tariffSelect},
 			{Text: "", Widget: costLabel},
+			{Text: "", Widget: advanceLabel},
+			{Text: "", Widget: remainingLabel},
 			{Text: "Примечания", Widget: notesEntry},
 		},
 		OnSubmit: func() {
@@ -610,10 +617,9 @@ func (bc *BookingCalendar) showQuickBookingForm(cottageID int, startDateTime tim
 func (bc *BookingCalendar) createLegend() fyne.CanvasObject {
 	items := []fyne.CanvasObject{
 		widget.NewLabel("Легенда:"),
-		bc.createLegendItem("Свободно", color.NRGBA{R: 40, G: 167, B: 69, A: 255}),
-		bc.createLegendItem("Забронировано", color.NRGBA{R: 255, G: 193, B: 7, A: 255}),
-		bc.createLegendItem("Заселено", color.NRGBA{R: 0, G: 123, B: 255, A: 255}),
-		bc.createLegendItem("Выселено", color.NRGBA{R: 108, G: 117, B: 125, A: 255}),
+		bc.createLegendItem("Свободно", color.NRGBA{R: 40, G: 167, B: 69, A: 255}), // Зеленый
+		bc.createLegendItem("Забронировано", color.NRGBA{R: 255, G: 193, B: 7, A: 255}), // Желтый
+		bc.createLegendItem("Заселено", color.NRGBA{R: 255, G: 102, B: 0, A: 255}), // Оранжевый
 	}
 
 	return container.NewHBox(items...)
@@ -640,12 +646,14 @@ func (bc *BookingCalendar) getStatusText(status string) string {
 		return "Забронировано"
 	case models.BookingStatusCheckedIn:
 		return "Заселено"
-	case models.BookingStatusCheckedOut:
-		return "Выселено"
 	case models.BookingStatusCancelled:
 		return "Отменено"
+	case models.BookingStatusTemporary:
+		return "Временное"
+	case models.BookingStatusBlocked:
+		return "Заблокировано"
 	default:
-		return status
+		return "Неизвестно"
 	}
 }
 

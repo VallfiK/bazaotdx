@@ -7,10 +7,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/VallfIK/bazaotdx/internal/app"
 	"github.com/VallfIK/bazaotdx/internal/db"
 	"github.com/VallfIK/bazaotdx/internal/models"
 	"github.com/VallfIK/bazaotdx/internal/service"
-	"github.com/VallfIK/bazaotdx/internal/ui"
 )
 
 func main() {
@@ -30,8 +30,8 @@ func main() {
 	tariffService := service.NewTariffService(database.DB)
 	bookingService := service.NewBookingService(database.DB) // Новый сервис
 
-	// Создание GUI с новым сервисом
-	app := ui.NewGuestApp(guestService, cottageService, tariffService, bookingService)
+	// Создание приложения
+	app := app.NewGuestApp(guestService, cottageService, tariffService, bookingService)
 
 	// Запускаем фоновые задачи ДО запуска GUI
 	go backgroundTasks(database.DB, bookingService)
@@ -43,8 +43,17 @@ func main() {
 // backgroundTasks выполняет фоновые задачи
 func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
 	for {
-		// Автоматическое выселение гостей
+		// Автоматическое удаление старых бронирований
 		_, err := db.Exec(`
+			DELETE FROM lesbaza.bookings 
+			WHERE status = $1 AND check_out_date <= NOW() - INTERVAL '24 hours'
+		`, models.BookingStatusCancelled)
+		if err != nil {
+			log.Printf("Error auto-delete old bookings: %v", err)
+		}
+
+		// Автоматическое выселение гостей
+		_, err = db.Exec(`
 			DELETE FROM lesbaza.guests 
 			WHERE check_out_date <= NOW() - INTERVAL '2 hours'
 		`)
@@ -83,7 +92,7 @@ func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
 			}
 		}
 
-		// Автоматическое выселение по бронированиям
+		// Автоматическое удаление старых заселенных бронирований
 		rows, err = db.Query(`
 			SELECT booking_id 
 			FROM lesbaza.bookings 
@@ -101,13 +110,13 @@ func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
 			}
 			rows.Close()
 
-			// Обновляем статусы и освобождаем домики
+			// Отменяем старые заселенные бронирования
 			for _, id := range bookingIDs {
 				_, err := db.Exec(`
 					UPDATE lesbaza.bookings 
 					SET status = $1 
 					WHERE booking_id = $2`,
-					models.BookingStatusCheckedOut, id,
+					models.BookingStatusCancelled, id,
 				)
 				if err == nil {
 					// Освобождаем домик
@@ -119,7 +128,7 @@ func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
 						AND c.cottage_id = b.cottage_id`,
 						id,
 					)
-					log.Printf("Auto checked-out booking %d", id)
+					log.Printf("Auto cancelled booking %d", id)
 				}
 			}
 		}

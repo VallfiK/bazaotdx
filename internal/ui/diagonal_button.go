@@ -17,6 +17,11 @@ type DiagonalButton struct {
 	leftTapped  func()
 	rightTapped func()
 	text        string
+
+	// Кешируем объекты для рендеринга
+	leftTriangle  *canvas.Rectangle
+	rightTriangle *canvas.Rectangle
+	textLabel     *canvas.Text
 }
 
 // NewDiagonalButton создает новую кнопку с диагональным разделением
@@ -29,16 +34,25 @@ func NewDiagonalButton(leftColor, rightColor color.Color, text string, leftTappe
 		text:        text,
 	}
 	db.ExtendBaseWidget(db)
+
+	// Создаем объекты сразу
+	db.leftTriangle = canvas.NewRectangle(leftColor)
+	db.rightTriangle = canvas.NewRectangle(rightColor)
+	db.textLabel = canvas.NewText(text, color.NRGBA{R: 0, G: 0, B: 0, A: 255})
+	db.textLabel.TextSize = 8
+	db.textLabel.Alignment = fyne.TextAlignCenter
+
 	return db
 }
 
 func (db *DiagonalButton) Tapped(evt *fyne.PointEvent) {
 	size := db.Size()
+	if size.Width == 0 || size.Height == 0 {
+		return
+	}
 
 	// Вычисляем, на какую часть кнопки кликнули
 	// Диагональ идет из левого верхнего угла в правый нижний
-	// Если точка выше диагонали - левая часть, ниже - правая
-
 	k := size.Height / size.Width
 	expectedY := evt.Position.X * k
 
@@ -70,7 +84,17 @@ type diagonalButtonRenderer struct {
 }
 
 // Layout не нужен для этого типа рендерера
-func (r *diagonalButtonRenderer) Layout(size fyne.Size) {}
+func (r *diagonalButtonRenderer) Layout(size fyne.Size) {
+	if r.base.leftTriangle != nil {
+		r.base.leftTriangle.Resize(size)
+	}
+	if r.base.rightTriangle != nil {
+		r.base.rightTriangle.Resize(size)
+	}
+	if r.base.textLabel != nil {
+		r.base.textLabel.Resize(size)
+	}
+}
 
 // MinSize возвращает минимальный размер кнопки
 func (r *diagonalButtonRenderer) MinSize() fyne.Size {
@@ -79,25 +103,34 @@ func (r *diagonalButtonRenderer) MinSize() fyne.Size {
 
 // Refresh обновляет рендерер
 func (r *diagonalButtonRenderer) Refresh() {
-	canvas.Refresh(r.base)
-}
-
-// getTextColor возвращает подходящий цвет текста в зависимости от фона
-func (r *diagonalButtonRenderer) getTextColor() color.Color {
-	// Для лучшей читаемости используем черный текст
-	// Можно также добавить логику выбора цвета в зависимости от яркости фона
-	return color.NRGBA{R: 0, G: 0, B: 0, A: 255} // Черный текст
+	// Обновляем цвета
+	if r.base.leftTriangle != nil {
+		r.base.leftTriangle.FillColor = r.base.leftColor
+		r.base.leftTriangle.Refresh()
+	}
+	if r.base.rightTriangle != nil {
+		r.base.rightTriangle.FillColor = r.base.rightColor
+		r.base.rightTriangle.Refresh()
+	}
+	if r.base.textLabel != nil {
+		r.base.textLabel.Text = r.base.text
+		r.base.textLabel.Refresh()
+	}
 }
 
 // Objects возвращает объекты для рендеринга
 func (r *diagonalButtonRenderer) Objects() []fyne.CanvasObject {
 	size := r.base.Size()
-	if size.Width == 0 || size.Height == 0 {
+	if size.Width <= 0 || size.Height <= 0 {
 		size = r.MinSize()
 	}
 
-	// Создаем левый треугольник
-	leftTriangle := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+	// Создаем маски для треугольников с помощью canvas.Raster
+	leftMask := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+		if w == 0 || h == 0 {
+			return color.Transparent
+		}
+
 		// Вычисляем коэффициент наклона диагонали
 		k := float32(h) / float32(w)
 		expectedY := int(float32(x) * k)
@@ -109,32 +142,36 @@ func (r *diagonalButtonRenderer) Objects() []fyne.CanvasObject {
 		return color.Transparent
 	})
 
-	// Создаем правый треугольник
-	rightTriangle := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+	rightMask := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+		if w == 0 || h == 0 {
+			return color.Transparent
+		}
+
 		k := float32(h) / float32(w)
 		expectedY := int(float32(x) * k)
 
-		// Если точка ниже диагонали - правый треугольник
+		// Если точка ниже или на диагонали - правый треугольник
 		if y >= expectedY {
 			return r.base.rightColor
 		}
 		return color.Transparent
 	})
 
-	// Создаем текст с контрастным цветом
-	label := canvas.NewText(r.base.text, r.getTextColor())
-	label.TextSize = 9
-	label.Alignment = fyne.TextAlignCenter
-
 	// Устанавливаем размеры
-	leftTriangle.Resize(size)
-	rightTriangle.Resize(size)
-	label.Resize(size)
+	leftMask.Resize(size)
+	rightMask.Resize(size)
 
+	// Создаем текст с черным цветом для лучшей видимости
+	textLabel := canvas.NewText(r.base.text, color.NRGBA{R: 0, G: 0, B: 0, A: 255})
+	textLabel.TextSize = 8
+	textLabel.Alignment = fyne.TextAlignCenter
+	textLabel.Resize(size)
+
+	// Возвращаем объекты в правильном порядке
 	return []fyne.CanvasObject{
-		leftTriangle,
-		rightTriangle,
-		label,
+		leftMask,
+		rightMask,
+		textLabel,
 	}
 }
 

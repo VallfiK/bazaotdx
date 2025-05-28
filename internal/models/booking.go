@@ -10,7 +10,7 @@ type Booking struct {
 	Email        string    `db:"email"`
 	CheckInDate  time.Time `db:"check_in_date"`
 	CheckOutDate time.Time `db:"check_out_date"`
-	Status       string    `db:"status"` // 'booked', 'checked_in', 'checked_out', 'cancelled'
+	Status       string    `db:"status"` // 'booked', 'checked_in', 'cancelled'
 	CreatedAt    time.Time `db:"created_at"`
 	Notes        string    `db:"notes"`
 	TariffID     int       `db:"tariff_id"`
@@ -21,7 +21,6 @@ type Booking struct {
 const (
 	BookingStatusBooked     = "booked"
 	BookingStatusCheckedIn  = "checked_in"
-	BookingStatusCheckedOut = "checked_out"
 	BookingStatusCancelled  = "cancelled"
 	BookingStatusTemporary  = "temporary"
 	BookingStatusBlocked    = "blocked"

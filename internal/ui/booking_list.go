@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -209,7 +208,14 @@ func (blw *BookingListWidget) updateBookingItem(id widget.ListItemID, item fyne.
 	phoneLabel.SetText(booking.Phone)
 
 	statusLabel := infoBox2.Objects[2].(*widget.Label)
-	statusLabel.SetText(blw.getStatusText(booking.Status))
+	switch booking.Status {
+	case models.BookingStatusBooked:
+		statusLabel.SetText("Забронировано")
+	case models.BookingStatusCheckedIn:
+		statusLabel.SetText("Заселено")
+	case models.BookingStatusCancelled:
+		statusLabel.SetText("Отменено")
+	}
 
 	// Цвет карточки в зависимости от статуса
 	switch booking.Status {
@@ -217,8 +223,6 @@ func (blw *BookingListWidget) updateBookingItem(id widget.ListItemID, item fyne.
 		card.SetSubTitle("Забронировано")
 	case models.BookingStatusCheckedIn:
 		card.SetSubTitle("Заселено")
-	case models.BookingStatusCheckedOut:
-		card.SetSubTitle("Выселено")
 	case models.BookingStatusCancelled:
 		card.SetSubTitle("Отменено")
 	}
@@ -236,7 +240,7 @@ func (blw *BookingListWidget) showBookingActions(booking models.Booking) {
 	}
 
 	content := container.NewVBox(
-		widget.NewCard("Информация о брони", "",
+		widget.NewCard("Информация о брони", "", 
 			container.NewVBox(
 				widget.NewLabel(fmt.Sprintf("Гость: %s", booking.GuestName)),
 				widget.NewLabel(fmt.Sprintf("Телефон: %s", booking.Phone)),
@@ -293,21 +297,6 @@ func (blw *BookingListWidget) showBookingActions(booking models.Booking) {
 		}))
 
 	case models.BookingStatusCheckedIn:
-		actions.Add(widget.NewButton("Выселить", func() {
-			dialog.ShowConfirm("Подтверждение", "Выселить гостя?", func(ok bool) {
-				if ok {
-					err := blw.bookingService.CheckOutBooking(booking.ID)
-					if err != nil {
-						dialog.ShowError(err, blw.window)
-						return
-					}
-					blw.loadData()
-					blw.triggerRefresh()
-					dialog.ShowInformation("Успешно", "Гость выселен", blw.window)
-				}
-			}, blw.window)
-		}))
-
 		// Здесь можно добавить кнопку "Изменить даты"
 	}
 
@@ -316,19 +305,20 @@ func (blw *BookingListWidget) showBookingActions(booking models.Booking) {
 	d := dialog.NewCustom("Действия с бронированием", "Закрыть", content, blw.window)
 	d.Resize(fyne.NewSize(500, 500))
 	d.Show()
-}
 
 // getStatusText возвращает текст статуса
 func (blw *BookingListWidget) getStatusText(status string) string {
 	switch status {
-	case models.BookingStatusBooked:
+	case BookingStatusBooked:
 		return "Забронировано"
-	case models.BookingStatusCheckedIn:
+	case BookingStatusCheckedIn:
 		return "Заселено"
-	case models.BookingStatusCheckedOut:
-		return "Выселено"
-	case models.BookingStatusCancelled:
+	case BookingStatusCancelled:
 		return "Отменено"
+	case BookingStatusTemporary:
+		return "Временное"
+	case BookingStatusBlocked:
+		return "Заблокировано"
 	default:
 		return status
 	}
