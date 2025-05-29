@@ -170,14 +170,18 @@ func (a *StyledGuestApp) createTopBar() fyne.CanvasObject {
 
 	updateTime := func() {
 		now := time.Now()
-		timeLabel.Text = now.Format("15:04:05\n02.01.2006")
-		timeLabel.Refresh()
+		fyne.Do(func() {
+			timeLabel.Text = now.Format("15:04:05\n02.01.2006")
+			timeLabel.Refresh()
+		})
 	}
 
 	updateTime()
 	go func() {
 		for range time.Tick(1 * time.Second) {
-			updateTime()
+			fyne.Do(func() {
+				updateTime()
+			})
 		}
 	}()
 
@@ -267,7 +271,8 @@ func (a *StyledGuestApp) createSidePanel() fyne.CanvasObject {
 func (a *StyledGuestApp) createFixedStatsDisplay() fyne.CanvasObject {
 	// Создаем виджеты для статистики с фиксированными размерами
 	statsLabel := widget.NewRichTextFromMarkdown("Загрузка статистики...")
-	statsLabel.Resize(fyne.NewSize(250, 120)) // ФИКСИРОВАННЫЙ РАЗМЕР
+	statsLabel.Resize(fyne.NewSize(260, 120)) // Увеличиваем ширину для предотвращения переноса текста
+	statsLabel.Wrapping = fyne.TextWrapWord   // Добавляем перенос текста по словам
 
 	// Кнопка обновления с фиксированным размером
 	updateBtn := widget.NewButtonWithIcon("🔄 Обновить", theme.ViewRefreshIcon(), func() {
@@ -588,47 +593,48 @@ func (a *StyledGuestApp) createTariffsTab() *container.TabItem {
 
 // updateStats обновляет статистику с ФИКСИРОВАННЫМИ размерами
 func (a *StyledGuestApp) updateStats(label *widget.RichText) {
-	go func() {
-		// Получаем статистику за текущий месяц
-		now := time.Now()
-		startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
-		endOfMonth := startOfMonth.AddDate(0, 1, -1)
+	// Получаем статистику за текущий месяц
+	now := time.Now()
+	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+	endOfMonth := startOfMonth.AddDate(0, 1, -1)
 
-		bookings, err := a.bookingService.GetBookingsByDateRange(startOfMonth, endOfMonth)
-		if err != nil {
+	bookings, err := a.bookingService.GetBookingsByDateRange(startOfMonth, endOfMonth)
+	if err != nil {
+		fyne.Do(func() {
 			label.ParseMarkdown("❌ Ошибка загрузки статистики")
-			return
+		})
+		return
+	}
+
+	totalBookings := len(bookings)
+	var totalRevenue float64
+	activeBookings := 0
+
+	for _, booking := range bookings {
+		if booking.Status != models.BookingStatusCancelled {
+			totalRevenue += booking.TotalCost
+			activeBookings++
 		}
+	}
 
-		totalBookings := len(bookings)
-		var totalRevenue float64
-		activeBookings := 0
-
-		for _, booking := range bookings {
-			if booking.Status != models.BookingStatusCancelled {
-				totalRevenue += booking.TotalCost
-				activeBookings++
-			}
+	// Получаем статистику по домикам
+	cottages, _ := a.cottageService.GetAllCottages()
+	freeCottages := 0
+	occupiedCottages := 0
+	for _, c := range cottages {
+		if c.Status == "free" {
+			freeCottages++
+		} else if c.Status == "occupied" {
+			occupiedCottages++
 		}
+	}
 
-		// Получаем статистику по домикам
-		cottages, _ := a.cottageService.GetAllCottages()
-		freeCottages := 0
-		occupiedCottages := 0
-		for _, c := range cottages {
-			if c.Status == "free" {
-				freeCottages++
-			} else if c.Status == "occupied" {
-				occupiedCottages++
-			}
-		}
+	avgCheck := 0.0
+	if activeBookings > 0 {
+		avgCheck = totalRevenue / float64(activeBookings)
+	}
 
-		avgCheck := 0.0
-		if activeBookings > 0 {
-			avgCheck = totalRevenue / float64(activeBookings)
-		}
-
-		statsText := fmt.Sprintf(`## 📊 %s %d
+	statsText := fmt.Sprintf(`## 📊 %s %d
 
 **🏠 Домики:**
 • Всего: %d
@@ -642,15 +648,15 @@ func (a *StyledGuestApp) updateStats(label *widget.RichText) {
 **💰 Доходы:**
 • Общий: **%.0f ₽**
 • Средний чек: **%.0f ₽**`,
-			a.getMonthName(now.Month()), now.Year(),
-			len(cottages), freeCottages, occupiedCottages,
-			totalBookings, activeBookings,
-			totalRevenue, avgCheck)
+		a.getMonthName(now.Month()), now.Year(),
+		len(cottages), freeCottages, occupiedCottages,
+		totalBookings, activeBookings,
+		totalRevenue, avgCheck)
 
+	fyne.Do(func() {
 		label.ParseMarkdown(statsText)
-		// ПРИНУДИТЕЛЬНО сохраняем размер после обновления
-		label.Resize(fyne.NewSize(250, 120))
-	}()
+		label.Resize(fyne.NewSize(260, 120)) // Updated width to match container
+	})
 }
 
 // getMonthName возвращает название месяца на русском

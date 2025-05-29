@@ -768,3 +768,393 @@
 2025/05/29 16:36:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
 2025/05/29 16:36:36 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
 2025/05/29 16:36:36   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:05:27 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:05:27 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:05:27 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:05:27 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:05:27 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:05:27 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:05:27 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:05:27 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:05:27 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:05:27 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:05:27 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:05:27 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:05:27 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:05:27 ✅ Успешное подключение к БД
+2025/05/29 18:05:27 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:05:27 🎯 Особенности новой версии:
+2025/05/29 18:05:27    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:05:27    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:05:27 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:05:27    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:05:27    • Эмоджи и улучшенная типографика
+2025/05/29 18:05:27    • Градиентные эффекты и стилизованные карточки
+2025/05/29 18:05:28 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:05:28   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:05:29 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:05:29   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:05:30 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:05:30   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:05:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:05:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:05:32 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:05:32   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:05:33 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:05:33   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:05:34 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:05:34   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:05:42 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:05:42 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:05:42 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:05:42 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:05:42 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:05:42 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:05:42 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:05:42 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:05:42 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:05:42 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:05:42 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:05:42 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:05:42 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:05:42 ✅ Успешное подключение к БД
+2025/05/29 18:05:42 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:05:42 🎯 Особенности новой версии:
+2025/05/29 18:05:42 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:05:42    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:05:42    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:05:42    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:05:42    • Эмоджи и улучшенная типографика
+2025/05/29 18:05:42    • Градиентные эффекты и стилизованные карточки
+2025/05/29 18:05:43 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:05:43   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:05:44 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:05:44   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:06:03 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:06:03 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:06:03 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:06:03 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:06:03 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:06:03 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:06:03 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:06:03 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:06:03 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:06:03 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:06:03 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:06:03 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:06:03 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:06:03 ✅ Успешное подключение к БД
+2025/05/29 18:06:03 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:06:03 🎯 Особенности новой версии:
+2025/05/29 18:06:03    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:06:03    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:06:03 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:06:03    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:06:03    • Эмоджи и улучшенная типографика
+2025/05/29 18:06:03    • Градиентные эффекты и стилизованные карточки
+2025/05/29 18:06:04 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:06:04   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:06:05 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:06:05   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:06:06 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:06:06   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:06:07 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:06:07   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:06:08 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:06:08   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:06:47 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:06:47 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:06:47 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:06:47 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:06:47 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:06:47 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:06:47 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:06:47 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:06:47 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:06:47 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:06:47 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:06:47 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:06:47 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:06:47 ✅ Успешное подключение к БД
+2025/05/29 18:06:47 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:06:47 🎯 Особенности новой версии:
+2025/05/29 18:06:47    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:06:47    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:06:47    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:06:47    • Эмоджи и улучшенная типографика
+2025/05/29 18:06:47    • Градиентные эффекты и стилизованные карточки
+2025/05/29 18:06:47 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:06:48 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:06:48   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:06:49 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:06:49   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:06:54 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:06:54 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:06:54 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:06:54 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:06:54 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:06:54 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:06:54 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:06:54 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:06:54 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:06:54 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:06:54 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:06:54 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:06:54 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:06:54 ✅ Успешное подключение к БД
+2025/05/29 18:06:54 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:06:54 🎯 Особенности новой версии:
+2025/05/29 18:06:54    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:06:54    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:06:54 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:06:54    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:06:54    • Эмоджи и улучшенная типографика
+2025/05/29 18:06:54    • Градиентные эффекты и стилизованные карточки
+2025/05/29 18:06:55 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:06:55   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:06:56 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:06:56   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:14 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:07:14 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:07:14 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:07:14 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:07:14 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:07:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:07:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:07:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:07:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:07:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:07:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:07:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:07:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:07:14 ✅ Успешное подключение к БД
+2025/05/29 18:07:14 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:07:14 🎯 Особенности новой версии:
+2025/05/29 18:07:14    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:07:14    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:07:14 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:07:14    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:07:14    • Эмоджи и улучшенная типографика
+2025/05/29 18:07:14    • Градиентные эффекты и стилизованные карточки
+2025/05/29 18:07:15 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:15   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:16 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:16   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:18 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:18   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:19 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:19   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:20 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:20   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:21 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:21   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:22 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:22   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:23 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:23   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:24 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:24   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:25 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:25   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:26 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:26   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:27 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:27   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:28 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:28   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:29 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:29   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:30 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:30   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:32 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:32   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:33 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:33   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:34 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:34   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:36 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:36   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:37 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:37   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:38 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:38   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:41 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:41   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:42 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:42   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:43 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:43   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:44 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:44   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:45 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:45   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:47 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:47   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:48 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:48   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:49 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:49   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:50 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:50   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:51 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:51   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:52 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:52   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:07:53 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:07:53   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:13 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:08:13 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:08:13 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:08:13 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:08:13 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:08:13 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:08:13 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:08:13 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:08:13 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:08:13 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:08:13 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:08:13 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:08:13 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:08:14 ✅ Успешное подключение к БД
+2025/05/29 18:08:14 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:08:14 🎯 Особенности новой версии:
+2025/05/29 18:08:14    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:08:14    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:08:14 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:08:14    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:08:14    • Эмоджи и улучшенная типографика
+2025/05/29 18:08:14    • Градиентные эффекты и стилизованные карточки
+2025/05/29 18:08:15 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:15   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:16 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:16   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:18 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:18   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:19 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:19   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:20 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:20   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:21 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:21   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:22 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:22   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:23 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:23   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:24 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:24   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:25 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:25   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:26 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:26   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:27 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:27   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:28 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:28   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:29 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:29   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:30 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:30   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:32 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:32   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:33 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:33   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:34 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:34   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:36 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:36   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:37 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:37   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:38 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:38   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:08:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:08:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:174
+2025/05/29 18:09:17 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:09:17 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:09:17 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:09:17 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:09:17 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:09:17 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:09:17 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:09:17 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:09:17 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:09:17 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:09:17 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:09:17 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:09:17 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:09:17 ✅ Успешное подключение к БД
+2025/05/29 18:09:18 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:09:18 🎯 Особенности новой версии:
+2025/05/29 18:09:18    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:09:18    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:09:18 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:09:18    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:09:18    • Эмоджи и улучшенная типографика
+2025/05/29 18:09:18    • Градиентные эффекты и стилизованные карточки
+2025/05/29 18:11:37 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:11:37 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:11:37 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:11:37 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:11:37 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:11:37 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:11:37 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:11:37 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:11:37 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:11:37 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:11:37 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:11:37 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:11:37 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:11:37 ✅ Успешное подключение к БД
+2025/05/29 18:11:37 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:11:37 🎯 Особенности новой версии:
+2025/05/29 18:11:37    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:11:37    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:11:37 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:11:37    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:11:37    • Эмоджи и улучшенная типографика
+2025/05/29 18:11:37    • Градиентные эффекты и стилизованные карточки
+2025/05/29 18:11:43 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:11:43   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:655
+2025/05/29 18:11:43 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:11:43   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:657
+2025/05/29 18:11:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 18:11:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:655
+2025/05/29 18:29:28 🌲 Запуск системы управления базой отдыха 'Звуки Леса'
+2025/05/29 18:29:28 🛠️ Версия: 3.0 (Улучшенный дизайн)
+2025/05/29 18:29:28 🎨 Тема: Природная (зеленые тона, золотые акценты, кремовый фон)
+2025/05/29 18:29:28 🏞️ База отдыха: Звуки Леса
+2025/05/29 18:29:28 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 18:29:28 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 18:29:28 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 18:29:28 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 18:29:28 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 18:29:28 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 18:29:28 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 18:29:28 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 18:29:28 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 18:29:29 ✅ Успешное подключение к БД
+2025/05/29 18:29:29 🔄 Запуск фоновых задач для 'Звуки Леса'...
+2025/05/29 18:29:29 🌲 Запуск системы управления 'Звуки Леса'...
+2025/05/29 18:29:29 🎯 Особенности новой версии:
+2025/05/29 18:29:29    • Фиксированные размеры окна (предотвращение расширения)
+2025/05/29 18:29:29    • Улучшенная цветовая схема с природными оттенками
+2025/05/29 18:29:29    • Обновленное название: 'Звуки Леса'
+2025/05/29 18:29:29    • Эмоджи и улучшенная типографика
+2025/05/29 18:29:29    • Градиентные эффекты и стилизованные карточки

@@ -53,10 +53,7 @@ func (t *ForestTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant)
 	switch name {
 	// Основные цвета интерфейса
 	case theme.ColorNameBackground:
-		if variant == theme.VariantLight {
-			return CreamWhite // Теплый кремовый фон
-		}
-		return DarkForestGreen
+		return theme.DefaultTheme().Color(name, variant)
 
 	case theme.ColorNameForeground:
 		if variant == theme.VariantLight {
