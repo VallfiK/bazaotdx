@@ -1,5 +1,4 @@
-// Измените ваш cmd/main.go следующим образом:
-
+// cmd/main.go
 package main
 
 import (
@@ -28,11 +27,15 @@ func main() {
 	multiWriter := io.MultiWriter(os.Stdout, logFile)
 	log.SetOutput(multiWriter)
 
-	log.Println("🚀 Запуск приложения")
-	log.Printf("🛠️ Путь к проекту: %s", "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx")
-	log.Printf("🔍 Проверка директории images: %s", "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images")
+	log.Println("🚀 Запуск приложения Лесной Базы Отдыха")
+	log.Printf("🛠️ Версия: 2.0 (Стилизованная)")
+	log.Printf("🎨 Тема: Лесная (зеленые оттенки, молочный, коричневый)")
 
 	// Проверяем существование файлов изображений
+	projectPath := "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx"
+	imagesPath := filepath.Join(projectPath, "images")
+	log.Printf("🔍 Проверка директории images: %s", imagesPath)
+
 	images := []string{
 		"free.png",
 		"booked.png",
@@ -45,15 +48,15 @@ func main() {
 	}
 
 	for _, img := range images {
-		imgPath := filepath.Join("C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images", img)
+		imgPath := filepath.Join(imagesPath, img)
 		if _, err := os.Stat(imgPath); err != nil {
-			log.Printf("❌ Ошибка: Файл не найден: %s", imgPath)
+			log.Printf("⚠️ Предупреждение: Файл не найден: %s", imgPath)
+			// Создаем отсутствующие изображения
+			createMissingImage(imgPath)
 		} else {
 			log.Printf("✅ Файл найден: %s", imgPath)
 		}
 	}
-
-	log.Printf("📄 Логи также записываются в файл: %s", "app.log")
 
 	// Инициализация БД
 	database, err := db.NewPostgresDB()
@@ -65,47 +68,66 @@ func main() {
 	defer database.Close()
 
 	// Конфигурация
-	documentsRoot := "documents" // Можно заменить на os.Getenv("DOCUMENTS_PATH")
+	documentsRoot := "documents"
 
 	// Инициализация сервисов
 	guestService := service.NewGuestService(database.DB, documentsRoot)
 	cottageService := service.NewCottageService(database.DB)
 	tariffService := service.NewTariffService(database.DB)
-	bookingService := service.NewBookingService(database.DB) // Новый сервис
+	bookingService := service.NewBookingService(database.DB)
 
-	// Создание приложения
-	app := app.NewGuestApp(guestService, cottageService, tariffService, bookingService)
+	// Создание стилизованного приложения
+	app := app.NewStyledGuestApp(guestService, cottageService, tariffService, bookingService)
 
-	// Запускаем фоновые задачи ДО запуска GUI
+	// Запускаем фоновые задачи
 	go backgroundTasks(database.DB, bookingService)
+
+	log.Println("🌲 Запуск стилизованного интерфейса...")
 
 	// Запуск приложения
 	app.Run()
 }
 
+// createMissingImage создает простое изображение-заглушку
+func createMissingImage(path string) {
+	// Создаем директорию если не существует
+	dir := filepath.Dir(path)
+	os.MkdirAll(dir, 0755)
+
+	// Создаем пустой файл как заглушку
+	file, err := os.Create(path)
+	if err != nil {
+		log.Printf("❌ Не удалось создать файл-заглушку: %v", err)
+		return
+	}
+	file.Close()
+	log.Printf("✅ Создан файл-заглушка: %s", path)
+}
+
 // backgroundTasks выполняет фоновые задачи
 func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
+	log.Println("🔄 Запуск фоновых задач...")
+
 	for {
-		// Автоматическое удаление старых отмененных и завершенных бронирований (старше 30 дней)
+		// Автоматическое удаление старых отмененных и завершенных бронирований
 		_, err := db.Exec(`
 			DELETE FROM lesbaza.bookings 
 			WHERE status IN ($1, $2) AND created_at <= NOW() - INTERVAL '30 days'
 		`, models.BookingStatusCancelled, models.BookingStatusCompleted)
 		if err != nil {
-			log.Printf("Error auto-delete old bookings: %v", err)
+			log.Printf("⚠️ Ошибка автоудаления старых броней: %v", err)
 		}
 
-		// Автоматическое выселение гостей из таблицы guests
+		// Автоматическое выселение гостей
 		_, err = db.Exec(`
 			DELETE FROM lesbaza.guests 
 			WHERE check_out_date <= NOW() - INTERVAL '2 hours'
 		`)
 		if err != nil {
-			log.Println("Auto-checkout error:", err)
+			log.Printf("⚠️ Ошибка автовыселения: %v", err)
 		}
 
 		// Автоматическое обновление статусов бронирований
-		// Переводим "забронировано" в "заселено" если наступил день заезда
 		rows, err := db.Query(`
 			SELECT booking_id 
 			FROM lesbaza.bookings 
@@ -128,9 +150,9 @@ func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
 			for _, id := range bookingIDs {
 				err := bookingService.CheckInBooking(id)
 				if err != nil {
-					log.Printf("Auto check-in error for booking %d: %v", id, err)
+					log.Printf("⚠️ Ошибка автозаселения брони %d: %v", id, err)
 				} else {
-					log.Printf("Auto checked-in booking %d", id)
+					log.Printf("✅ Автоматически заселена бронь %d", id)
 				}
 			}
 		}
@@ -157,13 +179,14 @@ func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
 			for _, id := range bookingIDs {
 				err := bookingService.CheckOutBooking(id)
 				if err != nil {
-					log.Printf("Auto checkout error for booking %d: %v", id, err)
+					log.Printf("⚠️ Ошибка автовыселения брони %d: %v", id, err)
 				} else {
-					log.Printf("Auto checked out booking %d", id)
+					log.Printf("✅ Автоматически выселена бронь %d", id)
 				}
 			}
 		}
 
+		// Пауза между проверками
 		time.Sleep(1 * time.Hour)
 	}
 }
