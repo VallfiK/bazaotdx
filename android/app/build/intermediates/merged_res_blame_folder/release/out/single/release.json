@@ -1,42 +1,42 @@
 [
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-xhdpi_ic_launcher.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-xhdpi/ic_launcher.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-xxxhdpi_ic_launcher_round.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-xxxhdpi/ic_launcher_round.xml"
     },
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-mdpi_ic_launcher.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-mdpi/ic_launcher.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-mdpi_ic_launcher.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-mdpi/ic_launcher.xml"
     },
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-xxhdpi_ic_launcher_round.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-xxhdpi/ic_launcher_round.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-xxhdpi_ic_launcher.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-xxhdpi/ic_launcher.xml"
     },
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-hdpi_ic_launcher_round.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-hdpi/ic_launcher_round.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-xxhdpi_ic_launcher_round.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-xxhdpi/ic_launcher_round.xml"
     },
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-xxhdpi_ic_launcher.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-xxhdpi/ic_launcher.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-xhdpi_ic_launcher_round.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-xhdpi/ic_launcher_round.xml"
     },
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-mdpi_ic_launcher_round.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-mdpi/ic_launcher_round.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-xhdpi_ic_launcher.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-xhdpi/ic_launcher.xml"
     },
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-hdpi_ic_launcher.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-hdpi/ic_launcher.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-hdpi_ic_launcher_round.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-hdpi/ic_launcher_round.xml"
     },
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-xxxhdpi_ic_launcher_round.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-xxxhdpi/ic_launcher_round.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-mdpi_ic_launcher_round.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-mdpi/ic_launcher_round.xml"
     },
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-xxxhdpi_ic_launcher.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-xxxhdpi/ic_launcher.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-xxxhdpi_ic_launcher.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-xxxhdpi/ic_launcher.xml"
     },
     {
-        "merged": "com.bazaotdx.bazaotdx.app-merged_res-65:/mipmap-xhdpi_ic_launcher_round.xml.flat",
-        "source": "com.bazaotdx.bazaotdx.app-main-66:/mipmap-xhdpi/ic_launcher_round.xml"
+        "merged": "com.vallflk.bazaotdx.app-merged_res-62:/mipmap-hdpi_ic_launcher.xml.flat",
+        "source": "com.vallflk.bazaotdx.app-main-63:/mipmap-hdpi/ic_launcher.xml"
     }
 ]

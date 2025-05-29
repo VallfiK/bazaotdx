@@ -49,10 +49,35 @@
     <string name="tariffs">Тарифы</string>
     <string name="total_bookings">Общее количество бронирований</string>
     <string name="total_income">Общий доход</string>
-    <style name="Theme.BazaOtdx" parent="Theme.Material3.DayNight">
+    <style name="Theme.BazaOtdx" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/forest_green</item>
         <item name="colorPrimaryDark">@color/dark_green</item>
         <item name="colorAccent">@color/forest_green</item>
+        
+        
         <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
+        
+        
+        <item name="colorPrimaryVariant">@color/dark_green</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/forest_green</item>
+        <item name="colorSecondaryVariant">@color/dark_green</item>
+        <item name="colorOnSecondary">@color/white</item>
+        
+        
+        <item name="android:colorBackground">@color/white</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        
+        
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">@color/dark_gray</item>
+        
+        
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/white</item>
+        
+        
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

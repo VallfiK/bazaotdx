@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.bazaotdx.bazaotdx.app-mergeReleaseResources-63:/values-h480dp-land-v13/values-h480dp-land-v13.xml",
+            "outputFile": "com.vallflk.bazaotdx.app-mergeReleaseResources-60:/values-h480dp-land-v13/values-h480dp-land-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\a7fb9eba4c1a31cdba4ce29b92ee9a4b\\transformed\\material-1.11.0\\res\\values-h480dp-land-v13\\values-h480dp-land-v13.xml",
+                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\a206bc552cb1ead1ef0973580f226e7d\\transformed\\material-1.11.0\\res\\values-h480dp-land-v13\\values-h480dp-land-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10",
                         "startColumns": "4,4,4,4,4,4,4,4,4",

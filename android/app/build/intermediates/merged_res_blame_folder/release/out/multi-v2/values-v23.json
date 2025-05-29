@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.bazaotdx.bazaotdx.app-mergeReleaseResources-63:/values-v23/values-v23.xml",
+            "outputFile": "com.vallflk.bazaotdx.app-mergeReleaseResources-60:/values-v23/values-v23.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\b45faeee50c8cc0dcdab84e8e6a3155d\\transformed\\cardview-1.0.0\\res\\values-v23\\values-v23.xml",
+                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\b06893f79b8f115a5b99e8947542bd68\\transformed\\cardview-1.0.0\\res\\values-v23\\values-v23.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\fcad5a810ffdbeafcc3fe7d5031dd0c2\\transformed\\appcompat-1.6.1\\res\\values-v23\\values-v23.xml",
+                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\c32e071c22f6314803745f4a3cc34fbe\\transformed\\appcompat-1.6.1\\res\\values-v23\\values-v23.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,20,34,35,36,39,43,44,45,46",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -34,7 +34,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\a7fb9eba4c1a31cdba4ce29b92ee9a4b\\transformed\\material-1.11.0\\res\\values-v23\\values-v23.xml",
+                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\a206bc552cb1ead1ef0973580f226e7d\\transformed\\material-1.11.0\\res\\values-v23\\values-v23.xml",
                     "from": {
                         "startLines": "2,5,9,13,16,19,22,25,28,32",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4",
