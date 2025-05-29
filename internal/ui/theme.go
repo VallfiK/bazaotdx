@@ -4,11 +4,11 @@ package ui
 import (
 	"image/color"
 
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2/widget"
 )
 
 // ResortTheme - кастомная тема для базы отдыха
@@ -116,16 +116,30 @@ func (t ResortTheme) Size(name fyne.ThemeSizeName) float32 {
 	return theme.DefaultTheme().Size(name)
 }
 
-// Кастомные стили для виджетов
-func CreateStyledCard(title, subtitle string, content fyne.CanvasObject) *fyne.Container {
-	titleLabel := NewStyledLabel(title, TextStyleTitle)
+// Стили текста
+type TextStyle int
 
+const (
+	TextStyleNormal TextStyle = iota
+	TextStyleTitle
+	TextStyleSubtitle
+	TextStyleCaption
+	TextStyleSuccess
+	TextStyleWarning
+	TextStyleError
+)
+
+// Кастомные функции для создания стилизованных виджетов
+func CreateStyledCard(title, subtitle string, content fyne.CanvasObject) *fyne.Container {
 	var cardContent []fyne.CanvasObject
+
 	if title != "" {
+		titleLabel := widget.NewLabel(title)
+		titleLabel.TextStyle = fyne.TextStyle{Bold: true}
 		cardContent = append(cardContent, titleLabel)
 	}
 	if subtitle != "" {
-		subtitleLabel := NewStyledLabel(subtitle, TextStyleSubtitle)
+		subtitleLabel := widget.NewLabel(subtitle)
 		cardContent = append(cardContent, subtitleLabel)
 	}
 	if content != nil {
@@ -143,28 +157,14 @@ func CreateStyledCard(title, subtitle string, content fyne.CanvasObject) *fyne.C
 	return container.NewStack(bg, container.NewPadded(card))
 }
 
-// Стили текста
-type TextStyle int
-
-const (
-	TextStyleNormal TextStyle = iota
-	TextStyleTitle
-	TextStyleSubtitle
-	TextStyleCaption
-	TextStyleSuccess
-	TextStyleWarning
-	TextStyleError
-)
-
 func NewStyledLabel(text string, style TextStyle) *widget.Label {
 	label := widget.NewLabel(text)
 
 	switch style {
 	case TextStyleTitle:
 		label.TextStyle = fyne.TextStyle{Bold: true}
-		// В Fyne нельзя напрямую задать цвет, но можно использовать RichText
 	case TextStyleSubtitle:
-		// Меньший размер, более светлый цвет
+		// Можно настроить дополнительные стили если нужно
 	case TextStyleCaption:
 		// Еще меньший размер
 	case TextStyleSuccess:
@@ -213,3 +213,5 @@ func CreateStatusIndicator(status string) *fyne.Container {
 
 	return container.NewWithoutLayout(indicator)
 }
+
+
