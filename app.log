@@ -227,3 +227,389 @@
 2025/05/29 09:45:27 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
 2025/05/29 09:45:27 📄 Логи также записываются в файл: app.log
 2025/05/29 09:45:27 ✅ Успешное подключение к БД
+2025/05/29 13:16:46 🚀 Запуск приложения Лесной Базы Отдыха
+2025/05/29 13:16:46 🛠️ Версия: 2.0 (Стилизованная)
+2025/05/29 13:16:46 🎨 Тема: Лесная (зеленые оттенки, молочный, коричневый)
+2025/05/29 13:16:46 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 13:16:46 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 13:16:46 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 13:16:46 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 13:16:46 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 13:16:46 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 13:16:46 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 13:16:46 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 13:16:46 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 13:16:46 ✅ Успешное подключение к БД
+2025/05/29 13:18:14 🚀 Запуск приложения Лесной Базы Отдыха
+2025/05/29 13:18:14 🛠️ Версия: 2.0 (Стилизованная)
+2025/05/29 13:18:14 🎨 Тема: Лесная (зеленые оттенки, молочный, коричневый)
+2025/05/29 13:18:14 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 13:18:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 13:18:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 13:18:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 13:18:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 13:18:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 13:18:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 13:18:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 13:18:14 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 13:18:14 ✅ Успешное подключение к БД
+2025/05/29 13:18:14 🌲 Запуск стилизованного интерфейса...
+2025/05/29 13:18:14 🔄 Запуск фоновых задач...
+2025/05/29 13:18:15 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:15   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:16 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:16   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:18 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:18   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:19 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:19   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:20 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:20   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:21 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:21   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:22 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:22   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:23 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:23   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:24 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:24   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:25 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:25   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:26 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:26   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:27 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:27   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:28 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:28   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:29 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:29   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:30 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:30   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:32 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:32   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:33 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:33   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:34 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:34   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:35 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:35   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:36 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:36   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:37 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:37   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:38 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:38   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:39 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:39   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:40 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:40   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:18:41 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:41   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:42 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:42   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:43 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:43   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:44 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:44   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:45 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:45   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:47 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:47   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:48 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:48   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:49 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:49   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:50 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:50   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:51 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:51   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:52 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:52   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:53 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:53   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:18:54 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:18:54   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:19:02 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:19:02   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:19:03 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:19:03   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:19:04 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:19:04   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:19:05 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:19:05   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:25:12 🚀 Запуск приложения Лесной Базы Отдыха
+2025/05/29 13:25:12 🛠️ Версия: 2.0 (Стилизованная)
+2025/05/29 13:25:12 🎨 Тема: Лесная (зеленые оттенки, молочный, коричневый)
+2025/05/29 13:25:12 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 13:25:12 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 13:25:12 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 13:25:12 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 13:25:12 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 13:25:12 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 13:25:12 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 13:25:12 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 13:25:12 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 13:25:12 ✅ Успешное подключение к БД
+2025/05/29 13:25:13 🌲 Запуск стилизованного интерфейса...
+2025/05/29 13:25:13 🔄 Запуск фоновых задач...
+2025/05/29 13:25:13 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:13   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:25:14 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:14   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:25:15 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:15   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:25:16 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:16   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 13:25:17 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:17   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 13:25:18 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 13:25:18   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 14:59:53 🚀 Запуск приложения Лесной Базы Отдыха
+2025/05/29 14:59:53 🛠️ Версия: 2.0 (Стилизованная)
+2025/05/29 14:59:53 🎨 Тема: Лесная (зеленые оттенки, молочный, коричневый)
+2025/05/29 14:59:53 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 14:59:53 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 14:59:53 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 14:59:53 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 14:59:53 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 14:59:53 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 14:59:53 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 14:59:53 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 14:59:53 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 14:59:53 ✅ Успешное подключение к БД
+2025/05/29 14:59:53 🌲 Запуск стилизованного интерфейса...
+2025/05/29 14:59:53 🔄 Запуск фоновых задач...
+2025/05/29 14:59:54 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 14:59:54   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 14:59:55 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 14:59:55   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 14:59:56 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 14:59:56   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 14:59:57 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 14:59:57   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 14:59:58 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 14:59:58   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:172
+2025/05/29 15:54:23 🚀 Запуск приложения Лесной Базы Отдыха
+2025/05/29 15:54:23 🛠️ Версия: 2.0 (Стилизованная)
+2025/05/29 15:54:23 🎨 Тема: Лесная (зеленые оттенки, молочный, коричневый)
+2025/05/29 15:54:23 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 15:54:23 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 15:54:23 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 15:54:23 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 15:54:23 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 15:54:23 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 15:54:23 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 15:54:23 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 15:54:23 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 15:54:23 ✅ Успешное подключение к БД
+2025/05/29 15:54:23 🌲 Запуск стилизованного интерфейса...
+2025/05/29 15:54:23 🔄 Запуск фоновых задач...
+2025/05/29 15:54:24 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:24   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:173
+2025/05/29 15:54:25 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:25   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:173
+2025/05/29 15:54:26 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:26   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:173
+2025/05/29 15:54:27 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:27   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:173
+2025/05/29 15:54:28 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:28   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:173
+2025/05/29 15:54:29 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:29   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:173
+2025/05/29 15:54:30 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:30   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:173
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:636
+2025/05/29 15:54:31 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:31   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:173
+2025/05/29 15:54:32 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 15:54:32   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:173
+2025/05/29 16:03:43 🚀 Запуск приложения Лесной Базы Отдыха
+2025/05/29 16:03:43 🛠️ Версия: 2.0 (Стилизованная)
+2025/05/29 16:03:43 🎨 Тема: Лесная (зеленые оттенки, молочный, коричневый)
+2025/05/29 16:03:43 🔍 Проверка директории images: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images
+2025/05/29 16:03:43 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\free.png
+2025/05/29 16:03:43 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\booked.png
+2025/05/29 16:03:43 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bought.png
+2025/05/29 16:03:43 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\freefirst.png
+2025/05/29 16:03:43 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedfirst.png
+2025/05/29 16:03:43 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtfirst.png
+2025/05/29 16:03:43 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\bookedlast.png
+2025/05/29 16:03:43 ✅ Файл найден: C:\Users\VallfIK\Documents\GitHub\bazaotdx\images\boughtlast.png
+2025/05/29 16:03:43 ✅ Успешное подключение к БД
+2025/05/29 16:03:43 🌲 Запуск стилизованного интерфейса...
+2025/05/29 16:03:43 🔄 Запуск фоновых задач...
+2025/05/29 16:03:44 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:44   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:164
+2025/05/29 16:03:45 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:45   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:164
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:629
+2025/05/29 16:03:46 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:46   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:164
+2025/05/29 16:03:47 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:47   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:164
+2025/05/29 16:03:50 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:50   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:164
+2025/05/29 16:03:50 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:50   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:164
+2025/05/29 16:03:51 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/05/29 16:03:51   From: C:/Users/VallfIK/Documents/GitHub/bazaotdx/internal/app/app.go:164

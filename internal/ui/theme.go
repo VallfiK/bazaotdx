@@ -19,16 +19,16 @@ var (
 	LightForestGreen = color.NRGBA{R: 129, G: 199, B: 127, A: 255} // Светло-зеленый
 	MintGreen        = color.NRGBA{R: 183, G: 228, B: 182, A: 255} // Мятный
 
-	// Молочные оттенки
-	Cream      = color.NRGBA{R: 253, G: 251, B: 247, A: 255} // Кремовый
-	LightCream = color.NRGBA{R: 255, G: 253, B: 250, A: 255} // Светло-кремовый
-	Beige      = color.NRGBA{R: 245, G: 240, B: 230, A: 255} // Бежевый
+	// Белые оттенки
+	White            = color.NRGBA{R: 255, G: 255, B: 255, A: 255} // Белый
+	LightWhite       = color.NRGBA{R: 250, G: 250, B: 250, A: 255} // Светло-белый
+	SoftWhite        = color.NRGBA{R: 245, G: 245, B: 245, A: 255} // Мягкий белый
 
-	// Коричневые оттенки
-	WoodBrown      = color.NRGBA{R: 139, G: 90, B: 43, A: 255}   // Цвет дерева
-	DarkBrown      = color.NRGBA{R: 83, G: 53, B: 30, A: 255}    // Темно-коричневый
-	LightBrown     = color.NRGBA{R: 196, G: 164, B: 132, A: 255} // Светло-коричневый
-	ChocolateBrown = color.NRGBA{R: 123, G: 63, B: 0, A: 255}    // Шоколадный
+	// Зеленые оттенки для элементов
+	ElementGreen     = color.NRGBA{R: 76, G: 175, B: 80, A: 255}   // Зеленый для элементов
+	ElementLight     = color.NRGBA{R: 200, G: 230, B: 200, A: 255} // Светло-зеленый для элементов
+	ElementHover     = color.NRGBA{R: 67, G: 160, B: 71, A: 255}   // Зеленый для наведения
+	ElementPressed   = color.NRGBA{R: 55, G: 127, B: 60, A: 255}   // Зеленый для нажатия
 
 	// Дополнительные цвета
 	SoftGray     = color.NRGBA{R: 240, G: 240, B: 240, A: 255} // Мягкий серый
@@ -42,66 +42,66 @@ func (t *ForestTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant)
 	// Основные цвета интерфейса
 	case theme.ColorNameBackground:
 		if variant == theme.VariantLight {
-			return Cream
+			return White
 		}
-		return DarkBrown
+		return DarkForestGreen
 
 	case theme.ColorNameForeground:
 		if variant == theme.VariantLight {
-			return DarkBrown
+			return DarkForestGreen
 		}
-		return Cream
+		return White
 
 	case theme.ColorNameButton:
 		if variant == theme.VariantLight {
-			return ForestGreen
+			return ElementGreen
 		}
 		return DarkForestGreen
 
 	case theme.ColorNamePrimary:
-		return ForestGreen
+		return ElementGreen
 
 	case theme.ColorNameHover:
 		if variant == theme.VariantLight {
-			return LightForestGreen
+			return ElementHover
 		}
 		return DarkForestGreen
 
 	case theme.ColorNamePressed:
-		return DarkForestGreen
+		return ElementPressed
 
 	case theme.ColorNameFocus:
-		return MintGreen
+		return ElementGreen
 
 	case theme.ColorNameSelection:
 		return color.NRGBA{R: 129, G: 199, B: 127, A: 100} // Полупрозрачный зеленый
 
-	case theme.ColorNameBorder:
+	case theme.ColorNameInputBorder:
 		if variant == theme.VariantLight {
-			return LightBrown
+			return ElementLight
 		}
-		return WoodBrown
+		return DarkForestGreen
 
 	case theme.ColorNameShadow:
 		return color.NRGBA{R: 0, G: 0, B: 0, A: 66}
 
 	case theme.ColorNameInputBackground:
 		if variant == theme.VariantLight {
-			return LightCream
+			return LightWhite
 		}
-		return color.NRGBA{R: 60, G: 40, B: 25, A: 255}
+		return DarkForestGreen
 
 	case theme.ColorNamePlaceHolder:
 		if variant == theme.VariantLight {
-			return color.NRGBA{R: 139, G: 90, B: 43, A: 180}
+			return color.NRGBA{R: 100, G: 100, B: 100, A: 180}
 		}
 		return color.NRGBA{R: 200, G: 200, B: 200, A: 180}
 
 	case theme.ColorNameScrollBar:
 		if variant == theme.VariantLight {
-			return LightBrown
+			return ElementLight
 		}
-		return WoodBrown
+		return DarkForestGreen
 
 	case theme.ColorNameError:
 		return ErrorRed
@@ -114,13 +114,13 @@ func (t *ForestTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant)
 
 	case theme.ColorNameMenuBackground:
 		if variant == theme.VariantLight {
-			return Beige
+			return LightWhite
 		}
-		return DarkBrown
+		return DarkForestGreen
 
 	case theme.ColorNameOverlayBackground:
 		if variant == theme.VariantLight {
-			return color.NRGBA{R: 250, G: 248, B: 244, A: 240}
+			return color.NRGBA{R: 250, G: 250, B: 250, A: 240}
 		}
 		return color.NRGBA{R: 40, G: 30, B: 20, A: 240}
 	}

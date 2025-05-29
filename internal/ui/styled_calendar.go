@@ -46,14 +46,14 @@ func (c *StyledCalendarCell) CreateRenderer() fyne.WidgetRenderer {
 		if c.isWeekend {
 			bgColor = MintGreen
 		} else {
-			bgColor = LightCream
+			bgColor = LightWhite
 		}
 	case "booked":
-		bgColor = color.NRGBA{R: 255, G: 193, B: 7, A: 180} // Янтарный
+		bgColor = WarningAmber
 	case "occupied":
 		bgColor = ForestGreen
 	default:
-		bgColor = LightCream
+		bgColor = LightWhite
 	}
 
 	// Создаем фон с закругленными углами
@@ -63,14 +63,13 @@ func (c *StyledCalendarCell) CreateRenderer() fyne.WidgetRenderer {
 	// Рамка для сегодняшнего дня
 	var border *canvas.Rectangle
 	if c.isToday {
-		border = canvas.NewRectangle(color.Transparent)
-		border.StrokeColor = DarkForestGreen
+		border = canvas.NewRectangle(ElementGreen)
 		border.StrokeWidth = 3
 		border.CornerRadius = 6
 	}
 
 	// Текст даты
-	dateText := canvas.NewText(fmt.Sprintf("%d", c.date.Day()), DarkBrown)
+	dateText := canvas.NewText(fmt.Sprintf("%d", c.date.Day()), DarkForestGreen)
 	dateText.TextSize = 14
 	dateText.TextStyle = fyne.TextStyle{Bold: true}
 	dateText.Alignment = fyne.TextAlignCenter
@@ -198,14 +197,14 @@ func (c *StyledCalendarCell) TappedSecondary(_ *fyne.PointEvent) {}
 // StyledMonthHeader создает стилизованный заголовок месяца
 func StyledMonthHeader(month time.Time, onPrev, onNext, onToday func()) fyne.CanvasObject {
 	// Фон заголовка
-	bg := canvas.NewRectangle(ForestGreen)
+	bg := canvas.NewRectangle(DarkForestGreen)
 	bg.CornerRadius = 10
 
 	// Название месяца
 	monthName := getMonthNameRu(month.Month())
 	yearText := fmt.Sprintf("%s %d", monthName, month.Year())
 
-	monthLabel := canvas.NewText(yearText, Cream)
+	monthLabel := canvas.NewText(yearText, White)
 	monthLabel.TextSize = 20
 	monthLabel.TextStyle = fyne.TextStyle{Bold: true}
 	monthLabel.Alignment = fyne.TextAlignCenter
@@ -228,10 +227,10 @@ func StyledMonthHeader(month time.Time, onPrev, onNext, onToday func()) fyne.Can
 
 // StyledDayHeader создает стилизованный заголовок дня недели
 func StyledDayHeader(weekday string) fyne.CanvasObject {
-	bg := canvas.NewRectangle(LightBrown)
+	bg := canvas.NewRectangle(SoftGray)
 	bg.CornerRadius = 4
 
-	text := canvas.NewText(weekday, Cream)
+	text := canvas.NewText(weekday, White)
 	text.TextSize = 12
 	text.TextStyle = fyne.TextStyle{Bold: true}
 	text.Alignment = fyne.TextAlignCenter
@@ -242,7 +241,7 @@ func StyledDayHeader(weekday string) fyne.CanvasObject {
 // StyledLegend создает стилизованную легенду
 func StyledLegend() fyne.CanvasObject {
 	items := []fyne.CanvasObject{
-		createLegendItem("Свободно", LightCream),
+		createLegendItem("Свободно", LightWhite),
 		createLegendItem("Забронировано", color.NRGBA{R: 255, G: 193, B: 7, A: 180}),
 		createLegendItem("Заселено", ForestGreen),
 		createLegendItem("Выходной", MintGreen),

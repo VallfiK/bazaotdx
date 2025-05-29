@@ -17,8 +17,15 @@ func StyledCard(title, subtitle string, content fyne.CanvasObject) fyne.CanvasOb
 	shadow.Resize(fyne.NewSize(0, 0))
 	shadow.Move(fyne.NewPos(3, 3))
 
+	// Создаем контейнер для контента
+	contentContainer := container.NewVBox(
+		canvas.NewText(title, DarkForestGreen),
+		canvas.NewText(subtitle, DarkForestGreen),
+		content,
+	)
+
 	// Создаем карточку
-	card := widget.NewCard(title, subtitle, content)
+	card := widget.NewCard("", "", contentContainer)
 
 	// Создаем контейнер с тенью
 	return container.NewMax(shadow, card)
@@ -37,8 +44,8 @@ func NewGradientButton(text string, onTapped func()) *GradientButton {
 	btn := &GradientButton{
 		text:       text,
 		onTapped:   onTapped,
-		startColor: ForestGreen,
-		endColor:   DarkForestGreen,
+		startColor: ElementGreen,
+		endColor:   ElementPressed,
 	}
 	btn.ExtendBaseWidget(btn)
 	return btn
@@ -51,7 +58,7 @@ func (b *GradientButton) CreateRenderer() fyne.WidgetRenderer {
 		return lerpColor(b.startColor, b.endColor, ratio)
 	})
 
-	text := canvas.NewText(b.text, Cream)
+	text := canvas.NewText(b.text, White)
 	text.TextStyle = fyne.TextStyle{Bold: true}
 	text.Alignment = fyne.TextAlignCenter
 
@@ -100,6 +107,7 @@ func (b *GradientButton) TappedSecondary(_ *fyne.PointEvent) {}
 // IconButton создает кнопку с иконкой
 func IconButton(icon fyne.Resource, text string, onTapped func()) *widget.Button {
 	btn := widget.NewButtonWithIcon(text, icon, onTapped)
+	btn.Importance = widget.HighImportance
 	return btn
 }
 
@@ -121,7 +129,7 @@ func NewFloatingActionButton(icon fyne.Resource, onTapped func()) *FloatingActio
 
 func (f *FloatingActionButton) CreateRenderer() fyne.WidgetRenderer {
 	// Создаем круглый фон
-	bg := canvas.NewCircle(ForestGreen)
+	bg := canvas.NewCircle(ElementGreen)
 
 	// Создаем тень
 	shadow := canvas.NewCircle(color.NRGBA{R: 0, G: 0, B: 0, A: 50})
@@ -166,7 +174,7 @@ func (r *fabRenderer) MinSize() fyne.Size {
 }
 
 func (r *fabRenderer) Refresh() {
-	r.bg.FillColor = ForestGreen
+	r.bg.FillColor = ElementGreen
 	r.bg.Refresh()
 }
 
@@ -193,38 +201,38 @@ func StyledEntry(placeholder string) *widget.Entry {
 
 // InfoCard создает информационную карточку с иконкой
 func InfoCard(icon fyne.Resource, title, value string, bgColor color.Color) fyne.CanvasObject {
-	// Фон карточки
-	bg := canvas.NewRectangle(bgColor)
-	bg.CornerRadius = 8
+	// Создаем контейнер для иконки
+	iconContainer := container.NewMax(
+		canvas.NewRectangle(bgColor),
+		canvas.NewImageFromResource(icon),
+	)
+	iconContainer.Resize(fyne.NewSize(40, 40))
 
-	// Иконка
-	iconImg := canvas.NewImageFromResource(icon)
-	iconImg.FillMode = canvas.ImageFillContain
-	iconImg.SetMinSize(fyne.NewSize(40, 40))
+	// Создаем текст
+	titleLabel := canvas.NewText(title, DarkForestGreen)
+	titleLabel.TextStyle = fyne.TextStyle{Bold: true}
+	titleLabel.Alignment = fyne.TextAlignLeading
 
-	// Тексты
-	titleLabel := canvas.NewText(title, Cream)
-	titleLabel.TextSize = 12
-
-	valueLabel := canvas.NewText(value, Cream)
-	valueLabel.TextSize = 24
+	valueLabel := canvas.NewText(value, ElementGreen)
 	valueLabel.TextStyle = fyne.TextStyle{Bold: true}
+	valueLabel.Alignment = fyne.TextAlignLeading
 
-	// Компоновка
-	content := container.NewBorder(
-		nil, nil,
-		container.NewCenter(iconImg),
-		nil,
-		container.NewVBox(
-			titleLabel,
-			valueLabel,
-		),
+	// Создаем контейнер для текста
+	textContainer := container.NewVBox(
+		titleLabel,
+		valueLabel,
 	)
 
-	// Добавляем отступы
-	padded := container.NewPadded(content)
+	// Создаем основной контейнер
+	mainContainer := container.NewHBox(
+		iconContainer,
+		textContainer,
+	)
 
-	return container.NewMax(bg, padded)
+	// Создаем карточку
+	card := widget.NewCard("", "", mainContainer)
+
+	return card
 }
 
 // Вспомогательная функция для интерполяции цветов
