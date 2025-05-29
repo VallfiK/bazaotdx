@@ -19,7 +19,7 @@ func NewCottagesTab(window fyne.Window, cottageService *service.CottageService, 
 	updateCottagesList := func() {
 		cottages, err := cottageService.GetAllCottages()
 		if err != nil {
-			dialog.ShowError(fmt.Errorf("Failed to load cottages: %v", err), window)
+			dialog.ShowError(fmt.Errorf("failed to load cottages: %v", err), window)
 			return
 		}
 
@@ -88,20 +88,20 @@ func editCottageDialog(window fyne.Window, cottageService *service.CottageServic
 	saveBtn := widget.NewButton("Save", func() {
 		name := nameEntry.Text
 		if name == "" {
-			dialog.ShowError(fmt.Errorf("Name cannot be empty"), window)
+			dialog.ShowError(fmt.Errorf("name cannot be empty"), window)
 			return
 		}
 
 		if cottage.ID > 0 {
 			// Update existing cottage
 			if err := cottageService.UpdateCottageName(cottage.ID, name); err != nil {
-				dialog.ShowError(fmt.Errorf("Failed to update cottage: %v", err), window)
+				dialog.ShowError(fmt.Errorf("failed to update cottage: %v", err), window)
 				return
 			}
 		} else {
 			// Add new cottage
 			if err := cottageService.AddCottage(name); err != nil {
-				dialog.ShowError(fmt.Errorf("Failed to add cottage: %v", err), window)
+				dialog.ShowError(fmt.Errorf("failed to add cottage: %v", err), window)
 				return
 			}
 		}
@@ -135,7 +135,7 @@ func deleteCottageDialog(window fyne.Window, cottageService *service.CottageServ
 		func(confirmed bool) {
 			if confirmed {
 				if err := cottageService.DeleteCottage(cottage.ID); err != nil {
-					dialog.ShowError(fmt.Errorf("Failed to delete cottage: %v", err), window)
+					dialog.ShowError(fmt.Errorf("failed to delete cottage: %v", err), window)
 					return
 				}
 				cottagesList.Refresh()

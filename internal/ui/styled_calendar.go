@@ -22,7 +22,6 @@ type StyledCalendarCell struct {
 	onTapped  func()
 	isToday   bool
 	isWeekend bool
-	cottageID int
 }
 
 func NewStyledCalendarCell(date time.Time, status, guestName string, onTapped func()) *StyledCalendarCell {
