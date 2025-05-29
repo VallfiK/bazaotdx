@@ -1,19 +1,16 @@
-// Измените ваш cmd/main.go следующим образом:
-
+// cmd/main.go - Обновленная версия с новой темой
 package main
 
 import (
-	"database/sql"
 	"io"
 	"log"
 	"os"
-	"path/filepath"
-	"time"
 
+	"fyne.io/fyne/v2/app"
 	"github.com/VallfIK/bazaotdx/internal/app"
 	"github.com/VallfIK/bazaotdx/internal/db"
-	"github.com/VallfIK/bazaotdx/internal/models"
 	"github.com/VallfIK/bazaotdx/internal/service"
+	"github.com/VallfIK/bazaotdx/internal/ui"
 )
 
 func main() {
@@ -24,146 +21,38 @@ func main() {
 	}
 	defer logFile.Close()
 
-	// Перенаправляем логи в файл и консоль
 	multiWriter := io.MultiWriter(os.Stdout, logFile)
 	log.SetOutput(multiWriter)
 
-	log.Println("🚀 Запуск приложения")
-	log.Printf("🛠️ Путь к проекту: %s", "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx")
-	log.Printf("🔍 Проверка директории images: %s", "C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images")
-
-	// Проверяем существование файлов изображений
-	images := []string{
-		"free.png",
-		"booked.png",
-		"bought.png",
-		"freefirst.png",
-		"bookedfirst.png",
-		"boughtfirst.png",
-		"bookedlast.png",
-		"boughtlast.png",
-	}
-
-	for _, img := range images {
-		imgPath := filepath.Join("C:\\Users\\VallfIK\\Documents\\GitHub\\bazaotdx\\images", img)
-		if _, err := os.Stat(imgPath); err != nil {
-			log.Printf("❌ Ошибка: Файл не найден: %s", imgPath)
-		} else {
-			log.Printf("✅ Файл найден: %s", imgPath)
-		}
-	}
-
-	log.Printf("📄 Логи также записываются в файл: %s", "app.log")
+	log.Println("🚀 Запуск приложения с новой темой")
 
 	// Инициализация БД
 	database, err := db.NewPostgresDB()
 	if err != nil {
 		log.Fatalf("❌ Ошибка подключения к БД: %v", err)
-	} else {
-		log.Println("✅ Успешное подключение к БД")
 	}
 	defer database.Close()
 
 	// Конфигурация
-	documentsRoot := "documents" // Можно заменить на os.Getenv("DOCUMENTS_PATH")
+	documentsRoot := "documents"
 
 	// Инициализация сервисов
 	guestService := service.NewGuestService(database.DB, documentsRoot)
 	cottageService := service.NewCottageService(database.DB)
 	tariffService := service.NewTariffService(database.DB)
-	bookingService := service.NewBookingService(database.DB) // Новый сервис
+	bookingService := service.NewBookingService(database.DB)
 
-	// Создание приложения
-	app := app.NewGuestApp(guestService, cottageService, tariffService, bookingService)
+	// Создание приложения с кастомной темой
+	fyneApp := app.New()
+	fyneApp.Settings().SetTheme(&ui.ResortTheme{}) // Применяем нашу тему
 
-	// Запускаем фоновые задачи ДО запуска GUI
+	// Создание главного приложения
+	guestApp := app.NewGuestApp(guestService, cottageService, tariffService, bookingService)
+	guestApp.SetFyneApp(fyneApp) // Передаем настроенное Fyne приложение
+
+	// Запускаем фоновые задачи
 	go backgroundTasks(database.DB, bookingService)
 
 	// Запуск приложения
-	app.Run()
-}
-
-// backgroundTasks выполняет фоновые задачи
-func backgroundTasks(db *sql.DB, bookingService *service.BookingService) {
-	for {
-		// Автоматическое удаление старых отмененных и завершенных бронирований (старше 30 дней)
-		_, err := db.Exec(`
-			DELETE FROM lesbaza.bookings 
-			WHERE status IN ($1, $2) AND created_at <= NOW() - INTERVAL '30 days'
-		`, models.BookingStatusCancelled, models.BookingStatusCompleted)
-		if err != nil {
-			log.Printf("Error auto-delete old bookings: %v", err)
-		}
-
-		// Автоматическое выселение гостей из таблицы guests
-		_, err = db.Exec(`
-			DELETE FROM lesbaza.guests 
-			WHERE check_out_date <= NOW() - INTERVAL '2 hours'
-		`)
-		if err != nil {
-			log.Println("Auto-checkout error:", err)
-		}
-
-		// Автоматическое обновление статусов бронирований
-		// Переводим "забронировано" в "заселено" если наступил день заезда
-		rows, err := db.Query(`
-			SELECT booking_id 
-			FROM lesbaza.bookings 
-			WHERE status = $1 
-			AND check_in_date::date = CURRENT_DATE
-			AND CURRENT_TIME > TIME '14:00'`,
-			models.BookingStatusBooked,
-		)
-		if err == nil {
-			var bookingIDs []int
-			for rows.Next() {
-				var id int
-				if rows.Scan(&id) == nil {
-					bookingIDs = append(bookingIDs, id)
-				}
-			}
-			rows.Close()
-
-			// Обновляем статусы
-			for _, id := range bookingIDs {
-				err := bookingService.CheckInBooking(id)
-				if err != nil {
-					log.Printf("Auto check-in error for booking %d: %v", id, err)
-				} else {
-					log.Printf("Auto checked-in booking %d", id)
-				}
-			}
-		}
-
-		// Автоматическое завершение просроченных заселенных бронирований
-		rows, err = db.Query(`
-			SELECT booking_id 
-			FROM lesbaza.bookings 
-			WHERE status = $1 
-			AND check_out_date::date < CURRENT_DATE`,
-			models.BookingStatusCheckedIn,
-		)
-		if err == nil {
-			var bookingIDs []int
-			for rows.Next() {
-				var id int
-				if rows.Scan(&id) == nil {
-					bookingIDs = append(bookingIDs, id)
-				}
-			}
-			rows.Close()
-
-			// Выселяем просроченные брони
-			for _, id := range bookingIDs {
-				err := bookingService.CheckOutBooking(id)
-				if err != nil {
-					log.Printf("Auto checkout error for booking %d: %v", id, err)
-				} else {
-					log.Printf("Auto checked out booking %d", id)
-				}
-			}
-		}
-
-		time.Sleep(1 * time.Hour)
-	}
+	guestApp.Run()
 }
