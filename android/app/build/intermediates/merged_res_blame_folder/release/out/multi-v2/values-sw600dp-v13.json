@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.vallflk.bazaotdx.app-mergeReleaseResources-60:/values-sw600dp-v13/values-sw600dp-v13.xml",
+            "outputFile": "com.vallflk.bazaotdx.app-mergeReleaseResources-64:/values-sw600dp-v13/values-sw600dp-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\c32e071c22f6314803745f4a3cc34fbe\\transformed\\appcompat-1.6.1\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\8.14.1\\transforms\\6a423379bde378835bb60438f9fa0bc1\\transformed\\appcompat-1.6.1\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\a206bc552cb1ead1ef0973580f226e7d\\transformed\\material-1.11.0\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\8.14.1\\transforms\\2dd64187f07d83ad33d68db7a0eddbd6\\transformed\\material-1.11.0\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,10,11,12,13,14",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",

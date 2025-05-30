@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.vallflk.bazaotdx.app-mergeReleaseResources-60:/values-h720dp-v13/values-h720dp-v13.xml",
+            "outputFile": "com.vallflk.bazaotdx.app-mergeReleaseResources-64:/values-h720dp-v13/values-h720dp-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\transforms-3\\c32e071c22f6314803745f4a3cc34fbe\\transformed\\appcompat-1.6.1\\res\\values-h720dp-v13\\values-h720dp-v13.xml",
+                    "source": "C:\\Users\\VallfIK\\.gradle\\caches\\8.14.1\\transforms\\6a423379bde378835bb60438f9fa0bc1\\transformed\\appcompat-1.6.1\\res\\values-h720dp-v13\\values-h720dp-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

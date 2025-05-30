@@ -550,19 +550,14 @@
     <color name="abc_search_url_text_normal">#7fa87f</color>
     <color name="abc_search_url_text_pressed">@android:color/black</color>
     <color name="abc_search_url_text_selected">@android:color/black</color>
-    <color name="accent">#4CAF50</color>
-    <color name="accent_dark">#388E3C</color>
-    <color name="accent_light">#C8E6C9</color>
     <color name="accent_material_dark">@color/material_deep_teal_200</color>
     <color name="accent_material_light">@color/material_deep_teal_500</color>
     <color name="androidx_core_ripple_material_light">#1f000000</color>
     <color name="androidx_core_secondary_text_default_material_light">#8a000000</color>
-    <color name="background">#F5F5F5</color>
     <color name="background_floating_material_dark">@color/material_grey_800</color>
     <color name="background_floating_material_light">@android:color/white</color>
     <color name="background_material_dark">@color/material_grey_850</color>
     <color name="background_material_light">@color/material_grey_50</color>
-    <color name="black">#000000</color>
     <color name="bright_foreground_disabled_material_dark">#80ffffff</color>
     <color name="bright_foreground_disabled_material_light">#80000000</color>
     <color name="bright_foreground_inverse_material_dark">@color/bright_foreground_material_light</color>
@@ -577,8 +572,16 @@
     <color name="cardview_light_background">#FFFFFFFF</color>
     <color name="cardview_shadow_end_color">#03000000</color>
     <color name="cardview_shadow_start_color">#37000000</color>
-    <color name="dark_gray">#424242</color>
-    <color name="dark_green">#006400</color>
+    <color name="colorAccent">@color/golden_yellow</color>
+    <color name="colorPrimary">@color/forest_green</color>
+    <color name="colorPrimaryDark">@color/dark_forest_green</color>
+    <color name="colorPrimaryVariant">@color/element_green</color>
+    <color name="colorSecondary">@color/mint_green</color>
+    <color name="colorSecondaryVariant">@color/element_light</color>
+    <color name="cream_white">#FDF5E6</color>
+    <color name="dark_forest_green">#196419</color>
+    <color name="dark_gray">#696969</color>
+    <color name="deep_red">#B22222</color>
     <color name="design_bottom_navigation_shadow_color">#14000000</color>
     <color name="design_dark_default_color_background">#121212</color>
     <color name="design_dark_default_color_error">#CF6679</color>
@@ -618,16 +621,22 @@
     <color name="dim_foreground_disabled_material_light">#80323232</color>
     <color name="dim_foreground_material_dark">#ffbebebe</color>
     <color name="dim_foreground_material_light">#ff323232</color>
-    <color name="error">#B00020</color>
+    <color name="earth_brown">#8B7355</color>
+    <color name="element_green">#32CD32</color>
+    <color name="element_hover">#2E7D32</color>
+    <color name="element_light">#ADFFAD</color>
+    <color name="element_pressed">#225A22</color>
     <color name="error_color_material_dark">#ff7043</color>
     <color name="error_color_material_light">#ff5722</color>
+    <color name="error_red">#DC143C</color>
     <color name="foreground_material_dark">@android:color/white</color>
     <color name="foreground_material_light">@android:color/black</color>
     <color name="forest_green">#228B22</color>
-    <color name="gray">#757575</color>
+    <color name="golden_yellow">#FFD700</color>
     <color name="highlighted_text_material_dark">#6680cbc4</color>
     <color name="highlighted_text_material_light">#66009688</color>
-    <color name="light_gray">#BDBDBD</color>
+    <color name="light_forest_green">#90EE90</color>
+    <color name="light_white">#FAFAFA</color>
     <color name="m3_ref_palette_black">#ff000000</color>
     <color name="m3_ref_palette_error0">#ff000000</color>
     <color name="m3_ref_palette_error10">#ff410e0b</color>
@@ -857,6 +866,67 @@
     <color name="material_personalized_color_text_primary_inverse_disable_only">#FFFFFF</color>
     <color name="material_personalized_color_text_secondary_and_tertiary_inverse">#FFFFFF</color>
     <color name="material_personalized_color_text_secondary_and_tertiary_inverse_disabled">#FFFFFF</color>
+    <color name="md_theme_dark_background">#111311</color>
+    <color name="md_theme_dark_error">#FFB4AB</color>
+    <color name="md_theme_dark_errorContainer">#93000A</color>
+    <color name="md_theme_dark_inverseOnSurface">#111311</color>
+    <color name="md_theme_dark_inversePrimary">#2D6930</color>
+    <color name="md_theme_dark_inverseSurface">#E1E3DE</color>
+    <color name="md_theme_dark_onBackground">#E1E3DE</color>
+    <color name="md_theme_dark_onError">#690005</color>
+    <color name="md_theme_dark_onErrorContainer">#FFDAD6</color>
+    <color name="md_theme_dark_onPrimary">#0F3814</color>
+    <color name="md_theme_dark_onPrimaryContainer">#AEFAAA</color>
+    <color name="md_theme_dark_onSecondary">#253425</color>
+    <color name="md_theme_dark_onSecondaryContainer">#D4E8D0</color>
+    <color name="md_theme_dark_onSurface">#E1E3DE</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C2C9BD</color>
+    <color name="md_theme_dark_onTertiary">#013638</color>
+    <color name="md_theme_dark_onTertiaryContainer">#BDEAF0</color>
+    <color name="md_theme_dark_outline">#8C9389</color>
+    <color name="md_theme_dark_outlineVariant">#424940</color>
+    <color name="md_theme_dark_primary">#93DD8F</color>
+    <color name="md_theme_dark_primaryContainer">#1E5021</color>
+    <color name="md_theme_dark_scrim">#000000</color>
+    <color name="md_theme_dark_secondary">#B9CCB5</color>
+    <color name="md_theme_dark_secondaryContainer">#3B4B3A</color>
+    <color name="md_theme_dark_shadow">#000000</color>
+    <color name="md_theme_dark_surface">#111311</color>
+    <color name="md_theme_dark_surfaceTint">#93DD8F</color>
+    <color name="md_theme_dark_surfaceVariant">#424940</color>
+    <color name="md_theme_dark_tertiary">#A1CED4</color>
+    <color name="md_theme_dark_tertiaryContainer">#1F4D51</color>
+    <color name="md_theme_light_background">#FDF5E6</color>
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_errorContainer">#FFDAD6</color>
+    <color name="md_theme_light_inverseOnSurface">#F0F1EC</color>
+    <color name="md_theme_light_inversePrimary">#93DD8F</color>
+    <color name="md_theme_light_inverseSurface">#2E312E</color>
+    <color name="md_theme_light_onBackground">#1A1C19</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_onErrorContainer">#410002</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_onPrimaryContainer">#072109</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_onSecondaryContainer">#101F10</color>
+    <color name="md_theme_light_onSurface">#1A1C19</color>
+    <color name="md_theme_light_onSurfaceVariant">#424940</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
+    <color name="md_theme_light_onTertiaryContainer">#001F22</color>
+    <color name="md_theme_light_outline">#727970</color>
+    <color name="md_theme_light_outlineVariant">#C2C9BD</color>
+    <color name="md_theme_light_primary">#2D6930</color>
+    <color name="md_theme_light_primaryContainer">#AEFAAA</color>
+    <color name="md_theme_light_scrim">#000000</color>
+    <color name="md_theme_light_secondary">#526350</color>
+    <color name="md_theme_light_secondaryContainer">#D4E8D0</color>
+    <color name="md_theme_light_shadow">#000000</color>
+    <color name="md_theme_light_surface">#FDF5E6</color>
+    <color name="md_theme_light_surfaceTint">#2D6930</color>
+    <color name="md_theme_light_surfaceVariant">#DEE5D9</color>
+    <color name="md_theme_light_tertiary">#39656A</color>
+    <color name="md_theme_light_tertiaryContainer">#BDEAF0</color>
+    <color name="mint_green">#98FB98</color>
     <color name="mtrl_btn_text_color_disabled">#61000000</color>
     <color name="mtrl_btn_transparent_bg_color">#00ffffff</color>
     <color name="mtrl_scrim_color">#52000000</color>
@@ -867,11 +937,8 @@
     <color name="mtrl_textinput_hovered_box_stroke_color">#DE000000</color>
     <color name="notification_action_color_filter">#ffffffff</color>
     <color name="notification_icon_bg_color">#ff9e9e9e</color>
-    <color name="primary">#228B22</color>
-    <color name="primary_dark">#006400</color>
     <color name="primary_dark_material_dark">@android:color/black</color>
     <color name="primary_dark_material_light">@color/material_grey_600</color>
-    <color name="primary_light">#98FB98</color>
     <color name="primary_material_dark">@color/material_grey_900</color>
     <color name="primary_material_light">@color/material_grey_100</color>
     <color name="primary_text_default_material_dark">#ffffffff</color>
@@ -880,23 +947,24 @@
     <color name="primary_text_disabled_material_light">#39000000</color>
     <color name="ripple_material_dark">#33ffffff</color>
     <color name="ripple_material_light">#1f000000</color>
+    <color name="royal_blue">#4169E1</color>
     <color name="secondary_text_default_material_dark">#b3ffffff</color>
     <color name="secondary_text_default_material_light">#8a000000</color>
     <color name="secondary_text_disabled_material_dark">#36ffffff</color>
     <color name="secondary_text_disabled_material_light">#24000000</color>
-    <color name="status_error">#F44336</color>
-    <color name="status_success">#4CAF50</color>
-    <color name="status_warning">#FFC107</color>
-    <color name="surface">#FFFFFF</color>
+    <color name="seed">#228B22</color>
+    <color name="sky_blue">#87CEEB</color>
+    <color name="soft_gray">#F5F5F5</color>
+    <color name="soft_white">#F8F8FF</color>
+    <color name="success_green">#008000</color>
+    <color name="sunset_orange">#FFA07A</color>
     <color name="switch_thumb_disabled_material_dark">#ff616161</color>
     <color name="switch_thumb_disabled_material_light">#ffbdbdbd</color>
     <color name="switch_thumb_normal_material_dark">#ffbdbdbd</color>
     <color name="switch_thumb_normal_material_light">#fff1f1f1</color>
-    <color name="text_disabled">#9E9E9E</color>
-    <color name="text_primary">#000000</color>
-    <color name="text_secondary">#616161</color>
     <color name="tooltip_background_dark">#e6616161</color>
     <color name="tooltip_background_light">#e6FFFFFF</color>
+    <color name="warning_amber">#FFBF00</color>
     <color name="white">#FFFFFF</color>
     <dimen name="abc_action_bar_content_inset_material">16dp</dimen>
     <dimen name="abc_action_bar_content_inset_with_nav">72dp</dimen>
@@ -1925,6 +1993,10 @@
     <string name="booking_total">Итого</string>
     <string name="bookings">Бронирования</string>
     <string name="bottom_sheet_behavior" translatable="false">com.google.android.material.bottomsheet.BottomSheetBehavior</string>
+    <string name="bottom_sheet_collapse_description">Collapse bottom sheet</string>
+    <string name="bottom_sheet_dismiss_description">Dismiss bottom sheet</string>
+    <string name="bottom_sheet_drag_handle_description">Drag handle</string>
+    <string name="bottom_sheet_expand_description">Expand bottom sheet</string>
     <string description="A description of an accessibility action to collapse the bottom sheet [CHAR LIMIT=NONE]" name="bottomsheet_action_collapse">Collapse the bottom sheet</string>
     <string description="A description of an accessibility action to expand the bottom sheet [CHAR LIMIT=NONE]" name="bottomsheet_action_expand">Expand the bottom sheet</string>
     <string description="A description of an action that a user of an accessibility service can perform to expand a bottomsheet halfway to its full height. [CHAR LIMIT=25]" name="bottomsheet_action_expand_halfway">Expand halfway</string>
@@ -1944,20 +2016,58 @@
     <string name="clear_text_end_icon_content_description">Clear text</string>
     <string name="close_drawer">"Close navigation menu"</string>
     <string name="close_sheet">"Close sheet"</string>
+    <string name="collapsed">Collapsed</string>
     <string name="cottage_capacity">Вместимость</string>
     <string name="cottage_description">Описание</string>
     <string name="cottage_name">Название домика</string>
     <string name="cottage_price">Цена за сутки</string>
     <string name="cottages">Домики</string>
+    <string name="date_input_headline">Entered date</string>
+    <string name="date_input_headline_description">Entered date: %1$s</string>
+    <string name="date_input_invalid_for_pattern">Date does not match expected pattern: %1$s</string>
+    <string name="date_input_invalid_not_allowed">Date not allowed: %1$s</string>
+    <string name="date_input_invalid_year_range">
+        Date out of expected year range %1$s - %2$s
+    </string>
+    <string name="date_input_label">Date</string>
+    <string name="date_input_no_input_description">None</string>
+    <string name="date_input_title">Select date</string>
+    <string name="date_picker_headline">"Selected date"</string>
+    <string name="date_picker_headline_description">Current selection: %1$s</string>
+    <string name="date_picker_navigate_to_year_description">Navigate to year %1$s</string>
+    <string name="date_picker_no_selection_description">None</string>
+    <string name="date_picker_scroll_to_earlier_years">Scroll to show earlier years</string>
+    <string name="date_picker_scroll_to_later_years">Scroll to show later years</string>
+    <string name="date_picker_switch_to_calendar_mode">Switch to calendar input mode</string>
+    <string name="date_picker_switch_to_day_selection">
+        "Swipe to select a year, or tap to switch back to selecting a day"
+    </string>
+    <string name="date_picker_switch_to_input_mode">Switch to text input mode</string>
+    <string name="date_picker_switch_to_next_month">"Change to next month"</string>
+    <string name="date_picker_switch_to_previous_month">"Change to previous month"</string>
+    <string name="date_picker_switch_to_year_selection">"Switch to selecting a year"</string>
+    <string name="date_picker_title">"Select date"</string>
+    <string name="date_picker_today_description">Today</string>
+    <string name="date_picker_year_picker_pane_title">Year picker visible</string>
+    <string name="date_range_input_invalid_range_input">Invalid date range input</string>
+    <string name="date_range_input_title">Enter dates</string>
+    <string name="date_range_picker_day_in_range">In range</string>
+    <string name="date_range_picker_end_headline">End date</string>
+    <string name="date_range_picker_scroll_to_next_month">Scroll to show the next month</string>
+    <string name="date_range_picker_scroll_to_previous_month">Scroll to show the previous month</string>
+    <string name="date_range_picker_start_headline">Start date</string>
+    <string name="date_range_picker_title">Select dates</string>
     <string name="default_error_message">"Invalid input"</string>
     <string name="default_popup_window_title" ns1:ignore="ExtraTranslation">"Pop-Up Window"</string>
     <string name="delete">Удалить</string>
+    <string name="dialog">"Dialog"</string>
     <string name="dropdown_menu">"Dropdown menu"</string>
     <string name="edit">Редактировать</string>
     <string description="Screen reader announcement for when a checkbox is on error. [CHAR LIMIT=NONE]" name="error_a11y_label">
     Error: invalid
   </string>
     <string name="error_icon_content_description">Error</string>
+    <string name="expanded">Expanded</string>
     <string name="exposed_dropdown_menu_content_description">Show dropdown menu</string>
     <string name="fab_transformation_scrim_behavior" translatable="false">com.google.android.material.transformation.FabTransformationScrimBehavior</string>
     <string name="fab_transformation_sheet_behavior" translatable="false">com.google.android.material.transformation.FabTransformationSheetBehavior</string>
@@ -1983,6 +2093,7 @@
     <string name="m3_sys_motion_easing_standard" translatable="false">cubic-bezier(0.2, 0, 0, 1)</string>
     <string name="m3_sys_motion_easing_standard_accelerate" translatable="false">cubic-bezier(0.3, 0, 1, 1)</string>
     <string name="m3_sys_motion_easing_standard_decelerate" translatable="false">cubic-bezier(0, 0, 0, 1)</string>
+    <string name="m3c_bottom_sheet_pane_title">Bottom Sheet</string>
     <string name="material_clock_display_divider" translatable="false">:</string>
     <string description="Description for the toggle to choose between AM and PM [CHAR_LIMIT=NONE]" name="material_clock_toggle_content_description">Select AM or PM</string>
     <string description="Spoken suffix for an hour in the 24-hour clock [CHAR_LIMIT=10]" name="material_hour_24h_suffix"><ns2:g id="number">%1$s</ns2:g> hours</string>
@@ -2087,6 +2198,7 @@
     <string name="range_start">"Range start"</string>
     <string name="reports">Отчеты</string>
     <string name="save">Сохранить</string>
+    <string name="search_bar_search">Search</string>
     <string name="search_menu_title">Search</string>
     <string name="searchbar_scrolling_view_behavior" translatable="false">
     com.google.android.material.search.SearchBar$ScrollingViewBehavior
@@ -2096,7 +2208,9 @@
     <string name="selected">Selected</string>
     <string description="Title of the side sheet&apos;s accessibility pane that is spoken by TalkBack when the side sheet appears on screen. [CHAR_LIMIT=NONE]" name="side_sheet_accessibility_pane_title">Side Sheet</string>
     <string name="side_sheet_behavior" translatable="false">com.google.android.material.sidesheet.SideSheetBehavior</string>
+    <string name="snackbar_dismiss">Dismiss</string>
     <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="suggestions_available">Suggestions below</string>
     <string name="switch_role">Switch</string>
     <string name="tab">Tab</string>
     <string name="tariff_description">Описание</string>
@@ -2104,6 +2218,20 @@
     <string name="tariff_price">Цена</string>
     <string name="tariffs">Тарифы</string>
     <string name="template_percent"><ns2:g id="percentage">%1$d</ns2:g> percent.</string>
+    <string name="time_picker_am">AM</string>
+    <string name="time_picker_hour">Hour</string>
+    <string name="time_picker_hour_24h_suffix">%1$d hours</string>
+    <string name="time_picker_hour_selection">Select hour</string>
+    <string name="time_picker_hour_suffix">%1$d o\'clock</string>
+    <string name="time_picker_hour_text_field">for hour</string>
+    <string name="time_picker_minute">Minute</string>
+    <string name="time_picker_minute_selection">Select minutes</string>
+    <string name="time_picker_minute_suffix">%1$d minutes</string>
+    <string name="time_picker_minute_text_field">for minutes</string>
+    <string name="time_picker_period_toggle_description">Select AM or PM</string>
+    <string name="time_picker_pm">PM</string>
+    <string name="tooltip_long_press_label">Show tooltip</string>
+    <string name="tooltip_pane_description">Tooltip</string>
     <string name="total_bookings">Общее количество бронирований</string>
     <string name="total_income">Общий доход</string>
     <style name="AlertDialog.AppCompat" parent="Base.AlertDialog.AppCompat"/>
@@ -6354,32 +6482,32 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-    <style name="Theme.BazaOtdx" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.BazaOtdx" parent="Theme.Material3.DayNight">
         <item name="colorPrimary">@color/forest_green</item>
-        <item name="colorPrimaryDark">@color/dark_green</item>
-        <item name="colorAccent">@color/forest_green</item>
+        <item name="colorPrimaryDark">@color/dark_forest_green</item>
+        <item name="colorAccent">@color/golden_yellow</item>
         
         
         <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
         
         
-        <item name="colorPrimaryVariant">@color/dark_green</item>
+        <item name="colorPrimaryVariant">@color/dark_forest_green</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">@color/forest_green</item>
-        <item name="colorSecondaryVariant">@color/dark_green</item>
+        <item name="colorSecondary">@color/mint_green</item>
+        <item name="colorSecondaryVariant">@color/element_green</item>
         <item name="colorOnSecondary">@color/white</item>
         
         
         <item name="android:colorBackground">@color/white</item>
         <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/black</item>
+        <item name="colorOnSurface">@color/dark_gray</item>
         
         
-        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorPrimary">@color/dark_gray</item>
         <item name="android:textColorSecondary">@color/dark_gray</item>
         
         
-        <item name="colorError">@color/error</item>
+        <item name="colorError">@color/error_red</item>
         <item name="colorOnError">@color/white</item>
         
         
